@@ -27,11 +27,20 @@ namespace Product.WebApi.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> Get(CancellationToken cancellationToken)
+        public async Task<IActionResult> Get([FromQuery] GetAllItemsRequest request, CancellationToken cancellationToken)
         {
             try
             {
-                var data = await mediator.Send(new GetAllItemsQuery(), cancellationToken);
+                var query = mapper.Map<GetAllItemsQuery>(request);
+                var data = await mediator.Send(query);
+
+                /* var criteria = new Shared.Infrastructure.Request.CriteriaQuery<ItemField>();
+                criteria.AddValues(ItemField.Name, "Test");
+                var data = await mediator.Send(new GetAllItemsQuery{
+                    // Criteria = criteria,
+                    Paged = new Shared.Infrastructure.Request.PagedQuery(0, 2),
+                    Ordered = new Shared.Infrastructure.Request.OrderedQuery<ItemField> { Field = ItemField.Name, Direction = Shared.Infrastructure.Enums.Direction.Ascending }
+                }, cancellationToken); */
 
                 return Ok(data);
             }

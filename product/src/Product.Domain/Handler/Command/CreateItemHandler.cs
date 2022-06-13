@@ -25,7 +25,7 @@ namespace Product.Domain.Handler.Query
         {
             var item = new ItemEntity(request.Name, request.Description);
 
-            unitOfWork.Item.Add(item);
+            unitOfWork.ProductItem.Add(item);
 
             await unitOfWork.SaveChangesAsync(cancellationToken);
 

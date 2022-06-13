@@ -24,12 +24,12 @@ namespace Product.Domain.Handler.Query
 
         public async Task<IItemDto> Handle(UpdateItemCommand request, CancellationToken cancellationToken)
         {
-            var item = await unitOfWork.Item.GetAll()
+            var item = await unitOfWork.ProductItem.GetAll()
                 .SingleOrDefaultAsync(e => e.Id.Equals(request.Id.Value), cancellationToken);
 
             item.SetUpdate(request.Name, request.Description);
 
-            unitOfWork.Item.Update(item);
+            unitOfWork.ProductItem.Update(item);
 
             await unitOfWork.SaveChangesAsync(cancellationToken);
 

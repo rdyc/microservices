@@ -18,10 +18,10 @@ namespace Product.Domain.Repository
             this.context = context;
             this.logger = logger;
 
-            Item = new ItemRepository(context);
+            ProductItem = new ItemRepository(context);
         }
 
-        public IItemRepository Item { get; set; }
+        public IItemRepository ProductItem { get; set; }
 
         public async Task<int> SaveChangesAsync(CancellationToken cancellationToken)
         {

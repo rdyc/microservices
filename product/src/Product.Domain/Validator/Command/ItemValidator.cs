@@ -22,7 +22,7 @@ namespace Product.Domain.Validator.Command
         {
             RuleFor(c => c.Id)
                 .NotNull()
-                .MustBeExistAsync(unitOfWork.Item).WithMessage("The resource was not found");
+                .MustBeExistAsync(unitOfWork.ProductItem).WithMessage("The resource was not found");
         }
 
         protected void ValidateDescription()
@@ -36,11 +36,11 @@ namespace Product.Domain.Validator.Command
 
             if (!isUpdate)
             {
-                rule.MustBeUniqueNameAsync(unitOfWork.Item).WithMessage("The name already exist");
+                rule.MustBeUniqueNameAsync(unitOfWork.ProductItem).WithMessage("The name already exist");
             }
             else
             {
-                rule.MustBeUniqueNameIdAsync(unitOfWork.Item).WithMessage("The name already taken");
+                rule.MustBeUniqueNameIdAsync(unitOfWork.ProductItem).WithMessage("The name already taken");
             }
         }
     }

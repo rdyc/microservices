@@ -5,10 +5,9 @@ using Shared.Infrastructure.Request;
 
 namespace Product.Contract.Query
 {
-    public class GetAllItemsQuery : IRequest<IEnumerable<IItemDto>>
+    public class GetListItemsQuery : IRequest<IEnumerable<IItemDto>>
     {
-        public CriteriaQuery<ItemField> Criteria { get; set; }
+        public CriteriaQuery<ItemField> Searched { get; set; }
         public OrderedQuery<ItemField> Ordered { get; set; }
-        public PagedQuery Paged { get; set; }
     }
 }

@@ -6,7 +6,7 @@ namespace Product.Domain.Repository
 {
     internal interface IUnitOfWork : IDisposable
     {
-        IItemRepository Item { get; }
+        IItemRepository ProductItem { get; }
         Task<int> SaveChangesAsync(CancellationToken cancellationToken);
     }
 }

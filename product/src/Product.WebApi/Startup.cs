@@ -10,6 +10,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Product.Domain;
 using Product.Domain.MapProfile;
+using Product.WebApi.Converters;
 
 namespace Product.WebApi
 {
@@ -39,8 +40,13 @@ namespace Product.WebApi
             services.AddAutoMapper(config =>
             {
                 config.AddProfile<RequestToCommandProfile>();
+                config.AddProfile<RequestToQueryProfile>();
                 config.AddProfile<EntityToDtoProfile>();
             });
+
+            services.AddScoped<CriteriaConverter>();
+            services.AddScoped<PagedConverter>();
+            services.AddScoped<OrderedConverter>();
 
             services.AddMediatR(typeof(Startup));
 

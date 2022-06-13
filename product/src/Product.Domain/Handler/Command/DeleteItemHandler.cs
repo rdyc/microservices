@@ -23,10 +23,10 @@ namespace Product.Domain.Handler.Query
 
         public async Task<IItemDto> Handle(DeleteItemCommand request, CancellationToken cancellationToken)
         {
-            var item = await unitOfWork.Item.GetAll()
+            var item = await unitOfWork.ProductItem.GetAll()
                 .SingleOrDefaultAsync(e => e.Id.Equals(request.Id.Value), cancellationToken);
 
-            unitOfWork.Item.Delete(item);
+            unitOfWork.ProductItem.Delete(item);
 
             await unitOfWork.SaveChangesAsync(cancellationToken);
 
