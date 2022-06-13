@@ -1,6 +1,5 @@
 using System;
 using AutoMapper;
-using FluentValidation;
 using MediatR;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -73,7 +72,7 @@ namespace Product.WebApi
                 });
 
                 options
-                    .EnableSensitiveDataLogging(false)
+                    .EnableSensitiveDataLogging(true)
                     .UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking);
             });
 

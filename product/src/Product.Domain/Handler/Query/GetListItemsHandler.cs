@@ -11,23 +11,22 @@ using Product.Domain.Dto;
 
 namespace Product.Domain.Handler.Query
 {
-    internal class GetAllItemsHandler : IRequestHandler<GetAllItemsQuery, IEnumerable<IItemDto>>
+    internal class GetListItemsHandler : IRequestHandler<GetListItemsQuery, IEnumerable<IItemDto>>
     {
         private readonly IUnitOfWork unitOfWork;
         private readonly IMapper mapper;
 
-        public GetAllItemsHandler(IUnitOfWork unitOfWork, IMapper mapper)
+        public GetListItemsHandler(IUnitOfWork unitOfWork, IMapper mapper)
         {
             this.unitOfWork = unitOfWork;
             this.mapper = mapper;
         }
 
-        public async Task<IEnumerable<IItemDto>> Handle(GetAllItemsQuery request, CancellationToken cancellationToken)
+        public async Task<IEnumerable<IItemDto>> Handle(GetListItemsQuery request, CancellationToken cancellationToken)
         {
             var result = await unitOfWork.ProductItem.GetAll()
                 .WithCriteria(request.Criteria)
                 .WithOrdered(request.Ordered)
-                .WithPaged(request.Paged)
                 .ToListAsync(cancellationToken);
 
             return mapper.Map<IEnumerable<ItemDto>>(result);

@@ -1,3 +1,4 @@
+using System;
 using AutoMapper;
 using Product.Contract.Query;
 using Product.WebApi.Model;
@@ -19,7 +20,10 @@ namespace Product.WebApi.Converters
                 }
                 else
                 {
-                    criteria.AddValues(ItemField.Id, sourceMember.Find);
+                    if (Guid.TryParse(sourceMember.Find, out Guid id))
+                    {
+                        criteria.AddValues(ItemField.Id, id);
+                    }
                     criteria.AddValues(ItemField.Name, sourceMember.Find);
                     criteria.AddValues(ItemField.Description, sourceMember.Find);
                 }

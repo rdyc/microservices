@@ -51,6 +51,8 @@ namespace Product.Domain
         private static void AddQueryHandlers(IServiceCollection services)
         {
             services.AddScoped<IRequestHandler<GetAllItemsQuery, IEnumerable<IItemDto>>, GetAllItemsHandler>();
+            services.AddScoped<IRequestHandler<GetListItemsQuery, IEnumerable<IItemDto>>, GetListItemsHandler>();
+            services.AddScoped<IRequestHandler<GetItemQuery, IItemDto>, GetItemHandler>();
         }
 
         public static void UseDbMigration(IServiceScope scope)

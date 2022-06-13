@@ -32,15 +32,27 @@ namespace Product.WebApi.Controllers
             try
             {
                 var query = mapper.Map<GetAllItemsQuery>(request);
+
                 var data = await mediator.Send(query);
 
-                /* var criteria = new Shared.Infrastructure.Request.CriteriaQuery<ItemField>();
-                criteria.AddValues(ItemField.Name, "Test");
-                var data = await mediator.Send(new GetAllItemsQuery{
-                    // Criteria = criteria,
-                    Paged = new Shared.Infrastructure.Request.PagedQuery(0, 2),
-                    Ordered = new Shared.Infrastructure.Request.OrderedQuery<ItemField> { Field = ItemField.Name, Direction = Shared.Infrastructure.Enums.Direction.Ascending }
-                }, cancellationToken); */
+                return Ok(data);
+            }
+            catch (OperationCanceledException ex) when (cancellationToken.IsCancellationRequested)
+            {
+                logger.LogWarning(ex.Message);
+            }
+
+            return NoContent();
+        }
+
+        [HttpGet("{itemId}")]
+        public async Task<IActionResult> Get(Guid itemId, CancellationToken cancellationToken)
+        {
+            try
+            {
+                var query = mapper.Map<GetItemQuery>(itemId);
+
+                var data = await mediator.Send(query);
 
                 return Ok(data);
             }
@@ -70,12 +82,12 @@ namespace Product.WebApi.Controllers
             return NoContent();
         }
 
-        [HttpPut("{id}")]
-        public async Task<IActionResult> Put(Guid id, UpdateItemRequest payload, CancellationToken cancellationToken)
+        [HttpPut("{itemId}")]
+        public async Task<IActionResult> Put(Guid itemId, UpdateItemRequest payload, CancellationToken cancellationToken)
         {
             try
             {
-                payload.Id = id;
+                payload.Id = itemId;
                 var request = mapper.Map<UpdateItemCommand>(payload);
                 var result = await mediator.Send(request, cancellationToken);
 
@@ -89,12 +101,12 @@ namespace Product.WebApi.Controllers
             return NoContent();
         }
 
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> Post(Guid id, DeleteItemRequest payload, CancellationToken cancellationToken)
+        [HttpDelete("{itemId}")]
+        public async Task<IActionResult> Post(Guid itemId, DeleteItemRequest payload, CancellationToken cancellationToken)
         {
             try
             {
-                payload.Id = id;
+                payload.Id = itemId;
                 var request = mapper.Map<DeleteItemCommand>(payload);
                 var result = await mediator.Send(request, cancellationToken);
 

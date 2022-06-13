@@ -7,7 +7,7 @@ namespace Product.Contract.Query
 {
     public class GetListItemsQuery : IRequest<IEnumerable<IItemDto>>
     {
-        public CriteriaQuery<ItemField> Searched { get; set; }
+        public CriteriaQuery<ItemField> Criteria { get; set; }
         public OrderedQuery<ItemField> Ordered { get; set; }
     }
 }
