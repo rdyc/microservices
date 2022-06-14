@@ -4,7 +4,7 @@ using Microsoft.Extensions.Logging;
 
 namespace Product.WebApi
 {
-    public class Program
+    internal class Program
     {
         public static void Main(string[] args)
         {
@@ -16,7 +16,7 @@ namespace Product.WebApi
                 .ConfigureWebHostDefaults(webBuilder =>
                 {
                     webBuilder.ConfigureLogging(opt => opt.AddConsole());
-                    webBuilder.UseStartup<Startup>(); 
+                    webBuilder.UseStartup<Startup>();
                 });
     }
 }

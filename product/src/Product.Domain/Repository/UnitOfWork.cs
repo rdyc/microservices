@@ -1,22 +1,17 @@
 using System.Threading;
 using System.Threading.Tasks;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Logging;
 using Product.Domain.Context;
-using Product.Domain.Entity;
 
 namespace Product.Domain.Repository
 {
     internal class UnitOfWork : IUnitOfWork
     {
         private readonly ProductContext context;
-        private readonly ILogger<UnitOfWork> logger;
         private bool isDisposed;
 
-        public UnitOfWork(ProductContext context, ILogger<UnitOfWork> logger)
+        public UnitOfWork(ProductContext context)
         {
             this.context = context;
-            this.logger = logger;
 
             ProductItem = new ItemRepository(context);
         }

@@ -1,12 +1,12 @@
 using System;
 using AutoMapper;
 using Product.Contract.Query;
-using Product.WebApi.Converters;
-using Product.WebApi.Model;
+using Product.WebApi.Versions.V1.Converters;
+using Product.WebApi.Versions.V1.Models;
 
-namespace Product.WebApi
+namespace Product.WebApi.Versions.V1.Profiles
 {
-    public class RequestToQueryProfile : Profile
+    internal class RequestToQueryProfile : Profile
     {
         public RequestToQueryProfile() : base("Request to query profile")
         {

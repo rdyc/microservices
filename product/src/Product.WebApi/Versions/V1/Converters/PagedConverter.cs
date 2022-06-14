@@ -1,10 +1,10 @@
 using AutoMapper;
-using Product.WebApi.Model;
+using Product.WebApi.Versions.V1.Models;
 using Shared.Infrastructure.Request;
 
-namespace Product.WebApi.Converters
+namespace Product.WebApi.Versions.V1.Converters
 {
-    public class PagedConverter : IValueConverter<GetAllItemsRequest, PagedQuery>
+    internal class PagedConverter : IValueConverter<GetAllItemsRequest, PagedQuery>
     {
         public PagedQuery Convert(GetAllItemsRequest sourceMember, ResolutionContext context)
         {

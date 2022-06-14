@@ -2,6 +2,11 @@ namespace Product.Contract.Query
 {
     public enum ItemField
     {
-        Id, Name, Description
+        /// <summary>
+        /// The item id.
+        /// </summary>
+        Id,
+        Name,
+        Description
     }
 }

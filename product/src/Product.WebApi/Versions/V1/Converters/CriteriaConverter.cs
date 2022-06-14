@@ -1,12 +1,12 @@
 using System;
 using AutoMapper;
 using Product.Contract.Query;
-using Product.WebApi.Model;
+using Product.WebApi.Versions.V1.Models;
 using Shared.Infrastructure.Request;
 
-namespace Product.WebApi.Converters
+namespace Product.WebApi.Versions.V1.Converters
 {
-    public class CriteriaConverter : IValueConverter<GetAllItemsRequest, CriteriaQuery<ItemField>>
+    internal class CriteriaConverter : IValueConverter<GetAllItemsRequest, CriteriaQuery<ItemField>>
     {
         public CriteriaQuery<ItemField> Convert(GetAllItemsRequest sourceMember, ResolutionContext context)
         {
