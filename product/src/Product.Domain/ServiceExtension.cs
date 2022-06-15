@@ -3,15 +3,18 @@ using System.Collections.Generic;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
-using Product.Contract.Dto;
-using Product.Contract.Query;
-using Product.Domain.Context;
-using Product.Domain.Repository;
+using Product.Contract.Dtos;
+using Product.Contract.Queries;
+using Product.Domain.Persistence;
+using Product.Domain.Repositories;
 using Product.Domain.Handler.Query;
-using Product.Contract.Command;
+using Product.Contract.Commands;
 using Product.Domain.Behaviours;
 using Product.Domain.Validator.Command;
 using FluentValidation;
+using Product.Domain.Converters;
+using Product.Domain.Profiles;
+using AutoMapper;
 
 namespace Product.Domain
 {
@@ -24,6 +27,11 @@ namespace Product.Domain
 
         public static void AddDomainService(this IServiceCollection services)
         {
+            services.AddAutoMapper(config =>
+            {
+                config.AddProfile<EntityToDtoProfile>();
+            });
+
             services.AddTransient(typeof(IPipelineBehavior<,>), typeof(ValidationBehaviour<,>));
 
             services.AddScoped<IUnitOfWork, UnitOfWork>();
@@ -32,27 +40,33 @@ namespace Product.Domain
             AddCommandValidators(services);
             AddCommandHandlers(services);
             AddQueryHandlers(services);
+            AddConverters(services);
         }
 
         private static void AddCommandValidators(IServiceCollection services)
         {
-            services.AddScoped<IValidator<CreateItemCommand>, CreateItemValidator>();
-            services.AddScoped<IValidator<UpdateItemCommand>, UpdateItemValidator>();
-            services.AddScoped<IValidator<DeleteItemCommand>, DeleteItemValidator>();
+            services.AddScoped<IValidator<CreateProductCommand>, CreateProductValidator>();
+            services.AddScoped<IValidator<UpdateProductCommand>, UpdateProductValidator>();
+            services.AddScoped<IValidator<DeleteProductCommand>, DeleteProductValidator>();
         }
-        
+
         private static void AddCommandHandlers(IServiceCollection services)
         {
-            services.AddScoped<IRequestHandler<CreateItemCommand, IItemDto>, CreateItemHandler>();
-            services.AddScoped<IRequestHandler<UpdateItemCommand, IItemDto>, UpdateItemHandler>();
-            services.AddScoped<IRequestHandler<DeleteItemCommand, IItemDto>, DeleteItemHandler>();
+            services.AddScoped<IRequestHandler<CreateProductCommand, IProductDto>, CreateProductHandler>();
+            services.AddScoped<IRequestHandler<UpdateProductCommand, IProductDto>, UpdateProductHandler>();
+            services.AddScoped<IRequestHandler<DeleteProductCommand, IProductDto>, DeleteProductHandler>();
         }
 
         private static void AddQueryHandlers(IServiceCollection services)
         {
-            services.AddScoped<IRequestHandler<GetAllItemsQuery, IEnumerable<IItemDto>>, GetAllItemsHandler>();
-            services.AddScoped<IRequestHandler<GetListItemsQuery, IEnumerable<IItemDto>>, GetListItemsHandler>();
-            services.AddScoped<IRequestHandler<GetItemQuery, IItemDto>, GetItemHandler>();
+            services.AddScoped<IRequestHandler<GetAllProductsQuery, IEnumerable<IProductDto>>, GetAllProductsHandler>();
+            services.AddScoped<IRequestHandler<GetListProductsQuery, IEnumerable<IProductDto>>, GetListProductsHandler>();
+            services.AddScoped<IRequestHandler<GetProductQuery, IProductDto>, GetProductHandler>();
+        }
+
+        private static void AddConverters(IServiceCollection services)
+        {
+            services.AddScoped<DtoConverter>();
         }
 
         public static void UseDbMigration(IServiceScope scope)

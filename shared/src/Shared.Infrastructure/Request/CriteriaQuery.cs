@@ -21,18 +21,18 @@ namespace Shared.Infrastructure.Request
             }
         }
 
-        private IList<CriteriaQueryValue<T>> values { get; set; }
+        private IList<CriteriaQueryValue<T>> TValues { get; set; }
 
-        public IEnumerable<CriteriaQueryValue<T>> Values => values;
+        public IEnumerable<CriteriaQueryValue<T>> Values => TValues;
 
         public void AddValues(T field, object value)
         {
-            if (values == null)
+            if (TValues == null)
             {
-                values = new List<CriteriaQueryValue<T>>();
+                TValues = new List<CriteriaQueryValue<T>>();
             }
 
-            values.Add(new CriteriaQueryValue<T>(field, value));
+            TValues.Add(new CriteriaQueryValue<T>(field, value));
         }
     }
 

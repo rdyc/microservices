@@ -1,13 +1,13 @@
 using AutoMapper;
-using Product.Contract.Query;
+using Product.Contract.Queries;
 using Product.WebApi.Versions.V1.Models;
 using Shared.Infrastructure.Request;
 
 namespace Product.WebApi.Versions.V1.Converters
 {
-    internal class OrderedConverter : IValueConverter<GetAllItemsRequest, OrderedQuery<ItemField>>
+    internal class OrderedConverter : IValueConverter<GetAllProductsRequest, OrderedQuery<ProductField>>
     {
-        public OrderedQuery<ItemField> Convert(GetAllItemsRequest sourceMember, ResolutionContext context)
+        public OrderedQuery<ProductField> Convert(GetAllProductsRequest sourceMember, ResolutionContext context)
         {
             // if (sourceMember.Index.HasValue && sourceMember.Size.HasValue)
             // {

@@ -83,9 +83,7 @@ namespace Shared.Infrastructure.Extensions
 
             protected override Expression VisitParameter(ParameterExpression p)
             {
-                ParameterExpression replacement;
-
-                if (map.TryGetValue(p, out replacement))
+                if (map.TryGetValue(p, out ParameterExpression replacement))
                 {
                     p = replacement;
                 }

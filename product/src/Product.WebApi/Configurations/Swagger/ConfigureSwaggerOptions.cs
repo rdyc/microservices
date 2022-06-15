@@ -47,8 +47,8 @@ namespace Product.WebApi.Configurations.Swagger
             var info = new OpenApiInfo()
             {
                 Version = description.ApiVersion.ToString(),
-                Title = "My API - V1",
-                Description = "A sample API to demo Swashbuckle",
+                Title = "Product API",
+                Description = "A product API to demo Swashbuckle",
                 TermsOfService = new Uri("http://tempuri.org/terms"),
                 Contact = new OpenApiContact
                 {

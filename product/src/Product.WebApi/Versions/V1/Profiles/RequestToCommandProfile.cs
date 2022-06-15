@@ -1,17 +1,17 @@
 using AutoMapper;
-using Product.Contract.Command;
+using Product.Contract.Commands;
 using Product.WebApi.Versions.V1.Models;
 
 namespace Product.WebApi.Versions.V1.Profiles
 {
     internal class RequestToCommandProfile : Profile
     {
-        public RequestToCommandProfile() : base("Request to command profile")
+        public RequestToCommandProfile() : base("V1 Request to command profile")
         {
-            CreateMap<CreateItemRequest, CreateItemCommand>()
+            CreateMap<CreateProductRequest, CreateProductCommand>()
                 .ForMember(dst => dst.Id, opt => opt.Ignore());
-            CreateMap<UpdateItemRequest, UpdateItemCommand>();
-            CreateMap<DeleteItemRequest, DeleteItemCommand>()
+            CreateMap<UpdateProductRequest, UpdateProductCommand>();
+            CreateMap<DeleteProductRequest, DeleteProductCommand>()
                 .ForMember(dst => dst.Name, opt => opt.Ignore())
                 .ForMember(dst => dst.Description, opt => opt.Ignore());
         }

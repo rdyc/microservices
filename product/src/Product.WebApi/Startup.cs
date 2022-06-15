@@ -13,12 +13,12 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Options;
 using Product.Domain;
-using Product.Domain.MapProfile;
 using Product.WebApi.Configurations.Swagger;
 using Product.WebApi.Configurations.Swagger.DocumentFilter;
 using Product.WebApi.Configurations.Swagger.OperationFilter;
-using Product.WebApi.Versions.V1.Converters;
-using Product.WebApi.Versions.V1.Profiles;
+using Product.WebApi.Middlewares;
+using Product.WebApi.Versions.V1;
+using Product.WebApi.Versions.V2;
 using Swashbuckle.AspNetCore.SwaggerGen;
 using Swashbuckle.AspNetCore.SwaggerUI;
 
@@ -52,16 +52,8 @@ namespace Product.WebApi
                     options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter(JsonNamingPolicy.CamelCase, false));
                 });
 
-            services.AddAutoMapper(config =>
-            {
-                config.AddProfile<RequestToCommandProfile>();
-                config.AddProfile<RequestToQueryProfile>();
-                config.AddProfile<EntityToDtoProfile>();
-            });
-
-            services.AddScoped<CriteriaConverter>();
-            services.AddScoped<PagedConverter>();
-            services.AddScoped<OrderedConverter>();
+            services.AddV1Service();
+            services.AddV2Service();
 
             services.AddMediatR(typeof(Startup));
 
@@ -146,7 +138,7 @@ namespace Product.WebApi
                     {
                         var endpoint = $"/swagger/{version.GroupName}/swagger.json";
 
-                        config.SwaggerEndpoint(endpoint, $"API {version.GroupName.ToUpperInvariant()} Docs");
+                        config.SwaggerEndpoint(endpoint, $"Product API {version.GroupName.ToUpperInvariant()}");
                     }
 
                     config.DocumentTitle = $"Product API ({env.EnvironmentName})";
@@ -167,22 +159,6 @@ namespace Product.WebApi
             {
                 endpoints.MapControllers();
             });
-        }
-    }
-
-    internal static class DbMiddleware
-    {
-        internal static void UseDbMigration(this IApplicationBuilder app)
-        {
-            try
-            {
-                using var scope = app.ApplicationServices.GetService<IServiceScopeFactory>().CreateScope();
-                ServiceExtension.UseDbMigration(scope);
-            }
-            catch (Exception ex)
-            {
-                throw new Exception(ex.GetBaseException().Message);
-            }
         }
     }
 }

@@ -4,9 +4,9 @@ using Shared.Infrastructure.Request;
 
 namespace Product.WebApi.Versions.V1.Converters
 {
-    internal class PagedConverter : IValueConverter<GetAllItemsRequest, PagedQuery>
+    internal class PagedConverter : IValueConverter<GetAllProductsRequest, PagedQuery>
     {
-        public PagedQuery Convert(GetAllItemsRequest sourceMember, ResolutionContext context)
+        public PagedQuery Convert(GetAllProductsRequest sourceMember, ResolutionContext context)
         {
             if (sourceMember.Index.HasValue && sourceMember.Size.HasValue)
             {

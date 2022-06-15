@@ -1,18 +1,18 @@
 using System;
 using AutoMapper;
-using Product.Contract.Query;
+using Product.Contract.Queries;
 using Product.WebApi.Versions.V1.Models;
 using Shared.Infrastructure.Request;
 
 namespace Product.WebApi.Versions.V1.Converters
 {
-    internal class CriteriaConverter : IValueConverter<GetAllItemsRequest, CriteriaQuery<ItemField>>
+    internal class CriteriaConverter : IValueConverter<GetAllProductsRequest, CriteriaQuery<ProductField>>
     {
-        public CriteriaQuery<ItemField> Convert(GetAllItemsRequest sourceMember, ResolutionContext context)
+        public CriteriaQuery<ProductField> Convert(GetAllProductsRequest sourceMember, ResolutionContext context)
         {
             if (!string.IsNullOrEmpty(sourceMember.Find))
             {
-                var criteria = new CriteriaQuery<ItemField>();
+                var criteria = new CriteriaQuery<ProductField>();
 
                 if (sourceMember.FindBy.HasValue)
                 {
@@ -22,10 +22,10 @@ namespace Product.WebApi.Versions.V1.Converters
                 {
                     if (Guid.TryParse(sourceMember.Find, out Guid id))
                     {
-                        criteria.AddValues(ItemField.Id, id);
+                        criteria.AddValues(ProductField.Id, id);
                     }
-                    criteria.AddValues(ItemField.Name, sourceMember.Find);
-                    criteria.AddValues(ItemField.Description, sourceMember.Find);
+                    criteria.AddValues(ProductField.Name, sourceMember.Find);
+                    criteria.AddValues(ProductField.Description, sourceMember.Find);
                 }
 
                 return criteria;

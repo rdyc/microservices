@@ -5,7 +5,7 @@ using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
-using Product.Domain.Context;
+using Product.Domain.Persistence;
 
 namespace Product.Domain.Migrations.Postgre.Product
 {
@@ -21,7 +21,7 @@ namespace Product.Domain.Migrations.Postgre.Product
                 .HasAnnotation("ProductVersion", "3.1.6")
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
-            modelBuilder.Entity("Product.Domain.Entity.ItemEntity", b =>
+            modelBuilder.Entity("Product.Domain.Persistence.Entities.ItemEntity", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
