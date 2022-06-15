@@ -13,6 +13,7 @@ namespace Product.Domain.Persistence.Entities
             string value,
             string unit)
         {
+            Id = Guid.NewGuid();
             ProductId = product.Id;
             Product = product;
             Sequence = sequence;
@@ -23,6 +24,11 @@ namespace Product.Domain.Persistence.Entities
             IsTransient = true;
         }
 
+        protected ProductAttributeEntity()
+        {
+        }
+
+        public Guid Id { get; internal set; }
         public Guid ProductId { get; internal set; }
         public ProductEntity Product { get; internal set; }
         public int Sequence { get; internal set; }

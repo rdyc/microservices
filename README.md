@@ -4,5 +4,5 @@ In case schema was changed during development, run these scripts to make databas
 
 ```
 $ cd src/Product.Domain
-$ dotnet ef migrations add <MigrationName> -c ProductContext -o Migration/Postgre/Product -s ../Product.WebApi
+$ dotnet ef migrations add <MigrationName> -c ProductContext -o Persistence/Migrations/Postgre -s ../Product.WebApi
 ```

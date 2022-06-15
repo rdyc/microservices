@@ -29,7 +29,11 @@ namespace Product.Domain.Persistence
                 }
             }
 
+            modelBuilder.ApplyConfiguration(new AttributeConfiguration());
+            modelBuilder.ApplyConfiguration(new CurrencyConfiguration());
             modelBuilder.ApplyConfiguration(new ProductConfiguration());
+            modelBuilder.ApplyConfiguration(new ProductCurrencyConfiguration());
+            modelBuilder.ApplyConfiguration(new ProductAttributeConfiguration());
 
             base.OnModelCreating(modelBuilder);
         }

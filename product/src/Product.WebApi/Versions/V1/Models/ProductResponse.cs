@@ -25,5 +25,11 @@ namespace Product.WebApi.Versions.V1.Models
         /// </summary>
         /// <value>The product description.</value>
         public string Description { get; private set; }
+
+        /// <summary>
+        /// The product price.
+        /// </summary>
+        /// <value>The product price.</value>
+         public decimal Price { get; private set; }
     }
 }

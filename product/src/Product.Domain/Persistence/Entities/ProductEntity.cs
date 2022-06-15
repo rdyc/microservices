@@ -16,6 +16,10 @@ namespace Product.Domain.Persistence.Entities
             IsTransient = true;
         }
 
+        protected ProductEntity()
+        {
+        }
+
         public Guid Id { get; internal set; }
         public string Name { get; internal set; }
         public string Description { get; internal set; }

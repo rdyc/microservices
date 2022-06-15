@@ -7,5 +7,6 @@ namespace Product.Contract.Dtos
         Guid Id { get; }
         string Name { get; }
         string Description { get; }
+        decimal Price { get; }
     }
 }

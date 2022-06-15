@@ -24,6 +24,7 @@ namespace Product.Domain.Handler.Query
         public async Task<IEnumerable<IProductDto>> Handle(GetAllProductsQuery request, CancellationToken cancellationToken)
         {
             var result = await unitOfWork.Product.GetAll()
+                .Include(e => e.Currency)
                 .WithCriteria(request.Criteria)
                 .WithOrdered(request.Ordered)
                 .WithPaged(request.Paged)
