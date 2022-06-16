@@ -4,27 +4,27 @@ namespace Product.Domain.Persistence.Entities
 {
     internal static class ProductExtension
     {
-        internal static void SetUpdate(this ProductEntity entity, string name, string description)
+        public static void SetUpdate(this ProductEntity entity, string name, string description)
         {
             entity.Name = name;
             entity.Description = description;
             entity.IsTransient = true;
         }
 
-        internal static ProductAttributeEntity AddAttribute(this ProductEntity entity, int sequence, string name, AttributeType type, string value, string unit)
+        public static ProductAttributeEntity AddAttribute(this ProductEntity entity, int sequence, AttributeReferenceEntity attributeReference, string value)
         {
             if (entity.Attributes == null)
             {
                 entity.Attributes = new List<ProductAttributeEntity>();
             }
 
-            var attribute = new ProductAttributeEntity(entity, sequence, name, type, value, unit);
+            var attribute = new ProductAttributeEntity(entity, sequence, attributeReference, value);
             entity.Attributes.Add(attribute);
 
             return attribute;
         }
 
-        internal static void ClearAttribute(this ProductEntity entity)
+        public static void ClearAttribute(this ProductEntity entity)
         {
             if (entity.Attributes != null)
             {

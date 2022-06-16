@@ -10,9 +10,19 @@ namespace Product.Domain.Profiles
     {
         public EntityToDtoProfile() : base("Entity To Dto profile")
         {
+            // attribute
+            CreateMap<AttributeEntity, IAttributeDto>()
+                .ConvertUsing<DtoConverter>();
+            CreateMap<AttributeEntity, AttributeDto>();
+
+            // currency
+            CreateMap<CurrencyEntity, ICurrencyDto>()
+                .ConvertUsing<DtoConverter>();
+            CreateMap<CurrencyEntity, CurrencyDto>();
+
+            // product
             CreateMap<ProductEntity, IProductDto>()
                 .ConvertUsing<DtoConverter>();
-
             CreateMap<ProductEntity, ProductDto>();
         }
     }

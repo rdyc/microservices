@@ -13,9 +13,11 @@ namespace Product.Domain.Repositories
         {
             this.context = context;
 
+            Config = new ConfigRepository(context);
             Product = new ProductRepository(context);
         }
 
+        public IConfigRepository Config { get; set; }
         public IProductRepository Product { get; set; }
 
         public async Task<int> SaveChangesAsync(CancellationToken cancellationToken)

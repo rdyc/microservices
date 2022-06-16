@@ -8,19 +8,16 @@ namespace Product.Domain.Persistence.Entities
         public ProductAttributeEntity(
             ProductEntity product,
             int sequence,
-            string name,
-            AttributeType type,
-            string value,
-            string unit)
+            AttributeReferenceEntity attribute,
+            string value)
         {
             Id = Guid.NewGuid();
             ProductId = product.Id;
             Product = product;
             Sequence = sequence;
-            Name = name;
-            Type = type;
+            AttributeRefId = attribute.RefId;
+            Attribute = attribute;
             Value = value;
-            Unit = unit;
             IsTransient = true;
         }
 
@@ -32,9 +29,8 @@ namespace Product.Domain.Persistence.Entities
         public Guid ProductId { get; internal set; }
         public ProductEntity Product { get; internal set; }
         public int Sequence { get; internal set; }
-        public string Name { get; internal set; }
-        public AttributeType Type { get; internal set; }
+        public Guid AttributeRefId { get; internal set; }
+        public AttributeReferenceEntity Attribute { get; internal set; }
         public string Value { get; internal set; }
-        public string Unit { get; internal set; }
     }
 }

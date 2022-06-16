@@ -22,6 +22,7 @@ namespace Product.Domain.Persistence.Configuration
             builder.Property(e => e.Name).HasMaxLength(50).IsRequired();
             builder.Property(e => e.Code).HasMaxLength(3).IsRequired();
             builder.Property(e => e.Symbol).HasMaxLength(5).IsRequired();
+            builder.Property(e => e.IsDeleted).IsRequired();
         }
     }
 }

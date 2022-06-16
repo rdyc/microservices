@@ -13,6 +13,9 @@ namespace Product.Domain.Persistence.Entities
             Id = Guid.NewGuid();
             Name = name;
             Description = description;
+            // CurrencyRefId = currency.RefId;
+            // Currency = currency;
+            // Price = price;
             IsTransient = true;
         }
 
@@ -23,9 +26,10 @@ namespace Product.Domain.Persistence.Entities
         public Guid Id { get; internal set; }
         public string Name { get; internal set; }
         public string Description { get; internal set; }
+        public Guid CurrencyRefId { get; internal set; }
+        public CurrencyReferenceEntity Currency { get; internal set; }
         public decimal Price { get; internal set; }
-        public ProductCurrencyEntity Currency { get; internal set; }
         public ICollection<ProductAttributeEntity> Attributes { get; internal set; }
-        public DateTime? DeletedAt { get; internal set; }
+        public bool IsDeleted { get; internal set; }
     }
 }

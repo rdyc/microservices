@@ -17,14 +17,15 @@ namespace Product.Domain.Persistence.Configuration
             // ignoring some properties
             builder.Ignore(e => e.IsTransient);
 
+            // define entity relation
+            builder.HasOne(e => e.Attribute).WithMany(e => e.ProductAttributes).HasForeignKey(e => e.AttributeRefId).HasPrincipalKey(e => e.RefId).OnDelete(DeleteBehavior.Restrict);
+
             // define property mapping
             builder.Property(e => e.Id).IsRequired();
             builder.Property(e => e.ProductId).IsRequired();
             builder.Property(e => e.Sequence).IsRequired();
-            builder.Property(e => e.Name).HasMaxLength(50).IsRequired();
-            builder.Property(e => e.Type).IsRequired();
+            builder.Property(e => e.AttributeRefId).IsRequired();
             builder.Property(e => e.Value).HasMaxLength(10).IsRequired();
-            builder.Property(e => e.Unit).HasMaxLength(10).IsRequired();
         }
     }
 }
