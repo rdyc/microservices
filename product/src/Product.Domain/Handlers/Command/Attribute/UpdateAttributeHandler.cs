@@ -6,8 +6,6 @@ using Product.Contract.Dtos;
 using Product.Domain.Repositories;
 using Product.Domain.Dtos;
 using Product.Contract.Commands;
-using Microsoft.EntityFrameworkCore;
-using Product.Domain.Persistence.Entities;
 
 namespace Product.Domain.Handlers
 {
@@ -24,12 +22,15 @@ namespace Product.Domain.Handlers
 
         public async Task<IAttributeDto> Handle(UpdateAttributeCommand request, CancellationToken cancellationToken)
         {
-            var attribute = await unitOfWork.Config.GetAllAttributes()
-                .SingleOrDefaultAsync(e => e.Id.Equals(request.Id.Value), cancellationToken);
+            // get existing attribute
+            var attribute = await unitOfWork.Config.GetAttributeAsync(request.Id.Value, cancellationToken);
 
-            attribute.SetUpdate(request.Name, request.Type, request.Unit);
-
-            unitOfWork.Config.Update(attribute);
+            // set attribute modification
+            unitOfWork.Config.UpdateAttribute(attribute, p => {
+                p.Name = request.Name;
+                p.Type = request.Type;
+                p.Unit = request.Unit;
+            });
 
             await unitOfWork.SaveChangesAsync(cancellationToken);
 

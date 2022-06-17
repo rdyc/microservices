@@ -21,8 +21,9 @@ namespace Product.Domain.Validators
         protected void ValidateId()
         {
             RuleFor(c => c.Id)
-                .NotNull()
-                .MustBeExistAttributeAsync(unitOfWork.Config).WithMessage("The resource was not found");
+                .Transform(value => value.Value)
+                .MustBeExistAttributeAsync(unitOfWork.Config)
+                .WithMessage("The requested attribute was not found");
         }
 
         protected void ValidateName(bool isUpdate = false)
@@ -31,11 +32,13 @@ namespace Product.Domain.Validators
 
             if (!isUpdate)
             {
-                rule.MustBeUniqueAttributeNameAsync(unitOfWork.Config).WithMessage("The name already exist");
+                rule.MustBeUniqueAttributeNameAsync(unitOfWork.Config)
+                    .WithMessage("The attribute name already exist");
             }
             else
             {
-                rule.MustBeUniqueAttributeNameIdAsync(unitOfWork.Config).WithMessage("The name already taken");
+                rule.MustBeUniqueAttributeNameIdAsync(unitOfWork.Config)
+                    .WithMessage("The attribute name already taken");
             }
         }
 
@@ -45,11 +48,13 @@ namespace Product.Domain.Validators
 
             if (!isUpdate)
             {
-                rule.MustBeUniqueAttributeUnitAsync(unitOfWork.Config).WithMessage("The unit already exist");
+                rule.MustBeUniqueAttributeUnitAsync(unitOfWork.Config)
+                    .WithMessage("The attribute unit already exist");
             }
             else
             {
-                rule.MustBeUniqueAttributeUnitIdAsync(unitOfWork.Config).WithMessage("The unit already taken");
+                rule.MustBeUniqueAttributeUnitIdAsync(unitOfWork.Config)
+                    .WithMessage("The attribute unit already taken");
             }
         }
     }

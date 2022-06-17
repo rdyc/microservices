@@ -52,7 +52,7 @@ namespace Product.WebApi.Versions.V1.Controllers
         {
             try
             {
-                GetAllProductsQuery query = mapper.Map<GetAllProductsQuery>(request);
+                var query = mapper.Map<GetAllProductsQuery>(request);
 
                 var data = await mediator.Send(query);
 
@@ -82,9 +82,9 @@ namespace Product.WebApi.Versions.V1.Controllers
         {
             try
             {
-                GetProductQuery query = mapper.Map<GetProductQuery>(productId);
+                var query = mapper.Map<GetProductQuery>(productId);
 
-                IProductDto data = await mediator.Send(query);
+                var data = await mediator.Send(query);
 
                 return Ok(data);
             }
@@ -109,8 +109,8 @@ namespace Product.WebApi.Versions.V1.Controllers
         {
             try
             {
-                CreateProductCommand request = mapper.Map<CreateProductCommand>(payload);
-                IProductDto result = await mediator.Send(request, cancellationToken);
+                var request = mapper.Map<CreateProductCommand>(payload);
+                var result = await mediator.Send(request, cancellationToken);
 
                 return Accepted(result);
             }
@@ -137,8 +137,8 @@ namespace Product.WebApi.Versions.V1.Controllers
             try
             {
                 payload.Id = productId;
-                UpdateProductCommand request = mapper.Map<UpdateProductCommand>(payload);
-                IProductDto result = await mediator.Send(request, cancellationToken);
+                var request = mapper.Map<UpdateProductCommand>(payload);
+                var result = await mediator.Send(request, cancellationToken);
 
                 return Accepted(result);
             }
@@ -165,8 +165,8 @@ namespace Product.WebApi.Versions.V1.Controllers
             try
             {
                 payload.Id = productId;
-                DeleteProductCommand request = mapper.Map<DeleteProductCommand>(payload);
-                IProductDto result = await mediator.Send(request, cancellationToken);
+                var request = mapper.Map<DeleteProductCommand>(payload);
+                var result = await mediator.Send(request, cancellationToken);
 
                 return Accepted();
             }

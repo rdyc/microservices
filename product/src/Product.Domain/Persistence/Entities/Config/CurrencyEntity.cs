@@ -3,7 +3,7 @@ using Shared.Infrastructure.Domain;
 
 namespace Product.Domain.Persistence.Entities
 {
-    public class CurrencyEntity : BaseEntity, IAggregateRoot, ISoftDelete
+    public class CurrencyEntity : Entity, IAggregateRoot, ISoftDelete
     {
         public CurrencyEntity(string name, string code, string symbol)
         {
@@ -11,7 +11,6 @@ namespace Product.Domain.Persistence.Entities
             Name = name;
             Code = code;
             Symbol = symbol;
-            IsTransient = true;
         }
 
         protected CurrencyEntity()

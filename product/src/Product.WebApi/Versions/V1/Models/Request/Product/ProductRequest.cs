@@ -1,3 +1,5 @@
+using System;
+
 namespace Product.WebApi.Versions.V1.Models
 {
     /// <summary>
@@ -16,6 +18,12 @@ namespace Product.WebApi.Versions.V1.Models
         /// </summary>
         /// <value>The product description.</value>
         public string Description { get; set; }
+
+        /// <summary>
+        /// The product currency id.
+        /// </summary>
+        /// <value>The product currency id.</value>
+        public Guid CurrencyId { get; set; }
 
         /// <summary>
         /// The product price.

@@ -2,10 +2,10 @@ using System.Threading;
 using System.Threading.Tasks;
 using AutoMapper;
 using MediatR;
-using Microsoft.EntityFrameworkCore;
 using Product.Contract.Commands;
 using Product.Contract.Dtos;
 using Product.Domain.Dtos;
+using Product.Domain.Persistence.Entities;
 using Product.Domain.Repositories;
 
 namespace Product.Domain.Handlers
@@ -23,10 +23,10 @@ namespace Product.Domain.Handlers
 
         public async Task<IProductDto> Handle(DeleteProductCommand request, CancellationToken cancellationToken)
         {
-            var product = await unitOfWork.Product.GetAll()
-                .SingleOrDefaultAsync(e => e.Id.Equals(request.Id.Value), cancellationToken);
+            // get existing product
+            var product = await unitOfWork.Product.GetDetailAsync(request.Id.Value, cancellationToken);
 
-            unitOfWork.Product.Delete(product);
+            unitOfWork.Product.Update(product, p => p.IsDeleted = true);
 
             await unitOfWork.SaveChangesAsync(cancellationToken);
 

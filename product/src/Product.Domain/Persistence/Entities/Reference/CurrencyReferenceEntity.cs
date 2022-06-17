@@ -4,7 +4,7 @@ using Shared.Infrastructure.Domain;
 
 namespace Product.Domain.Persistence.Entities
 {
-    internal class CurrencyReferenceEntity : BaseEntity, IAggregateRoot
+    internal class CurrencyReferenceEntity : Entity, IAggregateRoot
     {
         public CurrencyReferenceEntity(Guid id, string name, string code, string symbol)
         {

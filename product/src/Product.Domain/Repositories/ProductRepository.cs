@@ -1,5 +1,9 @@
+using System;
 using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
+using Product.Domain.Events;
 using Product.Domain.Persistence;
 using Product.Domain.Persistence.Entities;
 
@@ -19,19 +23,27 @@ namespace Product.Domain.Repositories
             return context.Products.AsQueryable();
         }
 
-        public void Add(ProductEntity entity)
+        public async Task<ProductEntity> GetDetailAsync(Guid productId, CancellationToken cancellationToken)
         {
-            context.Entry(entity).State = EntityState.Added;
+            return await context.Products
+                .Include(e => e.Currency)
+                .Include(e => e.Attributes)
+                    .ThenInclude(e => e.Attribute)
+                .SingleOrDefaultAsync(e => e.Id.Equals(productId));
         }
 
-        public void Update(ProductEntity entity)
+        public ProductEntity Create(string name, string description, CurrencyReferenceEntity currency, decimal price)
         {
-            context.Entry(entity).State = EntityState.Modified;
+            var product = new ProductEntity(name, description, currency, price);
+            product.Events.Add(new ProductCreatedEvent(product));
+            context.Entry(product).State = EntityState.Added;
+            return product;
         }
 
-        public void Delete(ProductEntity entity)
+        public void Update(ProductEntity product, Action<ProductEntity> action)
         {
-            context.Entry(entity).State = EntityState.Deleted;
+            action.Invoke(product);
+            context.Entry(product).State = EntityState.Modified;
         }
     }
 }

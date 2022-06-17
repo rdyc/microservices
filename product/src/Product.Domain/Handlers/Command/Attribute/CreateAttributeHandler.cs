@@ -6,7 +6,6 @@ using Product.Contract.Dtos;
 using Product.Domain.Repositories;
 using Product.Domain.Dtos;
 using Product.Contract.Commands;
-using Product.Domain.Persistence.Entities;
 
 namespace Product.Domain.Handlers
 {
@@ -23,9 +22,7 @@ namespace Product.Domain.Handlers
 
         public async Task<IAttributeDto> Handle(CreateAttributeCommand request, CancellationToken cancellationToken)
         {
-            var attribute = new AttributeEntity(request.Name, request.Type, request.Unit);
-
-            unitOfWork.Config.Add(attribute);
+            var attribute = unitOfWork.Config.CreateAttribute(request.Name, request.Type, request.Unit);
 
             await unitOfWork.SaveChangesAsync(cancellationToken);
 

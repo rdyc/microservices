@@ -2,11 +2,9 @@ using System.Threading;
 using System.Threading.Tasks;
 using AutoMapper;
 using MediatR;
-using Microsoft.EntityFrameworkCore;
 using Product.Contract.Commands;
 using Product.Contract.Dtos;
 using Product.Domain.Dtos;
-using Product.Domain.Persistence.Entities;
 using Product.Domain.Repositories;
 
 namespace Product.Domain.Handlers
@@ -24,12 +22,16 @@ namespace Product.Domain.Handlers
 
         public async Task<ICurrencyDto> Handle(UpdateCurrencyCommand request, CancellationToken cancellationToken)
         {
-            var currency = await unitOfWork.Config.GetAllCurrencies()
-                .SingleOrDefaultAsync(e => e.Id.Equals(request.Id.Value), cancellationToken);
+            // get existing currency
+            var currency = await unitOfWork.Config.GetCurrencyAsync(request.Id.Value, cancellationToken);
 
-            currency.SetUpdate(request.Name, request.Code, request.Symbol);
-
-            unitOfWork.Config.Update(currency);
+            // set attribute modification
+            unitOfWork.Config.UpdateCurrency(currency, p =>
+            {
+                p.Name = request.Name;
+                p.Code = request.Code;
+                p.Symbol = request.Symbol;
+            });
 
             await unitOfWork.SaveChangesAsync(cancellationToken);
 

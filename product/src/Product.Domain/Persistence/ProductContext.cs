@@ -21,7 +21,9 @@ namespace Product.Domain.Persistence
         /// <inheritdoc/>
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            // modelBuilder.Ignore<Event>();
+            // ignore any domain events
+            modelBuilder.Ignore<IDomainEvent>();
+            
             // applying query filter
             ApplyQueryFilter(modelBuilder);
 

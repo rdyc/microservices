@@ -10,6 +10,8 @@ namespace Product.Domain.Validators
             ValidateId();
             ValidateName(true);
             ValidateDescription();
+            ValidateCurrency();
+            ValidatePrice();
         }
     }
 }

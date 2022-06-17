@@ -143,6 +143,7 @@ namespace Product.WebApi
 
                     config.DocumentTitle = $"Product API ({env.EnvironmentName})";
                     config.DocExpansion(DocExpansion.None);
+                    config.DefaultModelRendering(ModelRendering.Model);
                     config.DisplayRequestDuration();
                     config.EnableDeepLinking();
                     config.EnableFilter();

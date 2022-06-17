@@ -24,6 +24,8 @@ namespace Product.Domain.Handlers
         public async Task<IProductDto> Handle(GetProductQuery request, CancellationToken cancellationToken)
         {
             var result = await unitOfWork.Product.GetAll()
+                .Include(e => e.Currency)
+                .Include(e => e.Attributes)
                 .SingleOrDefaultAsync(e => e.Id.Equals(request.Id), cancellationToken);
 
             return mapper.Map<ProductDto>(result);

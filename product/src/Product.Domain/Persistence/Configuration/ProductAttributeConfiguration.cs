@@ -15,7 +15,7 @@ namespace Product.Domain.Persistence.Configuration
             builder.HasKey(e => e.Id);
 
             // ignoring some properties
-            builder.Ignore(e => e.IsTransient);
+            // builder.Ignore(e => e.Status);
 
             // define entity relation
             builder.HasOne(e => e.Attribute).WithMany(e => e.ProductAttributes).HasForeignKey(e => e.AttributeRefId).HasPrincipalKey(e => e.RefId).OnDelete(DeleteBehavior.Restrict);

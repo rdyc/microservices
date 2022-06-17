@@ -12,12 +12,11 @@ namespace Product.Domain.Validators
 {
     internal static class AttributeValidatorExtension
     {
-        internal static IRuleBuilderOptions<T, Guid?> MustBeExistAttributeAsync<T>(this IRuleBuilder<T, Guid?> ruleBuilder, IConfigRepository configRepository)
-            where T : AttributeCommand
+        internal static IRuleBuilderOptions<T, Guid> MustBeExistAttributeAsync<T>(this IRuleBuilder<T, Guid> ruleBuilder, IConfigRepository configRepository)
         {
-            return ruleBuilder.MustAsync(async (context, id, cancellationToken) =>
+            return ruleBuilder.MustAsync(async (id, cancellationToken) =>
             {
-                return await configRepository.GetAllAttributes().AnyAsync(e => e.Id.Equals(id.Value), cancellationToken);
+                return await configRepository.GetAllAttributes().AnyAsync(e => e.Id.Equals(id), cancellationToken);
             });
         }
 

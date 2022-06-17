@@ -12,7 +12,7 @@ namespace Product.Domain.Persistence.Configuration
             builder.ToTable("attribute", "reference");
 
             // ignoring some properties
-            builder.Ignore(e => e.IsTransient);
+            // builder.Ignore(e => e.Status);
 
             // define primary key
             builder.HasKey(e => e.RefId);

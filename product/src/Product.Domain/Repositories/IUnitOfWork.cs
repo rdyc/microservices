@@ -8,6 +8,7 @@ namespace Product.Domain.Repositories
     {
         IConfigRepository Config { get; }
         IProductRepository Product { get; }
+        IReferenceRepository Reference { get; }
         Task<int> SaveChangesAsync(CancellationToken cancellationToken);
     }
 }

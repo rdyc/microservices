@@ -5,7 +5,6 @@ using MediatR;
 using Product.Contract.Commands;
 using Product.Contract.Dtos;
 using Product.Domain.Dtos;
-using Product.Domain.Persistence.Entities;
 using Product.Domain.Repositories;
 
 namespace Product.Domain.Handlers
@@ -23,9 +22,7 @@ namespace Product.Domain.Handlers
 
         public async Task<ICurrencyDto> Handle(CreateCurrencyCommand request, CancellationToken cancellationToken)
         {
-            var currency = new CurrencyEntity(request.Name, request.Code, request.Symbol);
-
-            unitOfWork.Config.Add(currency);
+            var currency = unitOfWork.Config.CreateCurrency(request.Name, request.Code, request.Symbol);
 
             await unitOfWork.SaveChangesAsync(cancellationToken);
 

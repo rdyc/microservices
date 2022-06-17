@@ -4,19 +4,20 @@ using Shared.Infrastructure.Domain;
 
 namespace Product.Domain.Persistence.Entities
 {
-    internal class ProductEntity : BaseEntity, IAggregateRoot, ISoftDelete
+    internal class ProductEntity : Entity, IAggregateRoot, ISoftDelete
     {
         public ProductEntity(
             string name,
-            string description)
+            string description,
+            CurrencyReferenceEntity currency,
+            decimal price)
         {
             Id = Guid.NewGuid();
             Name = name;
             Description = description;
-            // CurrencyRefId = currency.RefId;
-            // Currency = currency;
-            // Price = price;
-            IsTransient = true;
+            CurrencyRefId = currency.RefId;
+            Currency = currency;
+            Price = price;
         }
 
         protected ProductEntity()

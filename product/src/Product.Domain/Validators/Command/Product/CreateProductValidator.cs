@@ -9,6 +9,8 @@ namespace Product.Domain.Validators
         {
             ValidateName();
             ValidateDescription();
+            ValidateCurrency();
+            ValidatePrice();
         }
     }
 }

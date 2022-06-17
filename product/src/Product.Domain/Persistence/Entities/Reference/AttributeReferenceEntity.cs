@@ -5,7 +5,7 @@ using Shared.Infrastructure.Domain;
 
 namespace Product.Domain.Persistence.Entities
 {
-    internal class AttributeReferenceEntity : BaseEntity, IAggregateRoot
+    internal class AttributeReferenceEntity : Entity, IAggregateRoot
     {
         public AttributeReferenceEntity(Guid id, string name, AttributeType type, string unit)
         {

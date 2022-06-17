@@ -27,6 +27,12 @@ namespace Product.WebApi.Versions.V1.Models
         public string Description { get; private set; }
 
         /// <summary>
+        /// The product currency.
+        /// </summary>
+        /// <value>The product currency.</value>
+        public CurrencyResponse Currency { get; private set; }
+
+        /// <summary>
         /// The product price.
         /// </summary>
         /// <value>The product price.</value>

@@ -4,7 +4,7 @@ using Shared.Infrastructure.Domain;
 
 namespace Product.Domain.Persistence.Entities
 {
-    internal class AttributeEntity : BaseEntity, IAggregateRoot, ISoftDelete
+    internal class AttributeEntity : Entity, IAggregateRoot, ISoftDelete
     {
         public AttributeEntity(
             string name,
@@ -15,7 +15,6 @@ namespace Product.Domain.Persistence.Entities
             Name = name;
             Type = type;
             Unit = unit;
-            IsTransient = true;
         }
 
         protected AttributeEntity()

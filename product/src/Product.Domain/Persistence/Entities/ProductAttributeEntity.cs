@@ -3,7 +3,7 @@ using Shared.Infrastructure.Domain;
 
 namespace Product.Domain.Persistence.Entities
 {
-    internal class ProductAttributeEntity : BaseEntity
+    internal class ProductAttributeEntity : Entity
     {
         public ProductAttributeEntity(
             ProductEntity product,
@@ -18,7 +18,6 @@ namespace Product.Domain.Persistence.Entities
             AttributeRefId = attribute.RefId;
             Attribute = attribute;
             Value = value;
-            IsTransient = true;
         }
 
         protected ProductAttributeEntity()

@@ -1,5 +1,9 @@
+using System;
 using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
+using Product.Contract.Enums;
 using Product.Domain.Persistence;
 using Product.Domain.Persistence.Entities;
 
@@ -14,44 +18,50 @@ namespace Product.Domain.Repositories
             this.context = context;
         }
 
-        public IQueryable<AttributeEntity> GetAllAttributes()
-        {
-            return context.Attributes.AsQueryable();
-        }
-
         public IQueryable<CurrencyEntity> GetAllCurrencies()
         {
             return context.Currencies.AsQueryable();
         }
 
-        public void Add(AttributeEntity entity)
+        public async Task<CurrencyEntity> GetCurrencyAsync(Guid id, CancellationToken cancellationToken)
         {
-            context.Entry(entity).State = EntityState.Added;
+            return await GetAllCurrencies().SingleAsync(e => e.Id.Equals(id), cancellationToken);
         }
 
-        public void Update(AttributeEntity entity)
+        public CurrencyEntity CreateCurrency(string name, string code, string symbol)
         {
+            var entity = new CurrencyEntity(name, code, symbol);
+            context.Entry(entity).State = EntityState.Added;
+            return entity;
+        }
+
+        public void UpdateCurrency(CurrencyEntity entity, Action<CurrencyEntity> action)
+        {
+            action.Invoke(entity);
             context.Entry(entity).State = EntityState.Modified;
         }
 
-        public void Delete(AttributeEntity entity)
+        public IQueryable<AttributeEntity> GetAllAttributes()
         {
-            context.Entry(entity).State = EntityState.Deleted;
+            return context.Attributes.AsQueryable();
         }
 
-        public void Add(CurrencyEntity entity)
+        public async Task<AttributeEntity> GetAttributeAsync(Guid id, CancellationToken cancellationToken)
         {
+            return await GetAllAttributes().SingleAsync(e => e.Id.Equals(id), cancellationToken);
+        }
+
+        public AttributeEntity CreateAttribute(string name, AttributeType type, string unit)
+        {
+            var entity = new AttributeEntity(name, type, unit);
             context.Entry(entity).State = EntityState.Added;
+            return entity;
         }
 
-        public void Update(CurrencyEntity entity)
+        public void UpdateAttribute(AttributeEntity entity, Action<AttributeEntity> action)
         {
+            action.Invoke(entity);
             context.Entry(entity).State = EntityState.Modified;
-        }
-
-        public void Delete(CurrencyEntity entity)
-        {
-            context.Entry(entity).State = EntityState.Deleted;
         }
     }
 }

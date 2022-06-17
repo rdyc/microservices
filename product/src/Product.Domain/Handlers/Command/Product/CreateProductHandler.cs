@@ -23,10 +23,23 @@ namespace Product.Domain.Handlers
 
         public async Task<IProductDto> Handle(CreateProductCommand request, CancellationToken cancellationToken)
         {
-            var product = new ProductEntity(request.Name, request.Description);
+            // get currency from config
+            var currency = await unitOfWork.Config.GetCurrencyAsync(request.CurrencyId, cancellationToken);
+            
+            // get or create currency reference
+            /* var productCurrency = await unitOfWork.Reference.GetAllCurrencies()
+                .GetUniqueAsync(currency.Id, currency.Name, currency.Code, currency.Symbol); */
 
-            unitOfWork.Product.Add(product);
+            var productCurrency = await unitOfWork.Reference.GetOrCreateCurrencyAsync(currency.Id, currency.Name, currency.Code, currency.Symbol, cancellationToken);
 
+            // create a new product
+            // var product = new ProductEntity(request.Name, request.Description, productCurrency, request.Price);
+
+            var product = unitOfWork.Product.Create(request.Name, request.Description, productCurrency, request.Price);
+
+            // unitOfWork.Product.Add(product);
+
+            // save all changes
             await unitOfWork.SaveChangesAsync(cancellationToken);
 
             return mapper.Map<ProductDto>(product);

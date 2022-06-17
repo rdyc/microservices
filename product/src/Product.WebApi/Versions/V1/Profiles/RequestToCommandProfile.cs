@@ -32,8 +32,9 @@ namespace Product.WebApi.Versions.V1.Profiles
             CreateMap<UpdateProductRequest, UpdateProductCommand>();
             CreateMap<DeleteProductRequest, DeleteProductCommand>()
                 .ForMember(dst => dst.Name, opt => opt.Ignore())
-                .ForMember(dst => dst.Price, opt => opt.Ignore())
-                .ForMember(dst => dst.Description, opt => opt.Ignore());
+                .ForMember(dst => dst.Description, opt => opt.Ignore())
+                .ForMember(dst => dst.CurrencyId, opt => opt.Ignore())
+                .ForMember(dst => dst.Price, opt => opt.Ignore());
         }
     }
 }

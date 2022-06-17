@@ -21,13 +21,9 @@ namespace Product.Domain.Validators
         protected void ValidateId()
         {
             RuleFor(c => c.Id)
-                .NotNull()
-                .MustBeExistProductAsync(unitOfWork.Product).WithMessage("The resource was not found");
-        }
-
-        protected void ValidateDescription()
-        {
-            RuleFor(c => c.Description).NotEmpty();
+                .Transform(value => value.Value)
+                .MustBeExistProductAsync(unitOfWork.Product)
+                .WithMessage("The requested product was not found");
         }
 
         protected void ValidateName(bool isUpdate = false)
@@ -36,12 +32,32 @@ namespace Product.Domain.Validators
 
             if (!isUpdate)
             {
-                rule.MustBeUniqueProductNameAsync(unitOfWork.Product).WithMessage("The name already exist");
+                rule.MustBeUniqueProductNameAsync(unitOfWork.Product)
+                    .WithMessage("The product name already exist");
             }
             else
             {
-                rule.MustBeUniqueProductNameIdAsync(unitOfWork.Product).WithMessage("The name already taken");
+                rule.MustBeUniqueProductNameIdAsync(unitOfWork.Product)
+                    .WithMessage("The product name already taken");
             }
+        }
+
+        protected void ValidateDescription()
+        {
+            RuleFor(c => c.Description).NotEmpty();
+        }
+
+        protected void ValidateCurrency()
+        {
+            RuleFor(c => c.CurrencyId)
+                .MustBeExistCurrencyAsync(unitOfWork.Config)
+                .WithMessage("The requested currency was not found");
+        }
+
+        protected void ValidatePrice()
+        {
+            RuleFor(c => c.Price)
+                .GreaterThan(0);
         }
     }
 }

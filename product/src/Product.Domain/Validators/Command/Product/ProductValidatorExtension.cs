@@ -12,12 +12,11 @@ namespace Product.Domain.Validators
 {
     internal static class ProductValidatorExtension
     {
-        internal static IRuleBuilderOptions<T, Guid?> MustBeExistProductAsync<T>(this IRuleBuilder<T, Guid?> ruleBuilder, IProductRepository productRepository)
-            where T : ProductCommand
+        internal static IRuleBuilderOptions<T, Guid> MustBeExistProductAsync<T>(this IRuleBuilder<T, Guid> ruleBuilder, IProductRepository productRepository)
         {
-            return ruleBuilder.MustAsync(async (context, id, cancellationToken) =>
+            return ruleBuilder.MustAsync(async (id, cancellationToken) =>
             {
-                return await productRepository.GetAll().AnyAsync(e => e.Id.Equals(id.Value), cancellationToken);
+                return await productRepository.GetAll().AnyAsync(e => e.Id.Equals(id), cancellationToken);
             });
         }
 

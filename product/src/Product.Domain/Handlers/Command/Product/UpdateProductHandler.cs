@@ -2,7 +2,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using AutoMapper;
 using MediatR;
-using Microsoft.EntityFrameworkCore;
 using Product.Contract.Commands;
 using Product.Contract.Dtos;
 using Product.Domain.Dtos;
@@ -24,12 +23,23 @@ namespace Product.Domain.Handlers
 
         public async Task<IProductDto> Handle(UpdateProductCommand request, CancellationToken cancellationToken)
         {
-            var product = await unitOfWork.Product.GetAll()
-                .SingleOrDefaultAsync(e => e.Id.Equals(request.Id.Value), cancellationToken);
+            // get currency from config
+            var currency = await unitOfWork.Config.GetCurrencyAsync(request.CurrencyId, cancellationToken);
 
-            product.SetUpdate(request.Name, request.Description);
+            // get or create currency reference
+            var productCurrency = await unitOfWork.Reference.GetOrCreateCurrencyAsync(currency.Id, currency.Name, currency.Code, currency.Symbol, cancellationToken);
 
-            unitOfWork.Product.Update(product);
+            // get existing product
+            var product = await unitOfWork.Product.GetDetailAsync(request.Id.Value, cancellationToken);
+
+            // set product modification
+            unitOfWork.Product.Update(product, p =>
+            {
+                p.Name = request.Name;
+                p.Description = request.Description;
+                p.Currency = productCurrency;
+                p.Price = request.Price;
+            });
 
             await unitOfWork.SaveChangesAsync(cancellationToken);
 

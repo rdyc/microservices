@@ -24,6 +24,11 @@ namespace Product.Domain.Profiles
             CreateMap<ProductEntity, IProductDto>()
                 .ConvertUsing<DtoConverter>();
             CreateMap<ProductEntity, ProductDto>();
+
+            // reference
+            CreateMap<CurrencyReferenceEntity, ICurrencyDto>()
+                .ConvertUsing<DtoConverter>();
+            CreateMap<CurrencyReferenceEntity, CurrencyDto>();
         }
     }
 }

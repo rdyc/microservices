@@ -4,7 +4,6 @@ using AutoMapper;
 using MediatR;
 using Product.Domain.Repositories;
 using Product.Contract.Commands;
-using Microsoft.EntityFrameworkCore;
 using Product.Contract.Dtos;
 using Product.Domain.Dtos;
 
@@ -23,10 +22,11 @@ namespace Product.Domain.Handlers
 
         public async Task<IAttributeDto> Handle(DeleteAttributeCommand request, CancellationToken cancellationToken)
         {
-            var attribute = await unitOfWork.Config.GetAllAttributes()
-                .SingleOrDefaultAsync(e => e.Id.Equals(request.Id.Value), cancellationToken);
+            // get existing attribute
+            var attribute = await unitOfWork.Config.GetAttributeAsync(request.Id.Value, cancellationToken);
 
-            unitOfWork.Config.Delete(attribute);
+            // set attribute modification
+            unitOfWork.Config.UpdateAttribute(attribute, p => p.IsDeleted = true);
 
             await unitOfWork.SaveChangesAsync(cancellationToken);
 

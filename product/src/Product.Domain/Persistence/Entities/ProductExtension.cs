@@ -4,14 +4,10 @@ namespace Product.Domain.Persistence.Entities
 {
     internal static class ProductExtension
     {
-        public static void SetUpdate(this ProductEntity entity, string name, string description)
-        {
-            entity.Name = name;
-            entity.Description = description;
-            entity.IsTransient = true;
-        }
-
-        public static ProductAttributeEntity AddAttribute(this ProductEntity entity, int sequence, AttributeReferenceEntity attributeReference, string value)
+        public static ProductAttributeEntity AddAttribute(this ProductEntity entity,
+            int sequence,
+            AttributeReferenceEntity attributeReference,
+            string value)
         {
             if (entity.Attributes == null)
             {

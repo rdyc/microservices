@@ -21,8 +21,9 @@ namespace Product.Domain.Validators
         protected void ValidateId()
         {
             RuleFor(c => c.Id)
-                .NotNull()
-                .MustBeExistCurrencyAsync(unitOfWork.Config).WithMessage("The resource was not found");
+                .Transform(value => value.Value)
+                .MustBeExistCurrencyAsync(unitOfWork.Config)
+                .WithMessage("The requested currency was not found");
         }
 
         protected void ValidateName(bool isUpdate = false)
@@ -31,11 +32,13 @@ namespace Product.Domain.Validators
 
             if (!isUpdate)
             {
-                rule.MustBeUniqueCurrencyNameAsync(unitOfWork.Config).WithMessage("The name already exist");
+                rule.MustBeUniqueCurrencyNameAsync(unitOfWork.Config)
+                    .WithMessage("The currency name already exist");
             }
             else
             {
-                rule.MustBeUniqueCurrencyNameIdAsync(unitOfWork.Config).WithMessage("The name already taken");
+                rule.MustBeUniqueCurrencyNameIdAsync(unitOfWork.Config)
+                    .WithMessage("The currency name already taken");
             }
         }
 
@@ -45,11 +48,13 @@ namespace Product.Domain.Validators
 
             if (!isUpdate)
             {
-                rule.MustBeUniqueCurrencyCodeAsync(unitOfWork.Config).WithMessage("The code already exist");
+                rule.MustBeUniqueCurrencyCodeAsync(unitOfWork.Config)
+                    .WithMessage("The currency code already exist");
             }
             else
             {
-                rule.MustBeUniqueCurrencyCodeIdAsync(unitOfWork.Config).WithMessage("The code already taken");
+                rule.MustBeUniqueCurrencyCodeIdAsync(unitOfWork.Config)
+                    .WithMessage("The currency code already taken");
             }
         }
 
@@ -59,11 +64,13 @@ namespace Product.Domain.Validators
 
             if (!isUpdate)
             {
-                rule.MustBeUniqueCurrencySymbolAsync(unitOfWork.Config).WithMessage("The symbol already exist");
+                rule.MustBeUniqueCurrencySymbolAsync(unitOfWork.Config)
+                    .WithMessage("The currency symbol already exist");
             }
             else
             {
-                rule.MustBeUniqueCurrencySymbolIdAsync(unitOfWork.Config).WithMessage("The symbol already taken");
+                rule.MustBeUniqueCurrencySymbolIdAsync(unitOfWork.Config)
+                    .WithMessage("The currency symbol already taken");
             }
         }
     }
