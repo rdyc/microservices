@@ -1,9 +1,8 @@
-namespace Product.Contract.Enums
+namespace Product.Contract.Enums;
+
+public enum AttributeType
 {
-    public enum AttributeType
-    {
-        Text,
-        Number,
-        Decimal
-    }
+    Text,
+    Number,
+    Decimal
 }

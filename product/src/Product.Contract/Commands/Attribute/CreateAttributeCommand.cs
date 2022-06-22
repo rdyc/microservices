@@ -1,6 +1,5 @@
-namespace Product.Contract.Commands
+namespace Product.Contract.Commands;
+
+public class CreateAttributeCommand : AttributeCommand
 {
-    public class CreateAttributeCommand : AttributeCommand
-    {
-    }
 }

@@ -1,10 +1,9 @@
-namespace Product.Contract.Queries
+namespace Product.Contract.Queries;
+
+public enum CurrencyField
 {
-    public enum CurrencyField
-    {
-        Id,
-        Name,
-        Code,
-        Symbol
-    }
+    Id,
+    Name,
+    Code,
+    Symbol
 }

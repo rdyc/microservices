@@ -1,9 +1,8 @@
-namespace Product.Contract.Queries
+namespace Product.Contract.Queries;
+
+public enum ProductField
 {
-    public enum ProductField
-    {
-        Id,
-        Name,
-        Description
-    }
+    Id,
+    Name,
+    Description
 }

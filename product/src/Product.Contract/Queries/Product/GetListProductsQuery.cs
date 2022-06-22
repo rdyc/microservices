@@ -3,11 +3,10 @@ using MediatR;
 using Product.Contract.Dtos;
 using Shared.Infrastructure.Request;
 
-namespace Product.Contract.Queries
+namespace Product.Contract.Queries;
+
+public class GetListProductsQuery : IRequest<IEnumerable<IProductDto>>
 {
-    public class GetListProductsQuery : IRequest<IEnumerable<IProductDto>>
-    {
-        public CriteriaQuery<ProductField> Criteria { get; set; }
-        public OrderedQuery<ProductField> Ordered { get; set; }
-    }
+    public CriteriaQuery<ProductField> Criteria { get; set; }
+    public OrderedQuery<ProductField> Ordered { get; set; }
 }

@@ -1,13 +1,12 @@
 using System;
 
-namespace Product.Contract.Dtos
+namespace Product.Contract.Dtos;
+
+public interface IProductDto
 {
-    public interface IProductDto
-    {
-        Guid Id { get; }
-        string Name { get; }
-        string Description { get; }
-        ICurrencyDto Currency { get; }
-        decimal Price { get; }
-    }
+    Guid Id { get; }
+    string Name { get; }
+    string Description { get; }
+    ICurrencyDto Currency { get; }
+    decimal Price { get; }
 }

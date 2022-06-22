@@ -1,6 +1,5 @@
-namespace Product.Contract.Commands
+namespace Product.Contract.Commands;
+
+public class UpdateCurrencyCommand : CurrencyCommand
 {
-    public class UpdateCurrencyCommand : CurrencyCommand
-    {
-    }
 }

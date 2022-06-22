@@ -1,11 +1,10 @@
-namespace Product.Contract.Queries
+namespace Product.Contract.Queries;
+
+public enum AttributeField
 {
-    public enum AttributeField
-    {
-        Id,
-        Name,
-        Type,
-        Unit,
-        Value
-    }
+    Id,
+    Name,
+    Type,
+    Unit,
+    Value
 }
