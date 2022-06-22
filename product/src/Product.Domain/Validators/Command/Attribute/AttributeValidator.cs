@@ -20,8 +20,7 @@ namespace Product.Domain.Validators
 
         protected void ValidateId()
         {
-            RuleFor(c => c.Id)
-                .Transform(value => value.Value)
+            Transform(f => f.Id, t => t.Value)
                 .MustBeExistAttributeAsync(unitOfWork.Config)
                 .WithMessage("The requested attribute was not found");
         }

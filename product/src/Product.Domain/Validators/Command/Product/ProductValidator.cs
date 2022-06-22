@@ -20,8 +20,7 @@ namespace Product.Domain.Validators
 
         protected void ValidateId()
         {
-            RuleFor(c => c.Id)
-                .Transform(value => value.Value)
+            Transform(f => f.Id, t => t.Value)
                 .MustBeExistProductAsync(unitOfWork.Product)
                 .WithMessage("The requested product was not found");
         }
