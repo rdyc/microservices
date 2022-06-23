@@ -1,16 +1,22 @@
 using System;
 using System.Collections.Generic;
 using AutoMapper;
+using Core.Commands;
+using Core.EventStoreDB;
+using Core.EventStoreDB.Repository;
 using FluentValidation;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Product.Contract.Commands;
 using Product.Contract.Dtos;
 using Product.Contract.Queries;
 using Product.Domain.Behaviours;
+using Product.Domain.Commands;
 using Product.Domain.Converters;
 using Product.Domain.Handlers;
+using Product.Domain.Models;
 using Product.Domain.Persistence;
 using Product.Domain.Profiles;
 using Product.Domain.Repositories;
@@ -20,12 +26,23 @@ namespace Product.Domain
 {
     public static class ServiceExtension
     {
-        public static void AddDomainContext(this IServiceCollection services, Action<DbContextOptionsBuilder> optionsAction, ServiceLifetime contextLifetime = ServiceLifetime.Scoped, ServiceLifetime optionsLifetime = ServiceLifetime.Scoped)
+        public static IServiceCollection AddProductModule(this IServiceCollection services, IConfiguration config)
+        {
+            services
+                .AddDomainService()
+                .AddEventStoreDB(config);
+
+            return services;
+        }
+        
+        public static IServiceCollection AddDomainContext(this IServiceCollection services, Action<DbContextOptionsBuilder> optionsAction, ServiceLifetime contextLifetime = ServiceLifetime.Scoped, ServiceLifetime optionsLifetime = ServiceLifetime.Scoped)
         {
             services.AddDbContext<ProductContext>(optionsAction, contextLifetime, optionsLifetime);
+
+            return services;
         }
 
-        public static void AddDomainService(this IServiceCollection services)
+        private static IServiceCollection AddDomainService(this IServiceCollection services)
         {
             services.AddAutoMapper(config =>
             {
@@ -37,13 +54,16 @@ namespace Product.Domain
             services.AddScoped<IUnitOfWork, UnitOfWork>();
             // services.AddScoped<IProductRepository, ProductRepository>();
 
-            AddCommandValidators(services);
-            AddCommandHandlers(services);
-            AddQueryHandlers(services);
-            AddConverters(services);
+            services.AddScoped<IEventStoreDBRepository<CurrencyModel>, EventStoreDBRepository<CurrencyModel>>()
+                    .AddCommandValidators()
+                    .AddCommandHandlers()
+                    .AddQueryHandlers()
+                    .AddConverters();
+
+            return services;
         }
 
-        private static void AddCommandValidators(IServiceCollection services)
+        private static IServiceCollection AddCommandValidators(this IServiceCollection services)
         {
             // attribute
             services.AddScoped<IValidator<CreateAttributeCommand>, CreateAttributeValidator>();
@@ -59,16 +79,18 @@ namespace Product.Domain
             services.AddScoped<IValidator<CreateProductCommand>, CreateProductValidator>();
             services.AddScoped<IValidator<UpdateProductCommand>, UpdateProductValidator>();
             services.AddScoped<IValidator<DeleteProductCommand>, DeleteProductValidator>();
+
+            return services;
         }
 
-        private static void AddCommandHandlers(IServiceCollection services)
+        private static IServiceCollection AddCommandHandlers(this IServiceCollection services)
         {
             // attribute
             services.AddScoped<IRequestHandler<CreateAttributeCommand, IAttributeDto>, CreateAttributeHandler>();
             services.AddScoped<IRequestHandler<UpdateAttributeCommand, IAttributeDto>, UpdateAttributeHandler>();
             services.AddScoped<IRequestHandler<DeleteAttributeCommand, IAttributeDto>, DeleteAttributeHandler>();
 
-            // config
+            // curency
             services.AddScoped<IRequestHandler<CreateCurrencyCommand, ICurrencyDto>, CreateCurrencyHandler>();
             services.AddScoped<IRequestHandler<UpdateCurrencyCommand, ICurrencyDto>, UpdateCurrencyHandler>();
             services.AddScoped<IRequestHandler<DeleteCurrencyCommand, ICurrencyDto>, DeleteCurrencyHandler>();
@@ -77,9 +99,15 @@ namespace Product.Domain
             services.AddScoped<IRequestHandler<CreateProductCommand, IProductDto>, CreateProductHandler>();
             services.AddScoped<IRequestHandler<UpdateProductCommand, IProductDto>, UpdateProductHandler>();
             services.AddScoped<IRequestHandler<DeleteProductCommand, IProductDto>, DeleteProductHandler>();
+
+
+            services.AddCommandHandler<CreateCurrencyCmd, CreateCurrencyCmdHandler>();
+            services.AddCommandHandler<UpdateCurrencyCmd, UpdateCurrencyCmdHandler>();
+
+            return services;
         }
 
-        private static void AddQueryHandlers(IServiceCollection services)
+        private static IServiceCollection AddQueryHandlers(this IServiceCollection services)
         {
             // attribute
             services.AddScoped<IRequestHandler<GetAllAttributesQuery, IEnumerable<IAttributeDto>>, GetAllAttributesHandler>();
@@ -95,11 +123,15 @@ namespace Product.Domain
             services.AddScoped<IRequestHandler<GetAllProductsQuery, IEnumerable<IProductDto>>, GetAllProductsHandler>();
             services.AddScoped<IRequestHandler<GetListProductsQuery, IEnumerable<IProductDto>>, GetListProductsHandler>();
             services.AddScoped<IRequestHandler<GetProductQuery, IProductDto>, GetProductHandler>();
+
+            return services;
         }
 
-        private static void AddConverters(IServiceCollection services)
+        private static IServiceCollection AddConverters(this IServiceCollection services)
         {
             services.AddScoped<DtoConverter>();
+
+            return services;
         }
 
         public static void UseDbMigration(IServiceScope scope)

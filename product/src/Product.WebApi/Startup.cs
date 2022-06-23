@@ -1,8 +1,18 @@
 using System;
 using System.IO;
+using System.Net;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using AutoMapper;
+using Core;
+using Core.EventStoreDB;
+using Core.EventStoreDB.OptimisticConcurrency;
+using Core.Exceptions;
+using Core.WebApi.Middlewares.ExceptionHandling;
+using Core.WebApi.OptimisticConcurrency;
+using Core.WebApi.Swagger;
+using Core.WebApi.Tracing;
+using EventStore.Client;
 using MediatR;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -84,8 +94,6 @@ namespace Product.WebApi
                     .UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking);
             });
 
-            services.AddDomainService();
-
             services.AddApiVersioning(o => o.ReportApiVersions = true)
                 .AddMvcCore()
                 .AddApiExplorer();
@@ -113,9 +121,20 @@ namespace Product.WebApi
 
                 // operation filters
                 config.OperationFilter<RemoveVersionParameterOperationFilter>();
+                config.OperationFilter<MetadataOperationFilter>();
             });
 
             services.AddTransient<IConfigureOptions<SwaggerGenOptions>, ConfigureSwaggerOptions>();
+
+            // core and  event store services
+            services.AddCoreServices()
+                    .AddEventStoreDBSubscriptionToAll()
+                    .AddProductModule(Configuration)
+                    .AddCorrelationIdMiddleware()
+                    .AddOptimisticConcurrencyMiddleware(
+                        sp => sp.GetRequiredService<EventStoreDBExpectedStreamRevisionProvider>().TrySet,
+                        sp => () => sp.GetRequiredService<EventStoreDBNextStreamRevisionProvider>().Value?.ToString()
+                    );
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -149,6 +168,16 @@ namespace Product.WebApi
                     config.EnableFilter();
                 });
             }
+
+            // core
+            app.UseExceptionHandlingMiddleware(exception => exception switch
+                {
+                    AggregateNotFoundException _ => HttpStatusCode.NotFound,
+                    WrongExpectedVersionException => HttpStatusCode.PreconditionFailed,
+                    _ => HttpStatusCode.InternalServerError
+                })
+                .UseCorrelationIdMiddleware()
+                .UseOptimisticConcurrencyMiddleware();
 
             app.UseHttpsRedirection();
 
