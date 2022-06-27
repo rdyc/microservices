@@ -3,6 +3,6 @@ namespace Lookup.Currencies;
 public enum CurrencyStatus
 {
     Active,
-    Disable,
+    Inactive,
     Removed
 }

@@ -1,5 +1,7 @@
-using Lookup.Currencies.RegisterCurrency;
 using FW.Core.Aggregates;
+using Lookup.Currencies.Modifying;
+using Lookup.Currencies.Registering;
+using Lookup.Currencies.Removing;
 
 namespace Lookup.Currencies;
 
@@ -10,27 +12,30 @@ public class Currency : Aggregate
     public string Symbol { get; private set; } = default!;
     public CurrencyStatus Status { get; private set; } = default!;
 
-    public static Currency Register(Guid id, string name, string code, string symbol)
+    public static Currency Register(Guid? id, string name, string code, string symbol)
     {
-        return new Currency(id, name, code, symbol);
+        if (id is null)
+            throw new ArgumentNullException(nameof(id));
+
+        return new Currency(id.Value, name, code, symbol);
     }
 
     private Currency() { }
 
-    public override void When(object @event)
+    public override void When(object evt)
     {
-        switch (@event)
+        switch (evt)
         {
             case CurrencyRegistered currency:
                 Apply(currency);
                 return;
-                /* case ProductAdded cartOpened:
-                    Apply(cartOpened);
-                    return;
-                case ProductRemoved cartOpened:
-                    Apply(cartOpened);
-                    return;
-                case ShoppingCartConfirmed cartOpened:
+            case CurrencyModified currency:
+                Apply(currency);
+                return;
+            case CurrencyRemoved currency:
+                Apply(currency);
+                return;
+                /*case ShoppingCartConfirmed cartOpened:
                     Apply(cartOpened);
                     return;
                 case ShoppingCartCanceled cartCanceled:
@@ -47,45 +52,50 @@ public class Currency : Aggregate
         Apply(evt);
     }
 
-    public void Apply(CurrencyRegistered @event)
+    public void Apply(CurrencyRegistered evt)
     {
-        Id = @event.Id;
-        Name = @event.Name;
-        Code = @event.Code;
-        Symbol = @event.Symbol;
+        Id = evt.Id;
+        Name = evt.Name;
+        Code = evt.Code;
+        Symbol = evt.Symbol;
         Status = CurrencyStatus.Active;
     }
 
-
-    /* public void Confirm()
+    public void Modify(string name, string code, string symbol)
     {
-        if (Status != ShoppingCartStatus.Pending)
-            throw new InvalidOperationException($"Confirming cart in '{Status}' status is not allowed.");
+        if (Status == CurrencyStatus.Removed)
+            throw new InvalidOperationException($"The currency was removed");
 
-        var @event = ShoppingCartConfirmed.Create(Id, DateTime.UtcNow);
+        var evt = CurrencyModified.Create(Id, name, code, symbol);
 
-        Enqueue(@event);
-        Apply(@event);
+        Enqueue(evt);
+        Apply(evt);
     }
 
-    public void Apply(ShoppingCartConfirmed @event)
+    public void Apply(CurrencyModified evt)
     {
-        Status = ShoppingCartStatus.Confirmed;
+        Version++;
+
+        Name = evt.Name;
+        Code = evt.Code;
+        Symbol = evt.Symbol;
     }
 
-    public void Cancel()
+    public void Remove()
     {
-        if (Status != ShoppingCartStatus.Pending)
-            throw new InvalidOperationException($"Canceling cart in '{Status}' status is not allowed.");
+        if (Status == CurrencyStatus.Removed)
+            throw new InvalidOperationException($"The currency already removed");
 
-        var @event = ShoppingCartCanceled.Create(Id, DateTime.UtcNow);
+        var evt = CurrencyRemoved.Create(Id);
 
-        Enqueue(@event);
-        Apply(@event);
+        Enqueue(evt);
+        Apply(evt);
     }
 
-    public void Apply(ShoppingCartCanceled @event)
+    public void Apply(CurrencyRemoved _)
     {
-        Status = ShoppingCartStatus.Canceled;
-    } */
+        Version++;
+
+        Status = CurrencyStatus.Removed;
+    }
 }

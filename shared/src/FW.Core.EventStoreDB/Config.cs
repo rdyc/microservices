@@ -20,7 +20,7 @@ public record EventStoreDBOptions(
 public static class EventStoreDBConfigExtensions
 {
     // private const string DefaultConfigKey = "EventStore";
-    private const string DefaultConfigKey = "EventStore.ConnectionString";
+    private const string DefaultConfigKey = "EventStore:ConnectionString";
 
     public static IServiceCollection AddEventStoreDB(this IServiceCollection services, IConfiguration config, EventStoreDBOptions? options = null)
     {
@@ -35,8 +35,7 @@ public static class EventStoreDBConfigExtensions
 
         if (options?.UseInternalCheckpointing != false)
         {
-            services
-                .AddTransient<ISubscriptionCheckpointRepository, EventStoreDBSubscriptionCheckpointRepository>();
+            services.AddTransient<ISubscriptionCheckpointRepository, EventStoreDBSubscriptionCheckpointRepository>();
         }
 
         return services;

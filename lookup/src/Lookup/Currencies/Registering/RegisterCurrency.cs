@@ -2,11 +2,21 @@ using FW.Core.EventStoreDB.OptimisticConcurrency;
 using FW.Core.EventStoreDB.Repository;
 using MediatR;
 
-namespace Lookup.Currencies.RegisterCurrency;
+namespace Lookup.Currencies.Registering;
 
-public record RegisterCurrency(Guid Id, string Name, string Code, string Symbol) : IRequest;
+public record RegisterCurrency(string Name, string Code, string Symbol) : CurrencyCommand(Guid.NewGuid(), Name, Code, Symbol);
 
-internal class HandleRegisterCurrency : IRequestHandler<RegisterCurrency>
+internal class ValidateRegister : CurrencyValidator<RegisterCurrency>
+{
+    public ValidateRegister()
+    {
+        ValidateName();
+        ValidateCode();
+        ValidateSymbol();
+    }
+}
+
+internal class HandleRegisterCurrency : IRequestHandler<RegisterCurrency, Guid>
 {
     private readonly IEventStoreDBRepository<Currency> repository;
     private readonly IEventStoreDBAppendScope scope;
@@ -17,7 +27,7 @@ internal class HandleRegisterCurrency : IRequestHandler<RegisterCurrency>
         this.scope = scope;
     }
 
-    public async Task<Unit> Handle(RegisterCurrency command, CancellationToken cancellationToken)
+    public async Task<Guid> Handle(RegisterCurrency command, CancellationToken cancellationToken)
     {
         var (Id, Code, Name, Symbol) = command;
 
@@ -29,6 +39,6 @@ internal class HandleRegisterCurrency : IRequestHandler<RegisterCurrency>
             )
         );
 
-        return Unit.Value;
+        return Id.Value;
     }
 }

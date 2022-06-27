@@ -1,0 +1,47 @@
+﻿using Microsoft.Extensions.DependencyInjection;
+using MongoDB.Driver;
+
+namespace FW.Core.MongoDB.Queries;
+
+public static class QueryHandler
+{
+    public static IServiceCollection AddEntityFrameworkQueryHandler<TDbContext, TQuery, TResult>(
+        this IServiceCollection services,
+        Func<IQueryable<TResult>, TQuery, CancellationToken, Task<TResult>> handler
+    )
+        where TDbContext : IMongoDatabase where TResult : class
+        =>
+            services.AddQueryHandler<TQuery, TResult>(sp =>
+            {
+                var queryable = sp.GetRequiredService<TDbContext>()
+                        
+                        .AsQueryable();
+
+                return (query, ct) =>
+                    handler(queryable, query, ct);
+            });
+
+    public static IServiceCollection AddEntityFrameworkQueryHandler<TDBContext, TQuery, TResult>(
+        this IServiceCollection services,
+        Func<IQueryable<TResult>, TQuery, CancellationToken, Task<IReadOnlyList<TResult>>> handler
+    )
+        where TDBContext : IMongoDatabase where TResult : class
+        =>
+            services.AddQueryHandler<TQuery, IReadOnlyList<TResult>>(sp =>
+            {
+                var queryable =
+                    sp.GetRequiredService<TDBContext>()
+                        .Set<TResult>()
+                        .AsNoTracking()
+                        .AsQueryable();
+
+                return (query, ct) =>
+                    handler(queryable, query, ct);
+            });
+
+    public static IServiceCollection AddQueryHandler<TQuery, TResult>(
+        this IServiceCollection services,
+        Func<IServiceProvider, Func<TQuery, CancellationToken, Task<TResult>>> setup
+    ) =>
+        services.AddTransient(setup);
+}

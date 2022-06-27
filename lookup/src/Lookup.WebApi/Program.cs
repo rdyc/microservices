@@ -1,3 +1,5 @@
+using FW.Core;
+using Lookup;
 using Lookup.WebApi.Endpoints;
 using Lookup.WebApi.Repositories;
 
@@ -8,15 +10,19 @@ using var loggerFactory = LoggerFactory.Create(config =>
         .AddConsole()
 );
 
-// Add services to the container.
-builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen(options =>
-{
-    options.EnableAnnotations();
-    options.DescribeAllParametersInCamelCase();
-});
+var config = builder.Configuration;
 
-builder.Services.AddSingleton<IWeatherRepository, WeatherRepository>();
+// Add services to the container.
+builder.Services
+    .AddEndpointsApiExplorer()
+    .AddSwaggerGen(options =>
+    {
+        options.EnableAnnotations();
+        options.DescribeAllParametersInCamelCase();
+    })
+    .AddSingleton<IWeatherRepository, WeatherRepository>()
+    .AddCoreServices()
+    .AddLookup(config);
 
 var app = builder.Build();
 
@@ -31,5 +37,6 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 app.UseWeatherEndpoint();
+app.UseCurrencyEndpoint();
 
 app.Run();
