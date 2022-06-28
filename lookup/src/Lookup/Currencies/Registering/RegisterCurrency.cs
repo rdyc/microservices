@@ -6,9 +6,9 @@ namespace Lookup.Currencies.Registering;
 
 public record RegisterCurrency(string Name, string Code, string Symbol, CurrencyStatus Status) : CurrencyCommand(Guid.NewGuid(), Name, Code, Symbol, Status);
 
-internal class ValidateRegister : CurrencyValidator<RegisterCurrency>
+internal class ValidateRegisterCurrency : CurrencyValidator<RegisterCurrency>
 {
-    public ValidateRegister()
+    public ValidateRegisterCurrency()
     {
         ValidateName();
         ValidateCode();

@@ -1,13 +1,13 @@
-using Lookup.Currencies.Registering;
-using FW.Core.Events;
+using FluentValidation;
 using FW.Core.EventStoreDB.Repository;
-using Microsoft.Extensions.DependencyInjection;
-using MediatR;
-using Lookup.Currencies.Modifying;
-using Lookup.Currencies.Removing;
-using Lookup.Currencies.GettingCurrencies;
-using FW.Core.MongoDB.Projections;
 using FW.Core.MongoDB.Commands;
+using FW.Core.MongoDB.Projections;
+using Lookup.Currencies.GettingCurrencies;
+using Lookup.Currencies.Modifying;
+using Lookup.Currencies.Registering;
+using Lookup.Currencies.Removing;
+using MediatR;
+using Microsoft.Extensions.DependencyInjection;
 using MongoDB.Driver;
 
 namespace Lookup.Currencies;
@@ -17,10 +17,17 @@ internal static class CurrencyExtension
     internal static IServiceCollection AddCurrency(this IServiceCollection services) =>
         services
             .AddScoped<IEventStoreDBRepository<Currency>, EventStoreDBRepository<Currency>>()
+            .AddCommandValidators()
             .AddCommandHandlers()
             .AddProjections()
             .AddQueryHandlers();
             // .AddEventHandlers();
+
+    private static IServiceCollection AddCommandValidators(this IServiceCollection services) =>
+        services
+            .AddScoped<IValidator<RegisterCurrency>, ValidateRegisterCurrency>()
+            .AddScoped<IValidator<ModifyCurrency>, ValidateModifyCurrency>()
+            .AddScoped<IValidator<RemoveCurrency>, ValidateRemoveCurrency>();
 
     private static IServiceCollection AddCommandHandlers(this IServiceCollection services) =>
         services
@@ -42,11 +49,11 @@ internal static class CurrencyExtension
 
     private static IServiceCollection AddProjections(this IServiceCollection services) =>
         services
-            .For<CurrencyShortInfo>(builder => 
+            .For<CurrencyShortInfo>(builder =>
                 builder
                     .AddOn<CurrencyRegistered>(CurrencyShortInfoProjection.Handle)
                     .UpdateOn<CurrencyModified>(
-                        getViewId: e => e.Id, 
+                        getViewId: e => e.Id,
                         handler: CurrencyShortInfoProjection.Handle,
                         prepare: (view) => Builders<CurrencyShortInfo>.Update
                             .Set(e => e.Name, view.Name)
@@ -56,16 +63,4 @@ internal static class CurrencyExtension
                             .Set(e => e.LastProcessedPosition, view.LastProcessedPosition)
                     )
             );
-
-    /* internal static void ConfigureCarts(this StoreOptions options)
-    {
-        // Snapshots
-        options.Projections.SelfAggregate<ShoppingCart>();
-        // // projections
-        options.Projections.Add<CartShortInfoProjection>();
-        options.Projections.Add<CartDetailsProjection>();
-        //
-        // // transformation
-        options.Projections.Add<CartHistoryTransformation>();
-    } */
 }

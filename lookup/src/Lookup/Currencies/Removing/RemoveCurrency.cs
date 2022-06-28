@@ -6,9 +6,9 @@ namespace Lookup.Currencies.Removing;
 
 public record RemoveCurrency(Guid? Id) : CurrencyCommand(Id, default, default, default, default);
 
-internal class ValidateRemove : CurrencyValidator<RemoveCurrency>
+internal class ValidateRemoveCurrency : CurrencyValidator<RemoveCurrency>
 {
-    public ValidateRemove()
+    public ValidateRemoveCurrency()
     {
         ValidateId();
     }

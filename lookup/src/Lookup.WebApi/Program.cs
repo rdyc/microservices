@@ -8,7 +8,7 @@ using Microsoft.AspNetCore.Http.Json;
 
 var builder = WebApplication.CreateBuilder(args);
 
-using var loggerFactory = LoggerFactory.Create(config => 
+using var loggerFactory = LoggerFactory.Create(config =>
     config.SetMinimumLevel(LogLevel.Trace)
         .AddConsole()
 );
@@ -39,7 +39,8 @@ var app = builder.Build();
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
-    app.UseSwaggerUI(options => {
+    app.UseSwaggerUI(options =>
+    {
         options.DisplayRequestDuration();
     });
 }

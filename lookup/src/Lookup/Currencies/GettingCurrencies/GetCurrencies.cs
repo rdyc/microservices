@@ -19,8 +19,8 @@ internal class HandleGetCurrencies : IRequestHandler<GetCurrencies, IEnumerable<
         var (index, size) = request;
 
         return await collection.Find(_ => true)
-                .Skip(index * (index - 1))
-                .Limit(size)
-                .ToListAsync(cancellationToken);
+            .Skip(index * (index - 1))
+            .Limit(size)
+            .ToListAsync(cancellationToken);
     }
 }

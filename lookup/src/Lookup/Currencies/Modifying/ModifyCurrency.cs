@@ -6,9 +6,9 @@ namespace Lookup.Currencies.Modifying;
 
 public record ModifyCurrency(Guid? Id, string Name, string Code, string Symbol) : CurrencyCommand(Id, Name, Code, Symbol, default);
 
-internal class ValidateModify : CurrencyValidator<ModifyCurrency>
+internal class ValidateModifyCurrency : CurrencyValidator<ModifyCurrency>
 {
-    public ValidateModify()
+    public ValidateModifyCurrency()
     {
         ValidateId();
         ValidateName();

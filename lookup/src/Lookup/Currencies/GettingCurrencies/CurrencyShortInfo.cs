@@ -1,20 +1,18 @@
 using FW.Core.Events;
 using FW.Core.MongoDB;
-using FW.Core.Projections;
 using Lookup.Currencies.Modifying;
 using Lookup.Currencies.Registering;
 using Lookup.Currencies.Removing;
-using MongoDB.Bson;
 
 namespace Lookup.Currencies.GettingCurrencies;
 
 public record CurrencyShortInfo : Document//, IVersionedProjection
 {
     // public Guid Id { get; set; }
-    public string Name { get; set; }
-    public string Code { get; set; }
-    public string Symbol { get; set; }
-    public CurrencyStatus Status { get; set; }
+    public string Name { get; set; } = default!;
+    public string Code { get; set; } = default!;
+    public string Symbol { get; set; } = default!;
+    public CurrencyStatus Status { get; set; } = default!;
     public int Version { get; set; }
     public ulong LastProcessedPosition { get; set; }
 }
