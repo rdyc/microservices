@@ -13,10 +13,7 @@ namespace Core.EventStoreDB.Subscriptions;
 public class EventStoreDBSubscriptionToAllOptions
 {
     public string SubscriptionId { get; set; } = "default";
-
-    public SubscriptionFilterOptions FilterOptions { get; set; } =
-        new(EventTypeFilter.ExcludeSystemEvents());
-
+    public SubscriptionFilterOptions FilterOptions { get; set; } = new(EventTypeFilter.ExcludeSystemEvents());
     public Action<EventStoreClientOperationOptions>? ConfigureOperation { get; set; }
     public UserCredentials? Credentials { get; set; }
     public bool ResolveLinkTos { get; set; }
@@ -43,8 +40,7 @@ public class EventStoreDBSubscriptionToAll
     {
         this.eventBus = eventBus ?? throw new ArgumentNullException(nameof(eventBus));
         this.eventStoreClient = eventStoreClient ?? throw new ArgumentNullException(nameof(eventStoreClient));
-        this.checkpointRepository =
-            checkpointRepository ?? throw new ArgumentNullException(nameof(checkpointRepository));
+        this.checkpointRepository = checkpointRepository ?? throw new ArgumentNullException(nameof(checkpointRepository));
         this.logger = logger ?? throw new ArgumentNullException(nameof(logger));
     }
 

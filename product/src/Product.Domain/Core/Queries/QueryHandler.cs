@@ -1,20 +1,27 @@
-﻿using Microsoft.Extensions.DependencyInjection;
-using MongoDB.Driver;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 
-namespace FW.Core.MongoDB.Queries;
+namespace ECommerce.Core.Queries;
 
 public static class QueryHandler
 {
-    /* public static IServiceCollection AddEntityFrameworkQueryHandler<TDbContext, TQuery, TResult>(
+    public static IServiceCollection AddEntityFrameworkQueryHandler<TDbContext, TQuery, TResult>(
         this IServiceCollection services,
         Func<IQueryable<TResult>, TQuery, CancellationToken, Task<TResult>> handler
     )
-        where TDbContext : IMongoDatabase where TResult : class
+        where TDbContext : DbContext where TResult : class
         =>
             services.AddQueryHandler<TQuery, TResult>(sp =>
             {
-                var queryable = sp.GetRequiredService<TDbContext>()
-                        
+                var queryable =
+                    sp.GetRequiredService<TDbContext>()
+                        .Set<TResult>()
+                        .AsNoTracking()
                         .AsQueryable();
 
                 return (query, ct) =>
@@ -25,7 +32,7 @@ public static class QueryHandler
         this IServiceCollection services,
         Func<IQueryable<TResult>, TQuery, CancellationToken, Task<IReadOnlyList<TResult>>> handler
     )
-        where TDBContext : IMongoDatabase where TResult : class
+        where TDBContext : DbContext where TResult : class
         =>
             services.AddQueryHandler<TQuery, IReadOnlyList<TResult>>(sp =>
             {
@@ -43,5 +50,5 @@ public static class QueryHandler
         this IServiceCollection services,
         Func<IServiceProvider, Func<TQuery, CancellationToken, Task<TResult>>> setup
     ) =>
-        services.AddTransient(setup); */
+        services.AddTransient(setup);
 }

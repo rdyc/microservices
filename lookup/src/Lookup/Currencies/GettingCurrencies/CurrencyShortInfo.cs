@@ -1,13 +1,16 @@
 using FW.Core.Events;
+using FW.Core.MongoDB;
+using FW.Core.Projections;
 using Lookup.Currencies.Modifying;
 using Lookup.Currencies.Registering;
 using Lookup.Currencies.Removing;
+using MongoDB.Bson;
 
 namespace Lookup.Currencies.GettingCurrencies;
 
-public record CurrencyShortInfo
+public record CurrencyShortInfo : Document//, IVersionedProjection
 {
-    public Guid Id { get; set; }
+    // public Guid Id { get; set; }
     public string Name { get; set; }
     public string Code { get; set; }
     public string Symbol { get; set; }
@@ -39,7 +42,7 @@ public class CurrencyShortInfoProjection
         if (view.LastProcessedPosition >= eventEnvelope.Metadata.LogPosition)
             return;
 
-        var (name, code, symbol) = eventEnvelope.Data;
+        var (_, name, code, symbol) = eventEnvelope.Data;
 
         view.Name = name;
         view.Code = code;

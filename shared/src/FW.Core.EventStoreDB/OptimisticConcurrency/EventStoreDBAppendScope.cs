@@ -24,8 +24,7 @@ public static class EventStoreDBAppendScopeExtensions
             .AddScoped<IEventStoreDBAppendScope, EventStoreDBAppendScope>(
                 sp =>
                 {
-                    var expectedStreamVersionProvider =
-                        sp.GetRequiredService<EventStoreDBExpectedStreamRevisionProvider>();
+                    var expectedStreamVersionProvider = sp.GetRequiredService<EventStoreDBExpectedStreamRevisionProvider>();
                     var nextStreamVersionProvider = sp.GetRequiredService<EventStoreDBNextStreamRevisionProvider>();
                     var traceMetadataProvider = sp.GetRequiredService<ITraceMetadataProvider>();
 

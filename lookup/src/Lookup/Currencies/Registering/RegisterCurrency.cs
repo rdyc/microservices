@@ -4,7 +4,7 @@ using MediatR;
 
 namespace Lookup.Currencies.Registering;
 
-public record RegisterCurrency(string Name, string Code, string Symbol) : CurrencyCommand(Guid.NewGuid(), Name, Code, Symbol);
+public record RegisterCurrency(string Name, string Code, string Symbol, CurrencyStatus Status) : CurrencyCommand(Guid.NewGuid(), Name, Code, Symbol, Status);
 
 internal class ValidateRegister : CurrencyValidator<RegisterCurrency>
 {
@@ -29,16 +29,16 @@ internal class HandleRegisterCurrency : IRequestHandler<RegisterCurrency, Guid>
 
     public async Task<Guid> Handle(RegisterCurrency command, CancellationToken cancellationToken)
     {
-        var (Id, Code, Name, Symbol) = command;
+        var (id, code, name, symbol, status) = command;
 
         await scope.Do((_, eventMetadata) =>
             repository.Add(
-                Currency.Register(Id, Code, Name, Symbol),
+                Currency.Register(id, code, name, symbol, status),
                 eventMetadata,
                 cancellationToken
             )
         );
 
-        return Id.Value;
+        return id.Value;
     }
 }

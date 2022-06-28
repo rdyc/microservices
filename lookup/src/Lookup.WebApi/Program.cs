@@ -1,7 +1,10 @@
+using System.Text.Json;
+using System.Text.Json.Serialization;
 using FW.Core;
 using Lookup;
 using Lookup.WebApi.Endpoints;
 using Lookup.WebApi.Repositories;
+using Microsoft.AspNetCore.Http.Json;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -14,6 +17,11 @@ var config = builder.Configuration;
 
 // Add services to the container.
 builder.Services
+    .Configure<JsonOptions>(options =>
+    {
+        options.SerializerOptions.WriteIndented = false;
+        options.SerializerOptions.Converters.Add(new JsonStringEnumConverter(JsonNamingPolicy.CamelCase, false));
+    })
     .AddEndpointsApiExplorer()
     .AddSwaggerGen(options =>
     {
@@ -22,6 +30,7 @@ builder.Services
     })
     .AddSingleton<IWeatherRepository, WeatherRepository>()
     .AddCoreServices()
+    .Configure<FW.Core.MongoDB.Settings.MongoDbSettings>(builder.Configuration.GetSection(nameof(FW.Core.MongoDB.Settings.MongoDbSettings)))
     .AddLookup(config);
 
 var app = builder.Build();

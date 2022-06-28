@@ -1,6 +1,7 @@
 using EventStore.Client;
 using FW.Core.EventStoreDB;
 using FW.Core.EventStoreDB.Subscriptions;
+using FW.Core.MongoDB;
 using Lookup.Currencies;
 using MediatR;
 using Microsoft.Extensions.Configuration;
@@ -12,12 +13,13 @@ public static class LookupExtension
 {
     public static IServiceCollection AddLookup(this IServiceCollection services, IConfiguration configuration) =>
         services
+            .AddTransient(typeof(IPipelineBehavior<,>), typeof(ValidationBehaviour<,>))
+            .AddMongoDb(configuration)
             .AddEventStoreDB(configuration)
             .AddEventStoreDBSubscriptionToAll(new EventStoreDBSubscriptionToAllOptions
             {
                 SubscriptionId = "lookup-currency",
                 FilterOptions = new(EventTypeFilter.Prefix("Lookup_Currencies_"))
             })
-            .AddCurrency()
-            .AddTransient(typeof(IPipelineBehavior<,>), typeof(ValidationBehaviour<,>));
+            .AddCurrency();
 }

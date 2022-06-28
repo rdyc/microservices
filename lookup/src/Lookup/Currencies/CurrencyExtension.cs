@@ -6,6 +6,9 @@ using MediatR;
 using Lookup.Currencies.Modifying;
 using Lookup.Currencies.Removing;
 using Lookup.Currencies.GettingCurrencies;
+using FW.Core.MongoDB.Projections;
+using FW.Core.MongoDB.Commands;
+using MongoDB.Driver;
 
 namespace Lookup.Currencies;
 
@@ -15,8 +18,9 @@ internal static class CurrencyExtension
         services
             .AddScoped<IEventStoreDBRepository<Currency>, EventStoreDBRepository<Currency>>()
             .AddCommandHandlers()
-            // .AddQueryHandlers()
-            .AddEventHandlers();
+            .AddProjections()
+            .AddQueryHandlers();
+            // .AddEventHandlers();
 
     private static IServiceCollection AddCommandHandlers(this IServiceCollection services) =>
         services
@@ -24,22 +28,34 @@ internal static class CurrencyExtension
             .AddTransient<IRequestHandler<ModifyCurrency, Guid>, HandleModifyCurrency>()
             .AddTransient<IRequestHandler<RemoveCurrency, Guid>, HandleRemoveCurrency>();
 
-    /* private static IServiceCollection AddQueryHandlers(this IServiceCollection services) =>
-        services.AddQueryHandler<GetCartById, ShoppingCartDetails?, HandleGetCartById>()
-            .AddQueryHandler<GetCartAtVersion, ShoppingCartDetails, HandleGetCartAtVersion>()
-            .AddQueryHandler<GetCarts, IPagedList<ShoppingCartShortInfo>, HandleGetCarts>()
-            .AddQueryHandler<GetCartHistory, IPagedList<ShoppingCartHistory>, HandleGetCartHistory>(); */
+    private static IServiceCollection AddQueryHandlers(this IServiceCollection services) =>
+        services
+            .AddTransient<IRequestHandler<GetCurrencies, IEnumerable<CurrencyShortInfo>>, HandleGetCurrencies>();
 
     /* private static IServiceCollection AddEventHandlers(this IServiceCollection services) =>
         services.AddEventHandler<EventEnvelope<ShoppingCartConfirmed>, HandleCartFinalized>(); */
 
-    private static IServiceCollection AddEventHandlers(this IServiceCollection services) =>
+    /* private static IServiceCollection AddEventHandlers(this IServiceCollection services) =>
         services
             .AddTransient<IEventHandler<CurrencyRegistered>, HandleCurrencyRegistered>()
-            .AddTransient<IEventHandler<EventEnvelope<CurrencyRegistered>>, HandleCurrencyRegistered>();
+            .AddTransient<IEventHandler<EventEnvelope<CurrencyRegistered>>, HandleCurrencyRegistered>(); */
 
     private static IServiceCollection AddProjections(this IServiceCollection services) =>
-        services.AddOn<CurrencyRegistered>(CurrencyShortInfoProjection.Handle);
+        services
+            .For<CurrencyShortInfo>(builder => 
+                builder
+                    .AddOn<CurrencyRegistered>(CurrencyShortInfoProjection.Handle)
+                    .UpdateOn<CurrencyModified>(
+                        getViewId: e => e.Id, 
+                        handler: CurrencyShortInfoProjection.Handle,
+                        prepare: (view) => Builders<CurrencyShortInfo>.Update
+                            .Set(e => e.Name, view.Name)
+                            .Set(e => e.Code, view.Code)
+                            .Set(e => e.Symbol, view.Symbol)
+                            .Set(e => e.Version, view.Version)
+                            .Set(e => e.LastProcessedPosition, view.LastProcessedPosition)
+                    )
+            );
 
     /* internal static void ConfigureCarts(this StoreOptions options)
     {

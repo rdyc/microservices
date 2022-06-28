@@ -4,7 +4,7 @@ using MediatR;
 
 namespace Lookup.Currencies.Modifying;
 
-public record ModifyCurrency(Guid? Id, string Name, string Code, string Symbol) : CurrencyCommand(Id, Name, Code, Symbol);
+public record ModifyCurrency(Guid? Id, string Name, string Code, string Symbol) : CurrencyCommand(Id, Name, Code, Symbol, default);
 
 internal class ValidateModify : CurrencyValidator<ModifyCurrency>
 {
@@ -30,18 +30,18 @@ internal class HandleModifyCurrency : IRequestHandler<ModifyCurrency, Guid>
 
     public async Task<Guid> Handle(ModifyCurrency command, CancellationToken cancellationToken)
     {
-        var (Id, Code, Name, Symbol) = command;
+        var (id, code, name, symbol, statusl) = command;
 
         await scope.Do((expectedVersion, eventMetadata) =>
             repository.GetAndUpdate(
-                Id.Value,
-                (currency) => currency.Modify(Name, Code, Symbol),
+                id.Value,
+                (currency) => currency.Modify(name, code, symbol),
                 expectedVersion,
                 eventMetadata,
                 cancellationToken
             )
         );
 
-        return Id.Value;
+        return id.Value;
     }
 }

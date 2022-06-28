@@ -4,10 +4,12 @@ using System.Threading;
 using System.Threading.Tasks;
 using AutoMapper;
 using Core.Commands;
+using Core.EventStoreDB.Repository;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Product.Contract.Dtos;
 using Product.Domain.Commands;
+using Product.Domain.Models;
 using Product.WebApi.Versions.V2.Models;
 using Swashbuckle.AspNetCore.Annotations;
 
@@ -22,6 +24,7 @@ namespace Product.WebApi.Versions.V2.Controllers
     public class CurrencyController : ControllerBase
     {
         private readonly ICommandBus commandBus;
+        private readonly IEventStoreDBRepository<CurrencyModel> repository;
         private readonly IMapper mapper;
         private readonly ILogger<CurrencyController> logger;
 
@@ -31,11 +34,12 @@ namespace Product.WebApi.Versions.V2.Controllers
         /// <param name="commandBus">The command bus instance.</param>
         /// <param name="mapper">The mapper instance.</param>
         /// <param name="logger">The logger instance.</param>
-        public CurrencyController(ICommandBus commandBus, IMapper mapper, ILogger<CurrencyController> logger)
+        public CurrencyController(ICommandBus commandBus, IMapper mapper, ILogger<CurrencyController> logger, IEventStoreDBRepository<CurrencyModel> repository)
         {
             this.commandBus = commandBus;
             this.mapper = mapper;
             this.logger = logger;
+            this.repository = repository;
         }
 
         /// <summary>
@@ -84,6 +88,32 @@ namespace Product.WebApi.Versions.V2.Controllers
                 await commandBus.Send(command);
 
                 return Accepted();
+            }
+            catch (OperationCanceledException ex) when (cancellationToken.IsCancellationRequested)
+            {
+                logger.LogWarning(ex.Message);
+            }
+
+            return NoContent();
+        }
+
+        /// <summary>
+        /// Retrieve a currency.
+        /// </summary>
+        /// <param name="currencyId">The currency id.</param>
+        /// <param name="cancellationToken">The cancellation token.</param>
+        /// <returns>The collection set of currencies.</returns>
+        [HttpGet("{currencyId}")]
+        [Produces("application/json"), Consumes("application/json")]
+        [SwaggerOperation(OperationId = "get_detail", Tags = new[] { "Currency" })]
+        [ProducesResponseType(typeof(ICurrencyDto), (int)HttpStatusCode.OK)]
+        public async Task<IActionResult> Get(Guid currencyId, CancellationToken cancellationToken)
+        {
+            try
+            {
+                var data = await repository.Find(currencyId, cancellationToken);
+
+                return Ok(data);
             }
             catch (OperationCanceledException ex) when (cancellationToken.IsCancellationRequested)
             {

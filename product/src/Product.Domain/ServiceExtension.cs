@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using AutoMapper;
 using Core.Commands;
+using Core.Events;
 using Core.EventStoreDB;
 using Core.EventStoreDB.Repository;
 using FluentValidation;
@@ -15,7 +16,9 @@ using Product.Contract.Queries;
 using Product.Domain.Behaviours;
 using Product.Domain.Commands;
 using Product.Domain.Converters;
+using Product.Domain.Events;
 using Product.Domain.Handlers;
+using Product.Domain.Handlers.Event;
 using Product.Domain.Models;
 using Product.Domain.Persistence;
 using Product.Domain.Profiles;
@@ -54,6 +57,9 @@ namespace Product.Domain
             services.AddScoped<IUnitOfWork, UnitOfWork>();
             // services.AddScoped<IProductRepository, ProductRepository>();
 
+            services.AddTransient<IEventHandler<CurrencyUpdatedEvent>, CurrencyUpdatedEventHandler>(); // testing
+            services.AddTransient<IEventHandler<EventEnvelope<CurrencyUpdatedEvent>>, CurrencyUpdatedEventHandler>(); // testing
+            
             services.AddScoped<IEventStoreDBRepository<CurrencyModel>, EventStoreDBRepository<CurrencyModel>>()
                     .AddCommandValidators()
                     .AddCommandHandlers()

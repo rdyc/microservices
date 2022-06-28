@@ -63,7 +63,6 @@ public class CurrencyModel : Aggregate
     {
         Version++;
 
-        Id = @event.Id;
         Name = @event.Name;
         Code = @event.Code;
         Symbol = @event.Symbol;

@@ -12,6 +12,7 @@ using Core.WebApi.Middlewares.ExceptionHandling;
 using Core.WebApi.OptimisticConcurrency;
 using Core.WebApi.Swagger;
 using Core.WebApi.Tracing;
+using ECommerce.Core;
 using EventStore.Client;
 using MediatR;
 using Microsoft.AspNetCore.Builder;
@@ -142,7 +143,7 @@ namespace Product.WebApi
         {
             mapper.ConfigurationProvider.AssertConfigurationIsValid();
 
-            app.UseDbMigration();
+            // app.UseDbMigration();
 
             app.UseCors("CorsPolicy");
 

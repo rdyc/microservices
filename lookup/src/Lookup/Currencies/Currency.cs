@@ -12,12 +12,12 @@ public class Currency : Aggregate
     public string Symbol { get; private set; } = default!;
     public CurrencyStatus Status { get; private set; } = default!;
 
-    public static Currency Register(Guid? id, string name, string code, string symbol)
+    public static Currency Register(Guid? id, string name, string code, string symbol, CurrencyStatus status)
     {
         if (id is null)
             throw new ArgumentNullException(nameof(id));
 
-        return new Currency(id.Value, name, code, symbol);
+        return new Currency(id.Value, name, code, symbol, status);
     }
 
     private Currency() { }
@@ -44,9 +44,9 @@ public class Currency : Aggregate
         }
     }
 
-    private Currency(Guid id, string name, string code, string symbol)
+    private Currency(Guid id, string name, string code, string symbol, CurrencyStatus status)
     {
-        var evt = CurrencyRegistered.Create(id, name, code, symbol);
+        var evt = CurrencyRegistered.Handle(id, name, code, symbol, status);
 
         Enqueue(evt);
         Apply(evt);

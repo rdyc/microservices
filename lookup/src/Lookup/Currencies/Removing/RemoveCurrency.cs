@@ -4,7 +4,7 @@ using MediatR;
 
 namespace Lookup.Currencies.Removing;
 
-public record RemoveCurrency(Guid? Id) : CurrencyCommand(Id, default, default, default);
+public record RemoveCurrency(Guid? Id) : CurrencyCommand(Id, default, default, default, default);
 
 internal class ValidateRemove : CurrencyValidator<RemoveCurrency>
 {

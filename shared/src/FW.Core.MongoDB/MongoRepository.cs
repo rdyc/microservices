@@ -52,19 +52,19 @@ public class MongoRepository<TDocument> : IMongoRepository<TDocument>
         return Task.Run(() => collection.Find(filterExpression).FirstOrDefaultAsync());
     }
 
-    public virtual TDocument FindById(string id)
+    public virtual TDocument FindById(Guid id)
     {
-        var objectId = new ObjectId(id);
-        var filter = Builders<TDocument>.Filter.Eq(doc => doc.Id, objectId);
+        // var objectId = new ObjectId(id);
+        var filter = Builders<TDocument>.Filter.Eq(doc => doc.Id, id);
         return collection.Find(filter).SingleOrDefault();
     }
 
-    public virtual Task<TDocument> FindByIdAsync(string id)
+    public virtual Task<TDocument> FindByIdAsync(Guid id)
     {
         return Task.Run(() =>
         {
-            var objectId = new ObjectId(id);
-            var filter = Builders<TDocument>.Filter.Eq(doc => doc.Id, objectId);
+            // var objectId = new ObjectId(id);
+            var filter = Builders<TDocument>.Filter.Eq(doc => doc.Id, id);
             return collection.Find(filter).SingleOrDefaultAsync();
         });
     }
@@ -113,19 +113,19 @@ public class MongoRepository<TDocument> : IMongoRepository<TDocument>
         return Task.Run(() => collection.FindOneAndDeleteAsync(filterExpression));
     }
 
-    public void DeleteById(string id)
+    public void DeleteById(Guid id)
     {
-        var objectId = new ObjectId(id);
-        var filter = Builders<TDocument>.Filter.Eq(doc => doc.Id, objectId);
+        // var objectId = new ObjectId(id);
+        var filter = Builders<TDocument>.Filter.Eq(doc => doc.Id, id);
         collection.FindOneAndDelete(filter);
     }
 
-    public Task DeleteByIdAsync(string id)
+    public Task DeleteByIdAsync(Guid id)
     {
         return Task.Run(() =>
         {
-            var objectId = new ObjectId(id);
-            var filter = Builders<TDocument>.Filter.Eq(doc => doc.Id, objectId);
+            // var objectId = new ObjectId(id);
+            var filter = Builders<TDocument>.Filter.Eq(doc => doc.Id, id);
             collection.FindOneAndDeleteAsync(filter);
         });
     }

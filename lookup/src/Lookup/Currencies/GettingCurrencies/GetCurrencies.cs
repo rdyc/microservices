@@ -1,20 +1,26 @@
+using MediatR;
 using MongoDB.Driver;
 
 namespace Lookup.Currencies.GettingCurrencies;
 
-public record GetCurrencies(int Index, int Size)
+public record GetCurrencies(int Index, int Size) : IRequest<IEnumerable<CurrencyShortInfo>>;
+
+internal class HandleGetCurrencies : IRequestHandler<GetCurrencies, IEnumerable<CurrencyShortInfo>>
 {
-    public static async Task<IReadOnlyList<CurrencyShortInfo>> Handle(
-        IMongoCollection<CurrencyShortInfo> currencies,
-        GetCurrencies query,
-        CancellationToken ct
-    )
+    private readonly IMongoCollection<CurrencyShortInfo> collection;
+
+    public HandleGetCurrencies(IMongoDatabase mongoDb)
     {
-        // var collection = mongoClient.GetDatabase("lookup_currency").GetCollection<CurrencyShortInfo>("currency_shortinfo");
-        var (index, size) = query;
-        return await currencies.Find(_ => true)
-            .Skip(index * (index - 1))
-            .Limit(size)
-            .ToListAsync(ct);
+        this.collection = mongoDb.GetCollection<CurrencyShortInfo>("currency_shortinfo");
+    }
+
+    public async Task<IEnumerable<CurrencyShortInfo>> Handle(GetCurrencies request, CancellationToken cancellationToken)
+    {
+        var (index, size) = request;
+
+        return await collection.Find(_ => true)
+                .Skip(index * (index - 1))
+                .Limit(size)
+                .ToListAsync(cancellationToken);
     }
 }

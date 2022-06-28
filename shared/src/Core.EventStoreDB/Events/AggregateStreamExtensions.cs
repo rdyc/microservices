@@ -3,7 +3,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using Core.Events;
 using Core.EventStoreDB.Serialization;
-using Core.Exceptions;
 using Core.Projections;
 using EventStore.Client;
 
