@@ -11,6 +11,7 @@ using FW.Core.WebApi.Tracing;
 using Lookup;
 using Lookup.WebApi.Endpoints;
 using Microsoft.AspNetCore.Http.Json;
+using Swashbuckle.AspNetCore.SwaggerUI;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -48,10 +49,16 @@ var app = builder.Build();
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
-    app.UseSwagger()
+    app.UseStaticFiles()
+        .UseSwagger()
         .UseSwaggerUI(options =>
         {
+            options.DocExpansion(DocExpansion.None);
+            options.EnableTryItOutByDefault();
+            options.DisplayOperationId();
             options.DisplayRequestDuration();
+            options.InjectStylesheet("css/theme-dark.css");
+            options.InjectJavascript("js/json-folding.js");
         });
 }
 
