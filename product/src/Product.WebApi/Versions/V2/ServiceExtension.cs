@@ -1,23 +1,19 @@
-using AutoMapper;
 using Microsoft.Extensions.DependencyInjection;
 using Product.WebApi.Versions.V2.Converters;
 using Product.WebApi.Versions.V2.Profiles;
 
-namespace Product.WebApi.Versions.V2
+namespace Product.WebApi.Versions.V2;
+
+internal static class ServiceExtension
 {
-    internal static class ServiceExtension
-    {
-        public static void AddV2Service(this IServiceCollection services)
-        {
-            services.AddAutoMapper(config =>
+    public static IServiceCollection AddV2Service(this IServiceCollection services) =>
+        services
+            .AddAutoMapper(config =>
             {
                 config.AddProfile<DtoToResponseProfile>();
                 config.AddProfile<RequestToQueryProfile>();
-            });
-
-            services.AddScoped<CriteriaConverter>();
-            services.AddScoped<PagedConverter>();
-            services.AddScoped<OrderedConverter>();
-        }
-    }
+            })
+            .AddScoped<CriteriaConverter>()
+            .AddScoped<PagedConverter>()
+            .AddScoped<OrderedConverter>();
 }

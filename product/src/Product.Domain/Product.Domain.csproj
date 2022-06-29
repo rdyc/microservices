@@ -22,7 +22,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\..\shared\src\Core.EventStoreDB\Core.EventStoreDB.csproj" />
     <ProjectReference Include="..\Product.Contract\Product.Contract.csproj" />
   </ItemGroup>
 

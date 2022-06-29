@@ -6,71 +6,70 @@ using FluentValidation;
 using Product.Contract.Commands;
 using Product.Domain.Repositories;
 
-namespace Product.Domain.Validators
+namespace Product.Domain.Validators;
+
+internal class CurrencyValidator<T> : AbstractValidator<T>
+    where T : CurrencyCommand
 {
-    internal class CurrencyValidator<T> : AbstractValidator<T>
-        where T : CurrencyCommand
+    private readonly IUnitOfWork unitOfWork;
+
+    public CurrencyValidator(IUnitOfWork unitOfWork)
     {
-        private readonly IUnitOfWork unitOfWork;
+        this.unitOfWork = unitOfWork;
+    }
 
-        public CurrencyValidator(IUnitOfWork unitOfWork)
+    protected void ValidateId()
+    {
+        Transform(f => f.Id, t => t.Value)
+            .MustBeExistCurrencyAsync(unitOfWork.Config)
+            .WithMessage("The requested currency was not found");
+    }
+
+    protected void ValidateName(bool isUpdate = false)
+    {
+        var rule = RuleFor(c => c.Name).NotEmpty();
+
+        if (!isUpdate)
         {
-            this.unitOfWork = unitOfWork;
+            rule.MustBeUniqueCurrencyNameAsync(unitOfWork.Config)
+                .WithMessage("The currency name already exist");
         }
-
-        protected void ValidateId()
+        else
         {
-            Transform(f => f.Id, t => t.Value)
-                .MustBeExistCurrencyAsync(unitOfWork.Config)
-                .WithMessage("The requested currency was not found");
+            rule.MustBeUniqueCurrencyNameIdAsync(unitOfWork.Config)
+                .WithMessage("The currency name already taken");
         }
+    }
 
-        protected void ValidateName(bool isUpdate = false)
+    protected void ValidateCode(bool isUpdate = false)
+    {
+        var rule = RuleFor(c => c.Code).NotEmpty();
+
+        if (!isUpdate)
         {
-            var rule = RuleFor(c => c.Name).NotEmpty();
-
-            if (!isUpdate)
-            {
-                rule.MustBeUniqueCurrencyNameAsync(unitOfWork.Config)
-                    .WithMessage("The currency name already exist");
-            }
-            else
-            {
-                rule.MustBeUniqueCurrencyNameIdAsync(unitOfWork.Config)
-                    .WithMessage("The currency name already taken");
-            }
+            rule.MustBeUniqueCurrencyCodeAsync(unitOfWork.Config)
+                .WithMessage("The currency code already exist");
         }
-
-        protected void ValidateCode(bool isUpdate = false)
+        else
         {
-            var rule = RuleFor(c => c.Code).NotEmpty();
-
-            if (!isUpdate)
-            {
-                rule.MustBeUniqueCurrencyCodeAsync(unitOfWork.Config)
-                    .WithMessage("The currency code already exist");
-            }
-            else
-            {
-                rule.MustBeUniqueCurrencyCodeIdAsync(unitOfWork.Config)
-                    .WithMessage("The currency code already taken");
-            }
+            rule.MustBeUniqueCurrencyCodeIdAsync(unitOfWork.Config)
+                .WithMessage("The currency code already taken");
         }
+    }
 
-        protected void ValidateSymbol(bool isUpdate = false)
+    protected void ValidateSymbol(bool isUpdate = false)
+    {
+        var rule = RuleFor(c => c.Symbol).NotEmpty();
+
+        if (!isUpdate)
         {
-            var rule = RuleFor(c => c.Symbol).NotEmpty();
-
-            if (!isUpdate)
-            {
-                rule.MustBeUniqueCurrencySymbolAsync(unitOfWork.Config)
-                    .WithMessage("The currency symbol already exist");
-            }
-            else
-            {
-                rule.MustBeUniqueCurrencySymbolIdAsync(unitOfWork.Config)
-                    .WithMessage("The currency symbol already taken");
-            }
+            rule.MustBeUniqueCurrencySymbolAsync(unitOfWork.Config)
+                .WithMessage("The currency symbol already exist");
+        }
+        else
+        {
+            rule.MustBeUniqueCurrencySymbolIdAsync(unitOfWork.Config)
+                .WithMessage("The currency symbol already taken");
         }
     }
 }

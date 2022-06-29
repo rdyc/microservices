@@ -6,33 +6,32 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace Product.Domain.Behaviours
+namespace Product.Domain.Behaviours;
+
+internal class ValidationBehaviour<TRequest, TResponse> : IPipelineBehavior<TRequest, TResponse>
+    where TRequest : IRequest<TResponse>
 {
-    internal class ValidationBehaviour<TRequest, TResponse> : IPipelineBehavior<TRequest, TResponse>
-        where TRequest : IRequest<TResponse>
+    private readonly IEnumerable<IValidator<TRequest>> validator;
+
+    public ValidationBehaviour(IEnumerable<IValidator<TRequest>> validator)
     {
-        private readonly IEnumerable<IValidator<TRequest>> validator;
+        this.validator = validator ?? throw new ArgumentNullException(nameof(validator));
+    }
 
-        public ValidationBehaviour(IEnumerable<IValidator<TRequest>> validator)
+    public async Task<TResponse> Handle(TRequest request, CancellationToken cancellationToken, RequestHandlerDelegate<TResponse> next)
+    {
+        if (validator.Any())
         {
-            this.validator = validator ?? throw new ArgumentNullException(nameof(validator));
-        }
+            var context = new ValidationContext<TRequest>(request);
+            var validationResults = await Task.WhenAll(validator.Select(v => v.ValidateAsync(context, cancellationToken)));
+            var failures = validationResults.SelectMany(r => r.Errors).Where(f => f != null).ToList();
 
-        public async Task<TResponse> Handle(TRequest request, CancellationToken cancellationToken, RequestHandlerDelegate<TResponse> next)
-        {
-            if (validator.Any())
+            if (failures.Count != 0)
             {
-                var context = new ValidationContext<TRequest>(request);
-                var validationResults = await Task.WhenAll(validator.Select(v => v.ValidateAsync(context, cancellationToken)));
-                var failures = validationResults.SelectMany(r => r.Errors).Where(f => f != null).ToList();
-
-                if (failures.Count != 0)
-                {
-                    throw new ValidationException(failures);
-                }
+                throw new ValidationException(failures);
             }
-
-            return await next();
         }
+
+        return await next();
     }
 }

@@ -9,65 +9,64 @@ using Microsoft.Extensions.Options;
 using Microsoft.OpenApi.Models;
 using Swashbuckle.AspNetCore.SwaggerGen;
 
-namespace Product.WebApi.Configurations.Swagger
+namespace Product.WebApi.Configurations.Swagger;
+
+/// <summary>
+/// Configures the Swagger generation options.
+/// </summary>
+/// <remarks>This allows API versioning to define a Swagger document per API version after the
+/// <see cref="IApiVersionDescriptionProvider"/> service has been resolved from the service container.</remarks>
+public class ConfigureSwaggerOptions : IConfigureOptions<SwaggerGenOptions>
 {
+    private readonly IApiVersionDescriptionProvider provider;
+
     /// <summary>
-    /// Configures the Swagger generation options.
+    /// Initializes a new instance of the <see cref="ConfigureSwaggerOptions"/> class.
     /// </summary>
-    /// <remarks>This allows API versioning to define a Swagger document per API version after the
-    /// <see cref="IApiVersionDescriptionProvider"/> service has been resolved from the service container.</remarks>
-    public class ConfigureSwaggerOptions : IConfigureOptions<SwaggerGenOptions>
+    /// <param name="provider">The <see cref="IApiVersionDescriptionProvider">provider</see> used to generate Swagger documents.</param>
+    public ConfigureSwaggerOptions(
+        IApiVersionDescriptionProvider provider
+    )
     {
-        private readonly IApiVersionDescriptionProvider provider;
+        this.provider = provider;
+    }
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="ConfigureSwaggerOptions"/> class.
-        /// </summary>
-        /// <param name="provider">The <see cref="IApiVersionDescriptionProvider">provider</see> used to generate Swagger documents.</param>
-        public ConfigureSwaggerOptions(
-            IApiVersionDescriptionProvider provider
-        )
+    /// <inheritdoc />
+    public void Configure(SwaggerGenOptions options)
+    {
+        // add a swagger document for each discovered API version
+        // note: you might choose to skip or document deprecated API versions differently
+        foreach (var description in provider.ApiVersionDescriptions)
         {
-            this.provider = provider;
+            options.SwaggerDoc(description.GroupName, CreateInfoForApiVersion(description));
         }
+    }
 
-        /// <inheritdoc />
-        public void Configure(SwaggerGenOptions options)
+    private OpenApiInfo CreateInfoForApiVersion(ApiVersionDescription description)
+    {
+        var info = new OpenApiInfo()
         {
-            // add a swagger document for each discovered API version
-            // note: you might choose to skip or document deprecated API versions differently
-            foreach (var description in provider.ApiVersionDescriptions)
+            Version = description.ApiVersion.ToString(),
+            Title = "Product API",
+            Description = "A product API to demo Swashbuckle",
+            TermsOfService = new Uri("http://tempuri.org/terms"),
+            Contact = new OpenApiContact
             {
-                options.SwaggerDoc(description.GroupName, CreateInfoForApiVersion(description));
+                Name = "Joe Developer",
+                Email = "joe.developer@tempuri.org"
+            },
+            License = new OpenApiLicense
+            {
+                Name = "Apache 2.0",
+                Url = new Uri("http://www.apache.org/licenses/LICENSE-2.0.html")
             }
-        }
+        };
 
-        private OpenApiInfo CreateInfoForApiVersion(ApiVersionDescription description)
+        if (description.IsDeprecated)
         {
-            var info = new OpenApiInfo()
-            {
-                Version = description.ApiVersion.ToString(),
-                Title = "Product API",
-                Description = "A product API to demo Swashbuckle",
-                TermsOfService = new Uri("http://tempuri.org/terms"),
-                Contact = new OpenApiContact
-                {
-                    Name = "Joe Developer",
-                    Email = "joe.developer@tempuri.org"
-                },
-                License = new OpenApiLicense
-                {
-                    Name = "Apache 2.0",
-                    Url = new Uri("http://www.apache.org/licenses/LICENSE-2.0.html")
-                }
-            };
-
-            if (description.IsDeprecated)
-            {
-                info.Description += " This API version has been deprecated.";
-            }
-
-            return info;
+            info.Description += " This API version has been deprecated.";
         }
+
+        return info;
     }
 }

@@ -1,15 +1,14 @@
 using Product.Contract.Commands;
 using Product.Domain.Repositories;
 
-namespace Product.Domain.Validators
+namespace Product.Domain.Validators;
+
+internal class CreateCurrencyValidator : CurrencyValidator<CreateCurrencyCommand>
 {
-    internal class CreateCurrencyValidator : CurrencyValidator<CreateCurrencyCommand>
+    public CreateCurrencyValidator(IUnitOfWork unitOfWork) : base(unitOfWork)
     {
-        public CreateCurrencyValidator(IUnitOfWork unitOfWork) : base(unitOfWork)
-        {
-            ValidateName();
-            ValidateCode();
-            ValidateSymbol();
-        }
+        ValidateName();
+        ValidateCode();
+        ValidateSymbol();
     }
 }

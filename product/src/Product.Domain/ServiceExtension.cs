@@ -1,160 +1,106 @@
 using System;
 using System.Collections.Generic;
-using AutoMapper;
-using Core.Commands;
-using Core.Events;
-using Core.EventStoreDB;
-using Core.EventStoreDB.Repository;
 using FluentValidation;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Product.Contract.Commands;
 using Product.Contract.Dtos;
 using Product.Contract.Queries;
 using Product.Domain.Behaviours;
-using Product.Domain.Commands;
 using Product.Domain.Converters;
-using Product.Domain.Events;
 using Product.Domain.Handlers;
-using Product.Domain.Handlers.Event;
-using Product.Domain.Models;
 using Product.Domain.Persistence;
 using Product.Domain.Profiles;
 using Product.Domain.Repositories;
 using Product.Domain.Validators;
 
-namespace Product.Domain
-{
-    public static class ServiceExtension
-    {
-        public static IServiceCollection AddProductModule(this IServiceCollection services, IConfiguration config)
-        {
-            services
-                .AddDomainService()
-                .AddEventStoreDB(config);
+namespace Product.Domain;
 
-            return services;
-        }
-        
-        public static IServiceCollection AddDomainContext(this IServiceCollection services, Action<DbContextOptionsBuilder> optionsAction, ServiceLifetime contextLifetime = ServiceLifetime.Scoped, ServiceLifetime optionsLifetime = ServiceLifetime.Scoped)
-        {
-            services.AddDbContext<ProductContext>(optionsAction, contextLifetime, optionsLifetime);
+public static class ServiceExtension
+{        
+    public static IServiceCollection AddDomainContext(this IServiceCollection services, 
+        Action<DbContextOptionsBuilder> optionsAction, 
+        ServiceLifetime contextLifetime = ServiceLifetime.Scoped, 
+        ServiceLifetime optionsLifetime = ServiceLifetime.Scoped) =>
+        services.AddDbContext<ProductContext>(optionsAction, contextLifetime, optionsLifetime);
 
-            return services;
-        }
-
-        private static IServiceCollection AddDomainService(this IServiceCollection services)
-        {
-            services.AddAutoMapper(config =>
+    public static IServiceCollection AddDomainService(this IServiceCollection services) =>
+        services
+            .AddAutoMapper(config =>
             {
                 config.AddProfile<EntityToDtoProfile>();
-            });
+            })
+            .AddTransient(typeof(IPipelineBehavior<,>), typeof(ValidationBehaviour<,>))
+            .AddScoped<IUnitOfWork, UnitOfWork>()
+            // .AddScoped<IProductRepository, ProductRepository>();
+            .AddCommandValidators()
+            .AddCommandHandlers()
+            .AddQueryHandlers()
+            .AddConverters();
 
-            services.AddTransient(typeof(IPipelineBehavior<,>), typeof(ValidationBehaviour<,>));
-
-            services.AddScoped<IUnitOfWork, UnitOfWork>();
-            // services.AddScoped<IProductRepository, ProductRepository>();
-
-            services.AddTransient<IEventHandler<CurrencyUpdatedEvent>, CurrencyUpdatedEventHandler>(); // testing
-            services.AddTransient<IEventHandler<EventEnvelope<CurrencyUpdatedEvent>>, CurrencyUpdatedEventHandler>(); // testing
-            
-            services.AddScoped<IEventStoreDBRepository<CurrencyModel>, EventStoreDBRepository<CurrencyModel>>()
-                    .AddCommandValidators()
-                    .AddCommandHandlers()
-                    .AddQueryHandlers()
-                    .AddConverters();
-
-            return services;
-        }
-
-        private static IServiceCollection AddCommandValidators(this IServiceCollection services)
-        {
+    private static IServiceCollection AddCommandValidators(this IServiceCollection services) =>
+        services
             // attribute
-            services.AddScoped<IValidator<CreateAttributeCommand>, CreateAttributeValidator>();
-            services.AddScoped<IValidator<UpdateAttributeCommand>, UpdateAttributeValidator>();
-            services.AddScoped<IValidator<DeleteAttributeCommand>, DeleteAttributeValidator>();
-
+            .AddScoped<IValidator<CreateAttributeCommand>, CreateAttributeValidator>()
+            .AddScoped<IValidator<UpdateAttributeCommand>, UpdateAttributeValidator>()
+            .AddScoped<IValidator<DeleteAttributeCommand>, DeleteAttributeValidator>()
             // currency
-            services.AddScoped<IValidator<CreateCurrencyCommand>, CreateCurrencyValidator>();
-            services.AddScoped<IValidator<UpdateCurrencyCommand>, UpdateCurrencyValidator>();
-            services.AddScoped<IValidator<DeleteCurrencyCommand>, DeleteCurrencyValidator>();
-
+            .AddScoped<IValidator<CreateCurrencyCommand>, CreateCurrencyValidator>()
+            .AddScoped<IValidator<UpdateCurrencyCommand>, UpdateCurrencyValidator>()
+            .AddScoped<IValidator<DeleteCurrencyCommand>, DeleteCurrencyValidator>()
             // product
-            services.AddScoped<IValidator<CreateProductCommand>, CreateProductValidator>();
-            services.AddScoped<IValidator<UpdateProductCommand>, UpdateProductValidator>();
-            services.AddScoped<IValidator<DeleteProductCommand>, DeleteProductValidator>();
+            .AddScoped<IValidator<CreateProductCommand>, CreateProductValidator>()
+            .AddScoped<IValidator<UpdateProductCommand>, UpdateProductValidator>()
+            .AddScoped<IValidator<DeleteProductCommand>, DeleteProductValidator>();
 
-            return services;
-        }
-
-        private static IServiceCollection AddCommandHandlers(this IServiceCollection services)
-        {
+    private static IServiceCollection AddCommandHandlers(this IServiceCollection services) =>
+        services
             // attribute
-            services.AddScoped<IRequestHandler<CreateAttributeCommand, IAttributeDto>, CreateAttributeHandler>();
-            services.AddScoped<IRequestHandler<UpdateAttributeCommand, IAttributeDto>, UpdateAttributeHandler>();
-            services.AddScoped<IRequestHandler<DeleteAttributeCommand, IAttributeDto>, DeleteAttributeHandler>();
-
+            .AddScoped<IRequestHandler<CreateAttributeCommand, IAttributeDto>, CreateAttributeHandler>()
+            .AddScoped<IRequestHandler<UpdateAttributeCommand, IAttributeDto>, UpdateAttributeHandler>()
+            .AddScoped<IRequestHandler<DeleteAttributeCommand, IAttributeDto>, DeleteAttributeHandler>()
             // curency
-            services.AddScoped<IRequestHandler<CreateCurrencyCommand, ICurrencyDto>, CreateCurrencyHandler>();
-            services.AddScoped<IRequestHandler<UpdateCurrencyCommand, ICurrencyDto>, UpdateCurrencyHandler>();
-            services.AddScoped<IRequestHandler<DeleteCurrencyCommand, ICurrencyDto>, DeleteCurrencyHandler>();
-
+            .AddScoped<IRequestHandler<CreateCurrencyCommand, ICurrencyDto>, CreateCurrencyHandler>()
+            .AddScoped<IRequestHandler<UpdateCurrencyCommand, ICurrencyDto>, UpdateCurrencyHandler>()
+            .AddScoped<IRequestHandler<DeleteCurrencyCommand, ICurrencyDto>, DeleteCurrencyHandler>()
             // product
-            services.AddScoped<IRequestHandler<CreateProductCommand, IProductDto>, CreateProductHandler>();
-            services.AddScoped<IRequestHandler<UpdateProductCommand, IProductDto>, UpdateProductHandler>();
-            services.AddScoped<IRequestHandler<DeleteProductCommand, IProductDto>, DeleteProductHandler>();
+            .AddScoped<IRequestHandler<CreateProductCommand, IProductDto>, CreateProductHandler>()
+            .AddScoped<IRequestHandler<UpdateProductCommand, IProductDto>, UpdateProductHandler>()
+            .AddScoped<IRequestHandler<DeleteProductCommand, IProductDto>, DeleteProductHandler>();
 
-
-            services.AddCommandHandler<CreateCurrencyCmd, CreateCurrencyCmdHandler>();
-            services.AddCommandHandler<UpdateCurrencyCmd, UpdateCurrencyCmdHandler>();
-
-            return services;
-        }
-
-        private static IServiceCollection AddQueryHandlers(this IServiceCollection services)
-        {
+    private static IServiceCollection AddQueryHandlers(this IServiceCollection services) =>
+        services
             // attribute
-            services.AddScoped<IRequestHandler<GetAllAttributesQuery, IEnumerable<IAttributeDto>>, GetAllAttributesHandler>();
-            services.AddScoped<IRequestHandler<GetListAttributesQuery, IEnumerable<IAttributeDto>>, GetListAttributesHandler>();
-            services.AddScoped<IRequestHandler<GetAttributeQuery, IAttributeDto>, GetAttributeHandler>();
-
+            .AddScoped<IRequestHandler<GetAllAttributesQuery, IEnumerable<IAttributeDto>>, GetAllAttributesHandler>()
+            .AddScoped<IRequestHandler<GetListAttributesQuery, IEnumerable<IAttributeDto>>, GetListAttributesHandler>()
+            .AddScoped<IRequestHandler<GetAttributeQuery, IAttributeDto>, GetAttributeHandler>()
             // currency
-            services.AddScoped<IRequestHandler<GetAllCurrenciesQuery, IEnumerable<ICurrencyDto>>, GetAllCurrenciesHandler>();
-            services.AddScoped<IRequestHandler<GetListCurrenciesQuery, IEnumerable<ICurrencyDto>>, GetListCurrenciesHandler>();
-            services.AddScoped<IRequestHandler<GetCurrencyQuery, ICurrencyDto>, GetCurrencyHandler>();
-
+            .AddScoped<IRequestHandler<GetAllCurrenciesQuery, IEnumerable<ICurrencyDto>>, GetAllCurrenciesHandler>()
+            .AddScoped<IRequestHandler<GetListCurrenciesQuery, IEnumerable<ICurrencyDto>>, GetListCurrenciesHandler>()
+            .AddScoped<IRequestHandler<GetCurrencyQuery, ICurrencyDto>, GetCurrencyHandler>()
             // product
-            services.AddScoped<IRequestHandler<GetAllProductsQuery, IEnumerable<IProductDto>>, GetAllProductsHandler>();
-            services.AddScoped<IRequestHandler<GetListProductsQuery, IEnumerable<IProductDto>>, GetListProductsHandler>();
-            services.AddScoped<IRequestHandler<GetProductQuery, IProductDto>, GetProductHandler>();
+            .AddScoped<IRequestHandler<GetAllProductsQuery, IEnumerable<IProductDto>>, GetAllProductsHandler>()
+            .AddScoped<IRequestHandler<GetListProductsQuery, IEnumerable<IProductDto>>, GetListProductsHandler>()
+            .AddScoped<IRequestHandler<GetProductQuery, IProductDto>, GetProductHandler>();
 
-            return services;
-        }
+    private static IServiceCollection AddConverters(this IServiceCollection services) =>
+        services.AddScoped<DtoConverter>();
 
-        private static IServiceCollection AddConverters(this IServiceCollection services)
+    public static void UseDbMigration(IServiceScope scope)
+    {
+        try
         {
-            services.AddScoped<DtoConverter>();
+            var context = scope.ServiceProvider.GetRequiredService<ProductContext>();
 
-            return services;
+            using (context)
+            {
+                context.Database.Migrate();
+            }
         }
-
-        public static void UseDbMigration(IServiceScope scope)
+        catch (Exception ex)
         {
-            try
-            {
-                var context = scope.ServiceProvider.GetRequiredService<ProductContext>();
-
-                using (context)
-                {
-                    context.Database.Migrate();
-                }
-            }
-            catch (Exception ex)
-            {
-                throw new Exception(ex.GetBaseException().Message);
-            }
+            throw new Exception(ex.GetBaseException().Message);
         }
     }
 }

@@ -8,34 +8,33 @@ using Microsoft.EntityFrameworkCore;
 using Product.Contract.Commands;
 using Product.Domain.Repositories;
 
-namespace Product.Domain.Validators
+namespace Product.Domain.Validators;
+
+internal static class ProductValidatorExtension
 {
-    internal static class ProductValidatorExtension
+    internal static IRuleBuilderOptions<T, Guid> MustBeExistProductAsync<T>(this IRuleBuilder<T, Guid> ruleBuilder, IProductRepository productRepository)
     {
-        internal static IRuleBuilderOptions<T, Guid> MustBeExistProductAsync<T>(this IRuleBuilder<T, Guid> ruleBuilder, IProductRepository productRepository)
+        return ruleBuilder.MustAsync(async (id, cancellationToken) =>
         {
-            return ruleBuilder.MustAsync(async (id, cancellationToken) =>
-            {
-                return await productRepository.GetAll().AnyAsync(e => e.Id.Equals(id), cancellationToken);
-            });
-        }
+            return await productRepository.GetAll().AnyAsync(e => e.Id.Equals(id), cancellationToken);
+        });
+    }
 
-        public static IRuleBuilderOptions<T, string> MustBeUniqueProductNameAsync<T>(this IRuleBuilder<T, string> ruleBuilder, IProductRepository productRepository)
-            where T : ProductCommand
+    public static IRuleBuilderOptions<T, string> MustBeUniqueProductNameAsync<T>(this IRuleBuilder<T, string> ruleBuilder, IProductRepository productRepository)
+        where T : ProductCommand
+    {
+        return ruleBuilder.MustAsync(async (context, value, cancellationToken) =>
         {
-            return ruleBuilder.MustAsync(async (context, value, cancellationToken) =>
-            {
-                return !await productRepository.GetAll().AnyAsync(e => e.Name.Equals(value));
-            });
-        }
+            return !await productRepository.GetAll().AnyAsync(e => e.Name.Equals(value), cancellationToken);
+        });
+    }
 
-        public static IRuleBuilderOptions<T, string> MustBeUniqueProductNameIdAsync<T>(this IRuleBuilder<T, string> ruleBuilder, IProductRepository productRepository)
-            where T : ProductCommand
+    public static IRuleBuilderOptions<T, string> MustBeUniqueProductNameIdAsync<T>(this IRuleBuilder<T, string> ruleBuilder, IProductRepository productRepository)
+        where T : ProductCommand
+    {
+        return ruleBuilder.MustAsync(async (context, value, cancellationToken) =>
         {
-            return ruleBuilder.MustAsync(async (context, value, cancellationToken) =>
-            {
-                return !await productRepository.GetAll().AnyAsync(e => !e.Id.Equals(context.Id.Value) && e.Name.Equals(value));
-            });
-        }
+            return !await productRepository.GetAll().AnyAsync(e => !e.Id.Equals(context.Id.Value) && e.Name.Equals(value), cancellationToken);
+        });
     }
 }

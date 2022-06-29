@@ -1,16 +1,15 @@
 using System;
 
-namespace Product.WebApi.Versions.V1.Models
+namespace Product.WebApi.Versions.V1.Models;
+
+/// <summary>
+/// The get product request.
+/// </summary>
+public class GetProductRequest
 {
     /// <summary>
-    /// The get product request.
+    /// The product id.
     /// </summary>
-    public class GetProductRequest
-    {
-        /// <summary>
-        /// The product id.
-        /// </summary>
-        /// <value>The product id.</value>
-        public Guid Id { get; set; }
-    }
+    /// <value>The product id.</value>
+    public Guid Id { get; set; }
 }

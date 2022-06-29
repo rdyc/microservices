@@ -1,16 +1,15 @@
 using Product.Contract.Commands;
 using Product.Domain.Repositories;
 
-namespace Product.Domain.Validators
+namespace Product.Domain.Validators;
+
+internal class CreateProductValidator : ProductValidator<CreateProductCommand>
 {
-    internal class CreateProductValidator : ProductValidator<CreateProductCommand>
+    public CreateProductValidator(IUnitOfWork unitOfWork) : base(unitOfWork)
     {
-        public CreateProductValidator(IUnitOfWork unitOfWork) : base(unitOfWork)
-        {
-            ValidateName();
-            ValidateDescription();
-            ValidateCurrency();
-            ValidatePrice();
-        }
+        ValidateName();
+        ValidateDescription();
+        ValidateCurrency();
+        ValidatePrice();
     }
 }

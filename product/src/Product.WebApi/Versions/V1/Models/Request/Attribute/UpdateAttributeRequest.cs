@@ -1,18 +1,17 @@
 using System;
 using System.Text.Json.Serialization;
 
-namespace Product.WebApi.Versions.V1.Models
+namespace Product.WebApi.Versions.V1.Models;
+
+/// <summary>
+/// The update attribute request.
+/// </summary>
+public class UpdateAttributeRequest : AttributeRequest
 {
     /// <summary>
-    /// The update attribute request.
+    /// The attribute id.
     /// </summary>
-    public class UpdateAttributeRequest : AttributeRequest
-    {
-        /// <summary>
-        /// The attribute id.
-        /// </summary>
-        /// <value>The attribute id.</value>
-        [JsonIgnore]
-        public Guid Id { get; set; }
-    }
+    /// <value>The attribute id.</value>
+    [JsonIgnore]
+    public Guid Id { get; set; }
 }

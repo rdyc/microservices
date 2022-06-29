@@ -7,28 +7,27 @@ using Swashbuckle.AspNetCore.SwaggerGen;
 using System;
 using System.Linq;
 
-namespace Product.WebApi.Configurations.Swagger.DocumentFilter
+namespace Product.WebApi.Configurations.Swagger.DocumentFilter;
+
+/// <summary>
+/// Replace version with exact value in path.
+/// </summary>
+public class ReplaceVersionWithExactValueInPath : IDocumentFilter
 {
-    /// <summary>
-    /// Replace version with exact value in path.
-    /// </summary>
-    public class ReplaceVersionWithExactValueInPath : IDocumentFilter
+    /// <inheritdoc/>
+    public void Apply(OpenApiDocument swaggerDoc, DocumentFilterContext context)
     {
-        /// <inheritdoc/>
-        public void Apply(OpenApiDocument swaggerDoc, DocumentFilterContext context)
+        var paths = swaggerDoc.Paths
+            .ToDictionary(
+                path => path.Key.Replace("v{version}", $"v{swaggerDoc.Info.Version}", StringComparison.CurrentCulture),
+                path => path.Value
+            );
+
+        swaggerDoc.Paths.Clear();
+
+        foreach (var item in paths)
         {
-            var paths = swaggerDoc.Paths
-                .ToDictionary(
-                    path => path.Key.Replace("v{version}", $"v{swaggerDoc.Info.Version}", StringComparison.CurrentCulture),
-                    path => path.Value
-                );
-
-            swaggerDoc.Paths.Clear();
-
-            foreach (var item in paths)
-            {
-                swaggerDoc.Paths.Add(item.Key, item.Value);
-            }
+            swaggerDoc.Paths.Add(item.Key, item.Value);
         }
     }
 }

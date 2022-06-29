@@ -7,35 +7,34 @@ using Product.Contract.Dtos;
 using Product.Domain.Dtos;
 using Product.Domain.Repositories;
 
-namespace Product.Domain.Handlers
+namespace Product.Domain.Handlers;
+
+internal class UpdateCurrencyHandler : IRequestHandler<UpdateCurrencyCommand, ICurrencyDto>
 {
-    internal class UpdateCurrencyHandler : IRequestHandler<UpdateCurrencyCommand, ICurrencyDto>
+    private readonly IUnitOfWork unitOfWork;
+    private readonly IMapper mapper;
+
+    public UpdateCurrencyHandler(IUnitOfWork unitOfWork, IMapper mapper)
     {
-        private readonly IUnitOfWork unitOfWork;
-        private readonly IMapper mapper;
+        this.unitOfWork = unitOfWork;
+        this.mapper = mapper;
+    }
 
-        public UpdateCurrencyHandler(IUnitOfWork unitOfWork, IMapper mapper)
+    public async Task<ICurrencyDto> Handle(UpdateCurrencyCommand request, CancellationToken cancellationToken)
+    {
+        // get existing currency
+        var currency = await unitOfWork.Config.GetCurrencyAsync(request.Id.Value, cancellationToken);
+
+        // set attribute modification
+        unitOfWork.Config.UpdateCurrency(currency, p =>
         {
-            this.unitOfWork = unitOfWork;
-            this.mapper = mapper;
-        }
+            p.Name = request.Name;
+            p.Code = request.Code;
+            p.Symbol = request.Symbol;
+        });
 
-        public async Task<ICurrencyDto> Handle(UpdateCurrencyCommand request, CancellationToken cancellationToken)
-        {
-            // get existing currency
-            var currency = await unitOfWork.Config.GetCurrencyAsync(request.Id.Value, cancellationToken);
+        await unitOfWork.SaveChangesAsync(cancellationToken);
 
-            // set attribute modification
-            unitOfWork.Config.UpdateCurrency(currency, p =>
-            {
-                p.Name = request.Name;
-                p.Code = request.Code;
-                p.Symbol = request.Symbol;
-            });
-
-            await unitOfWork.SaveChangesAsync(cancellationToken);
-
-            return mapper.Map<CurrencyDto>(currency);
-        }
+        return mapper.Map<CurrencyDto>(currency);
     }
 }

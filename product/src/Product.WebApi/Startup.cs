@@ -1,19 +1,8 @@
 using System;
 using System.IO;
-using System.Net;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using AutoMapper;
-using Core;
-using Core.EventStoreDB;
-using Core.EventStoreDB.OptimisticConcurrency;
-using Core.Exceptions;
-using Core.WebApi.Middlewares.ExceptionHandling;
-using Core.WebApi.OptimisticConcurrency;
-using Core.WebApi.Swagger;
-using Core.WebApi.Tracing;
-using ECommerce.Core;
-using EventStore.Client;
 using MediatR;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -27,50 +16,46 @@ using Product.Domain;
 using Product.WebApi.Configurations.Swagger;
 using Product.WebApi.Configurations.Swagger.DocumentFilter;
 using Product.WebApi.Configurations.Swagger.OperationFilter;
-using Product.WebApi.Middlewares;
 using Product.WebApi.Versions.V1;
 using Product.WebApi.Versions.V2;
 using Swashbuckle.AspNetCore.SwaggerGen;
 using Swashbuckle.AspNetCore.SwaggerUI;
 
-namespace Product.WebApi
+namespace Product.WebApi;
+
+internal class Startup
 {
-    internal class Startup
+    public Startup(IConfiguration configuration)
     {
-        public Startup(IConfiguration configuration)
-        {
-            Configuration = configuration;
-        }
+        Configuration = configuration;
+    }
 
-        public IConfiguration Configuration { get; }
+    public IConfiguration Configuration { get; }
 
-        // This method gets called by the runtime. Use this method to add services to the container.
-        public void ConfigureServices(IServiceCollection services)
-        {
-            services.AddCors(options =>
+    // This method gets called by the runtime. Use this method to add services to the container.
+    public void ConfigureServices(IServiceCollection services)
+    {
+        services
+            .AddCors(options =>
             {
                 options.AddPolicy("CorsPolicy", builder => builder
                     .AllowAnyOrigin()
                     .AllowAnyHeader()
                     .WithMethods("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS")
                     .WithExposedHeaders("Date", "X-Response-Time-Ms", "X-Correlation-Id", "X-Rate-Limit-Limit", "X-Rate-Limit-Remaining", "X-Rate-Limit-Reset"));
+            })
+            .AddControllers()
+            .AddJsonOptions(options =>
+            {
+                options.JsonSerializerOptions.WriteIndented = false;
+                options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter(JsonNamingPolicy.CamelCase, false));
             });
 
-            services.AddControllers()
-                .AddJsonOptions(options =>
-                {
-                    options.JsonSerializerOptions.WriteIndented = false;
-                    options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter(JsonNamingPolicy.CamelCase, false));
-                });
-
-            services.AddV1Service();
-            services.AddV2Service();
-
-            services.AddMediatR(typeof(Startup));
-
-            // services.AddValidatorsFromAssembly(System.Reflection.Assembly.Load("Product.Domain"));
-
-            services.AddDomainContext(options =>
+        services
+            .AddMediatR(typeof(Startup))
+            .AddV1Service()
+            .AddV2Service()
+            .AddDomainContext(options =>
             {
                 var config = new
                 {
@@ -95,64 +80,53 @@ namespace Product.WebApi
                     .UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking);
             });
 
-            services.AddApiVersioning(o => o.ReportApiVersions = true)
-                .AddMvcCore()
-                .AddApiExplorer();
+        services.AddApiVersioning(o => o.ReportApiVersions = true)
+            .AddMvcCore()
+            .AddApiExplorer();
 
-            services
-                .AddVersionedApiExplorer(o =>
-                {
-                    o.AssumeDefaultVersionWhenUnspecified = true;
-                    o.GroupNameFormat = "'v'VVV";
-                });
-
-            services.AddSwaggerGen(config =>
+        services
+            .AddVersionedApiExplorer(o =>
             {
-                var dir = new DirectoryInfo(Path.GetDirectoryName(AppContext.BaseDirectory));
-                foreach (var fi in dir.EnumerateFiles("*.xml"))
-                {
-                    config.IncludeXmlComments(fi.FullName);
-                }
-
-                config.EnableAnnotations();
-                config.DescribeAllParametersInCamelCase();
-
-                // document filters
-                config.DocumentFilter<ReplaceVersionWithExactValueInPath>();
-
-                // operation filters
-                config.OperationFilter<RemoveVersionParameterOperationFilter>();
-                config.OperationFilter<MetadataOperationFilter>();
+                o.AssumeDefaultVersionWhenUnspecified = true;
+                o.GroupNameFormat = "'v'VVV";
             });
 
-            services.AddTransient<IConfigureOptions<SwaggerGenOptions>, ConfigureSwaggerOptions>();
-
-            // core and  event store services
-            services.AddCoreServices()
-                    .AddEventStoreDBSubscriptionToAll()
-                    .AddProductModule(Configuration)
-                    .AddCorrelationIdMiddleware()
-                    .AddOptimisticConcurrencyMiddleware(
-                        sp => sp.GetRequiredService<EventStoreDBExpectedStreamRevisionProvider>().TrySet,
-                        sp => () => sp.GetRequiredService<EventStoreDBNextStreamRevisionProvider>().Value?.ToString()
-                    );
-        }
-
-        // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IWebHostEnvironment env, IApiVersionDescriptionProvider provider, IMapper mapper)
+        services.AddSwaggerGen(config =>
         {
-            mapper.ConfigurationProvider.AssertConfigurationIsValid();
-
-            // app.UseDbMigration();
-
-            app.UseCors("CorsPolicy");
-
-            if (env.IsDevelopment())
+            var dir = new DirectoryInfo(Path.GetDirectoryName(AppContext.BaseDirectory));
+            foreach (var fi in dir.EnumerateFiles("*.xml"))
             {
-                app.UseDeveloperExceptionPage();
+                config.IncludeXmlComments(fi.FullName);
+            }
 
-                app.UseSwagger();
-                app.UseSwaggerUI(config =>
+            config.EnableAnnotations();
+            config.DescribeAllParametersInCamelCase();
+
+            // document filters
+            config.DocumentFilter<ReplaceVersionWithExactValueInPath>();
+
+            // operation filters
+            config.OperationFilter<RemoveVersionParameterOperationFilter>();
+        });
+
+        services.AddTransient<IConfigureOptions<SwaggerGenOptions>, ConfigureSwaggerOptions>();
+        services.AddDomainService();
+    }
+
+    // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
+    public void Configure(IApplicationBuilder app, IWebHostEnvironment env, IApiVersionDescriptionProvider provider, IMapper mapper)
+    {
+        mapper.ConfigurationProvider.AssertConfigurationIsValid();
+
+        // app.UseDbMigration();
+
+        app.UseCors("CorsPolicy");
+
+        if (env.IsDevelopment())
+        {
+            app.UseDeveloperExceptionPage()
+                .UseSwagger()
+                .UseSwaggerUI(config =>
                 {
                     foreach (var version in provider.ApiVersionDescriptions)
                     {
@@ -168,28 +142,14 @@ namespace Product.WebApi
                     config.EnableDeepLinking();
                     config.EnableFilter();
                 });
-            }
+        }
 
-            // core
-            app.UseExceptionHandlingMiddleware(exception => exception switch
-                {
-                    AggregateNotFoundException _ => HttpStatusCode.NotFound,
-                    WrongExpectedVersionException => HttpStatusCode.PreconditionFailed,
-                    _ => HttpStatusCode.InternalServerError
-                })
-                .UseCorrelationIdMiddleware()
-                .UseOptimisticConcurrencyMiddleware();
-
-            app.UseHttpsRedirection();
-
-            app.UseRouting();
-
-            app.UseAuthorization();
-
-            app.UseEndpoints(endpoints =>
+        app.UseHttpsRedirection()
+            .UseRouting()
+            .UseAuthorization()
+            .UseEndpoints(endpoints =>
             {
                 endpoints.MapControllers();
             });
-        }
     }
 }
