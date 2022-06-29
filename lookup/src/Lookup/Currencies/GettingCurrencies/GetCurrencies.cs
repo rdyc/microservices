@@ -1,11 +1,13 @@
+using FW.Core.MongoDB.Extensions;
+using FW.Core.Pagination;
 using MediatR;
 using MongoDB.Driver;
 
 namespace Lookup.Currencies.GettingCurrencies;
 
-public record GetCurrencies(int Index, int Size) : IRequest<IEnumerable<CurrencyShortInfo>>;
+public record GetCurrencies(int Index, int Size) : IRequest<IListPaged<CurrencyShortInfo>>;
 
-internal class HandleGetCurrencies : IRequestHandler<GetCurrencies, IEnumerable<CurrencyShortInfo>>
+internal class HandleGetCurrencies : IRequestHandler<GetCurrencies, IListPaged<CurrencyShortInfo>>
 {
     private readonly IMongoCollection<CurrencyShortInfo> collection;
 
@@ -14,13 +16,12 @@ internal class HandleGetCurrencies : IRequestHandler<GetCurrencies, IEnumerable<
         this.collection = mongoDb.GetCollection<CurrencyShortInfo>("currency_shortinfo");
     }
 
-    public async Task<IEnumerable<CurrencyShortInfo>> Handle(GetCurrencies request, CancellationToken cancellationToken)
+    public async Task<IListPaged<CurrencyShortInfo>> Handle(GetCurrencies request, CancellationToken cancellationToken)
     {
         var (index, size) = request;
 
-        return await collection.Find(_ => true)
-            .Skip(index * (index - 1))
-            .Limit(size)
-            .ToListAsync(cancellationToken);
+        var filter = Builders<CurrencyShortInfo>.Filter.Empty;
+
+        return await collection.FindWithPagingAsync(filter, index, size, cancellationToken);
     }
 }

@@ -1,0 +1,34 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.30114.105
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{FC309FA1-D540-4EF6-9888-0D32A9EAECE2}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Lookup", "src\Lookup\Lookup.csproj", "{91146191-0785-4AFE-BC6F-45B98ADDC4FD}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Lookup.WebApi", "src\Lookup.WebApi\Lookup.WebApi.csproj", "{7246A48A-1DEC-46ED-AF41-1BE07E7104C5}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{91146191-0785-4AFE-BC6F-45B98ADDC4FD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{91146191-0785-4AFE-BC6F-45B98ADDC4FD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{91146191-0785-4AFE-BC6F-45B98ADDC4FD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{91146191-0785-4AFE-BC6F-45B98ADDC4FD}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7246A48A-1DEC-46ED-AF41-1BE07E7104C5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7246A48A-1DEC-46ED-AF41-1BE07E7104C5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7246A48A-1DEC-46ED-AF41-1BE07E7104C5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7246A48A-1DEC-46ED-AF41-1BE07E7104C5}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{91146191-0785-4AFE-BC6F-45B98ADDC4FD} = {FC309FA1-D540-4EF6-9888-0D32A9EAECE2}
+		{7246A48A-1DEC-46ED-AF41-1BE07E7104C5} = {FC309FA1-D540-4EF6-9888-0D32A9EAECE2}
+	EndGlobalSection
+EndGlobal

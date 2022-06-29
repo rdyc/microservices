@@ -22,11 +22,5 @@ public static class Configuration
                 var option = ctx.GetRequiredService<IMongoDbSettings>(); 
                 var client = ctx.GetRequiredService<MongoClient>();
                 return client.GetDatabase(option.DatabaseName);
-            })
-            .AddScoped(typeof(IMongoRepository<>), typeof(MongoRepository<>));
-
-    public static IServiceCollection AddCoreServices(this IServiceCollection services, IConfiguration configuration) =>
-        services
-            .AddEventBus()
-            .AddEventStoreDB(configuration);
+            });
 }

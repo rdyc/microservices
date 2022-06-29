@@ -13,6 +13,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\..\shared\src\FW.Core.WebApi\FW.Core.WebApi.csproj" />
     <ProjectReference Include="..\Lookup\Lookup.csproj" />
   </ItemGroup>
 

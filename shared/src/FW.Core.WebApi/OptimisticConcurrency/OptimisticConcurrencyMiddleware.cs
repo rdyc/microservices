@@ -2,7 +2,7 @@
 using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
-using Core.OptimisticConcurrency;
+using FW.Core.OptimisticConcurrency;
 using FW.Core.WebApi.Headers;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;

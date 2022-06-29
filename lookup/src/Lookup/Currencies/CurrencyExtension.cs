@@ -1,7 +1,7 @@
 using FluentValidation;
 using FW.Core.EventStoreDB.Repository;
-using FW.Core.MongoDB.Commands;
 using FW.Core.MongoDB.Projections;
+using FW.Core.Pagination;
 using Lookup.Currencies.GettingCurrencies;
 using Lookup.Currencies.Modifying;
 using Lookup.Currencies.Registering;
@@ -37,7 +37,7 @@ internal static class CurrencyExtension
 
     private static IServiceCollection AddQueryHandlers(this IServiceCollection services) =>
         services
-            .AddTransient<IRequestHandler<GetCurrencies, IEnumerable<CurrencyShortInfo>>, HandleGetCurrencies>();
+            .AddTransient<IRequestHandler<GetCurrencies, IListPaged<CurrencyShortInfo>>, HandleGetCurrencies>();
 
     /* private static IServiceCollection AddEventHandlers(this IServiceCollection services) =>
         services.AddEventHandler<EventEnvelope<ShoppingCartConfirmed>, HandleCartFinalized>(); */

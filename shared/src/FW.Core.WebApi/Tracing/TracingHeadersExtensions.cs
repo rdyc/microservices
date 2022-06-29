@@ -1,5 +1,5 @@
-﻿using Core.Tracing.Causation;
-using Core.Tracing.Correlation;
+﻿using FW.Core.Tracing.Causation;
+using FW.Core.Tracing.Correlation;
 using Microsoft.AspNetCore.Http;
 
 namespace FW.Core.WebApi.Tracing;

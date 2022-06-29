@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Threading.Tasks;
-using Core.Tracing;
+using FW.Core.Tracing;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;

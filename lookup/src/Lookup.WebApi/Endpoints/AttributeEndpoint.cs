@@ -8,9 +8,9 @@ using Swashbuckle.AspNetCore.Annotations;
 
 namespace Lookup.WebApi.Endpoints;
 
-public static class CurrencyEndpoint
+public static class AttributeEndpoint
 {
-    [SwaggerOperation(Summary = "Retrieve all currencies", OperationId = "get_all", Tags = new[] { "Currency" })]
+    [SwaggerOperation(Summary = "Retrieve all attributes", OperationId = "get_all", Tags = new[] { "Attribute" })]
     internal static async Task<IResult> GetAsync(int index, int size, IMediator mediator, ILoggerFactory logger, CancellationToken cancellationToken)
     {
         var log = logger.CreateLogger<Program>();
@@ -29,7 +29,7 @@ public static class CurrencyEndpoint
         return Results.NoContent();
     }
 
-    [SwaggerOperation(Summary = "Register a new currency", OperationId = "post", Tags = new[] { "Currency" })]
+    [SwaggerOperation(Summary = "Register a new attribute", OperationId = "post", Tags = new[] { "Attribute" })]
     internal static async Task<IResult> PostAsync([FromBody] CurrencyCreateRequest request, IMediator mediator, ILoggerFactory logger, CancellationToken cancellationToken)
     {
         var log = logger.CreateLogger<Program>();
@@ -49,7 +49,7 @@ public static class CurrencyEndpoint
         return Results.NoContent();
     }
 
-    [SwaggerOperation(Summary = "Modify existing currency", OperationId = "put", Tags = new[] { "Currency" })]
+    [SwaggerOperation(Summary = "Modify existing attribute", OperationId = "put", Tags = new[] { "Attribute" })]
     internal static async Task<IResult> PutAsync(Guid id, [FromBody] CurrencyModifyRequest request, IMediator mediator, ILoggerFactory logger, CancellationToken cancellationToken)
     {
         var log = logger.CreateLogger<Program>();

@@ -1,9 +1,15 @@
+using System.Net;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using EventStore.Client;
 using FW.Core;
+using FW.Core.EventStoreDB.OptimisticConcurrency;
+using FW.Core.Exceptions;
+using FW.Core.WebApi.Middlewares.ExceptionHandling;
+using FW.Core.WebApi.OptimisticConcurrency;
+using FW.Core.WebApi.Tracing;
 using Lookup;
 using Lookup.WebApi.Endpoints;
-using Lookup.WebApi.Repositories;
 using Microsoft.AspNetCore.Http.Json;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -28,8 +34,12 @@ builder.Services
         options.EnableAnnotations();
         options.DescribeAllParametersInCamelCase();
     })
-    .AddSingleton<IWeatherRepository, WeatherRepository>()
     .AddCoreServices()
+    .AddCorrelationIdMiddleware()
+    .AddOptimisticConcurrencyMiddleware(
+        sp => sp.GetRequiredService<EventStoreDBExpectedStreamRevisionProvider>().TrySet,
+        sp => () => sp.GetRequiredService<EventStoreDBNextStreamRevisionProvider>().Value?.ToString()
+    )
     .Configure<FW.Core.MongoDB.Settings.MongoDbSettings>(builder.Configuration.GetSection(nameof(FW.Core.MongoDB.Settings.MongoDbSettings)))
     .AddLookup(config);
 
@@ -38,15 +48,22 @@ var app = builder.Build();
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
-    app.UseSwagger();
-    app.UseSwaggerUI(options =>
-    {
-        options.DisplayRequestDuration();
-    });
+    app.UseSwagger()
+        .UseSwaggerUI(options =>
+        {
+            options.DisplayRequestDuration();
+        });
 }
 
-app.UseHttpsRedirection();
-app.UseWeatherEndpoint();
-app.UseCurrencyEndpoint();
+app.UseExceptionHandlingMiddleware(exception => exception switch
+    {
+        AggregateNotFoundException _ => HttpStatusCode.NotFound,
+        WrongExpectedVersionException => HttpStatusCode.PreconditionFailed,
+        _ => HttpStatusCode.InternalServerError
+    })
+    .UseCorrelationIdMiddleware()
+    .UseOptimisticConcurrencyMiddleware();
+
+app.UseLookupEndpoints();
 
 app.Run();
