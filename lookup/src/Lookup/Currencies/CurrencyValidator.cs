@@ -22,6 +22,6 @@ public class CurrencyValidator<T> : AbstractValidator<T>
 
     protected void ValidateSymbol()
     {
-        RuleFor(p => p.Symbol).NotEmpty().MaximumLength(2);
+        RuleFor(p => p.Symbol).NotEmpty().MaximumLength(3);
     }
 }

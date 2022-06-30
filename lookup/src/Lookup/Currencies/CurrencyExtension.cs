@@ -1,4 +1,5 @@
 using FluentValidation;
+using FW.Core.Events;
 using FW.Core.EventStoreDB.Repository;
 using FW.Core.MongoDB.Projections;
 using FW.Core.Pagination;
@@ -20,8 +21,8 @@ internal static class CurrencyExtension
             .AddCommandValidators()
             .AddCommandHandlers()
             .AddProjections()
-            .AddQueryHandlers();
-            // .AddEventHandlers();
+            .AddQueryHandlers()
+            .AddEventHandlers();
 
     private static IServiceCollection AddCommandValidators(this IServiceCollection services) =>
         services
@@ -39,13 +40,11 @@ internal static class CurrencyExtension
         services
             .AddTransient<IRequestHandler<GetCurrencies, IListPaged<CurrencyShortInfo>>, HandleGetCurrencies>();
 
-    /* private static IServiceCollection AddEventHandlers(this IServiceCollection services) =>
-        services.AddEventHandler<EventEnvelope<ShoppingCartConfirmed>, HandleCartFinalized>(); */
-
-    /* private static IServiceCollection AddEventHandlers(this IServiceCollection services) =>
+    private static IServiceCollection AddEventHandlers(this IServiceCollection services) =>
         services
-            .AddTransient<IEventHandler<CurrencyRegistered>, HandleCurrencyRegistered>()
-            .AddTransient<IEventHandler<EventEnvelope<CurrencyRegistered>>, HandleCurrencyRegistered>(); */
+            .AddEventHandler<EventEnvelope<Publishing.CurrencyRegistered>, Publishing.HandleCurrencyChanges>()
+            .AddEventHandler<EventEnvelope<Publishing.CurrencyModified>, Publishing.HandleCurrencyChanges>()
+            .AddEventHandler<EventEnvelope<Publishing.CurrencyRemoved>, Publishing.HandleCurrencyChanges>();
 
     private static IServiceCollection AddProjections(this IServiceCollection services) =>
         services

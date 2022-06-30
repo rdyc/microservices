@@ -5,6 +5,7 @@ using EventStore.Client;
 using FW.Core;
 using FW.Core.EventStoreDB.OptimisticConcurrency;
 using FW.Core.Exceptions;
+using FW.Core.Kafka;
 using FW.Core.WebApi.Middlewares.ExceptionHandling;
 using FW.Core.WebApi.OptimisticConcurrency;
 using FW.Core.WebApi.Tracing;
@@ -36,6 +37,7 @@ builder.Services
         options.DescribeAllParametersInCamelCase();
     })
     .AddCoreServices()
+    .AddKafkaProducer()
     .AddCorrelationIdMiddleware()
     .AddOptimisticConcurrencyMiddleware(
         sp => sp.GetRequiredService<EventStoreDBExpectedStreamRevisionProvider>().TrySet,

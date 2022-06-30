@@ -1,0 +1,15 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net6.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\shared\src\FW.Core\FW.Core.csproj" />
+    <ProjectReference Include="..\..\..\shared\src\FW.Core.MongoDB\FW.Core.MongoDB.csproj" />
+    <ProjectReference Include="..\..\..\shared\src\FW.Core.Kafka\FW.Core.Kafka.csproj" />
+  </ItemGroup>
+
+</Project>

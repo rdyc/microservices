@@ -46,7 +46,7 @@ public class Currency : Aggregate
 
     private Currency(Guid id, string name, string code, string symbol, CurrencyStatus status)
     {
-        var evt = CurrencyRegistered.Handle(id, name, code, symbol, status);
+        var evt = CurrencyRegistered.Create(id, name, code, symbol, status);
 
         Enqueue(evt);
         Apply(evt);
