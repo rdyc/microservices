@@ -29,11 +29,11 @@ internal class HandleRegisterCurrency : IRequestHandler<RegisterCurrency, Guid>
 
     public async Task<Guid> Handle(RegisterCurrency command, CancellationToken cancellationToken)
     {
-        var (id, code, name, symbol, status) = command;
+        var (id, name, code, symbol, status) = command;
 
         await scope.Do((_, eventMetadata) =>
             repository.Add(
-                Currency.Register(id, code, name, symbol, status),
+                Currency.Register(id, name, code, symbol, status),
                 eventMetadata,
                 cancellationToken
             )

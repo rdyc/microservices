@@ -1,8 +1,5 @@
 ﻿using FW.Core.Events;
-using FW.Core.MongoDB.Queries;
-using FW.Core.MongoDB.Settings;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Options;
 using MongoDB.Driver;
 
 namespace FW.Core.MongoDB.Projections;
@@ -35,7 +32,10 @@ public class DocumentProjectionBuilder<TView>
         return this;
     }
 
-    public DocumentProjectionBuilder<TView> UpdateOn<TEvent>(Func<TEvent, Guid> getViewId, Func<TView, UpdateDefinition<TView>> prepare, Action<EventEnvelope<TEvent>, TView> handler) where TEvent : notnull
+    public DocumentProjectionBuilder<TView> UpdateOn<TEvent>(
+        Func<TEvent, Guid> getViewId,
+        Func<TView, UpdateDefinition<TView>> prepare,
+        Action<EventEnvelope<TEvent>, TView> handler) where TEvent : notnull
     {
         services.AddSingleton(getViewId);
         services.AddSingleton(handler);
@@ -77,11 +77,11 @@ public class AddProjection<TView, TEvent> : IEventHandler<EventEnvelope<TEvent>>
         this.create = create;
     }
 
-    public async Task Handle(EventEnvelope<TEvent> eventEnvelope, CancellationToken ct)
+    public async Task Handle(EventEnvelope<TEvent> eventEnvelope, CancellationToken cancellationToken)
     {
         var view = create(eventEnvelope);
 
-        await collection.InsertOneAsync(view, null, ct);
+        await collection.InsertOneAsync(view, default, cancellationToken);
     }
 }
 
@@ -106,11 +106,11 @@ public class UpdateProjection<TView, TEvent> : IEventHandler<EventEnvelope<TEven
         this.prepare = prepare;
     }
 
-    public async Task Handle(EventEnvelope<TEvent> eventEnvelope, CancellationToken ct)
+    public async Task Handle(EventEnvelope<TEvent> eventEnvelope, CancellationToken cancellationToken)
     {
         var viewId = getViewId(eventEnvelope.Data);
         var filter = Builders<TView>.Filter.Eq(doc => doc.Id, viewId);
-        var view = await collection.Find(filter).SingleOrDefaultAsync(ct);
+        var view = await collection.Find(filter).SingleOrDefaultAsync(cancellationToken);
 
         if (view == null)
             throw new InvalidOperationException($"{typeof(TView).Name} with id {viewId} wasn't found");
@@ -119,6 +119,6 @@ public class UpdateProjection<TView, TEvent> : IEventHandler<EventEnvelope<TEven
 
         var updateDefinition = prepare.Invoke(view);
 
-        await collection.UpdateOneAsync<TView>(e => e.Id == viewId, updateDefinition, new UpdateOptions() { IsUpsert = true }, ct);
+        await collection.UpdateOneAsync<TView>(e => e.Id == viewId, updateDefinition, default, cancellationToken);
     }
 }

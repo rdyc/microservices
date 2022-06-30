@@ -30,7 +30,7 @@ internal class HandleModifyCurrency : IRequestHandler<ModifyCurrency, Guid>
 
     public async Task<Guid> Handle(ModifyCurrency command, CancellationToken cancellationToken)
     {
-        var (id, code, name, symbol, statusl) = command;
+        var (id, name, code, symbol, _) = command;
 
         await scope.Do((expectedVersion, eventMetadata) =>
             repository.GetAndUpdate(

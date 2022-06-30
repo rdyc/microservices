@@ -4,6 +4,6 @@ public record CurrencyRegistered(Guid Id, string Name, string Code, string Symbo
 {
     public static CurrencyRegistered Create(Guid id, string name, string code, string symbol, CurrencyStatus status)
     {
-        return new CurrencyRegistered(id, code, name, symbol, status);
+        return new CurrencyRegistered(id, name, code, symbol, status);
     }
 }

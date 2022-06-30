@@ -28,13 +28,15 @@ internal static class CurrencyExtension
                             .Set(e => e.Version, view.Version)
                             .Set(e => e.LastProcessedPosition, view.LastProcessedPosition)
                     )
-                    .UpdateOn<CurrencyRemoved>(
+                    /* multiple updates will not work!, it always use the last singleton service from "prepare" action.
+
+                     .UpdateOn<CurrencyRemoved>(
                         getViewId: e => e.Id,
                         handler: CurrencyShortInfoProjection.Handle,
                         prepare: (view) => Builders<CurrencyShortInfo>.Update
                             .Set(e => e.Status, view.Status)
                             .Set(e => e.Version, view.Version)
                             .Set(e => e.LastProcessedPosition, view.LastProcessedPosition)
-                    )
+                    ) */
             );
 }
