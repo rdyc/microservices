@@ -1,6 +1,7 @@
 using Lookup.Currencies.GettingCurrencies;
 using Lookup.Currencies.Modifying;
 using Lookup.Currencies.Registering;
+using Lookup.Currencies.Removing;
 using Lookup.WebApi.Requests;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
@@ -60,6 +61,25 @@ public static class CurrencyEndpoint
             var result = await mediator.Send(new ModifyCurrency(id, name, code, symbol), cancellationToken);
 
             return Results.AcceptedAtRoute("get_currencies", result);
+        }
+        catch (OperationCanceledException ex) when (cancellationToken.IsCancellationRequested)
+        {
+            log.LogWarning(ex.Message);
+        }
+
+        return Results.NoContent();
+    }
+
+    [SwaggerOperation(Summary = "Remove existing currency", OperationId = "delete", Tags = new[] { "Currency" })]
+    internal static async Task<IResult> DeleteAsync(Guid id, IMediator mediator, ILoggerFactory logger, CancellationToken cancellationToken)
+    {
+        var log = logger.CreateLogger<Program>();
+
+        try
+        {
+            await mediator.Send(new RemoveCurrency(id), cancellationToken);
+
+            return Results.NoContent();
         }
         catch (OperationCanceledException ex) when (cancellationToken.IsCancellationRequested)
         {

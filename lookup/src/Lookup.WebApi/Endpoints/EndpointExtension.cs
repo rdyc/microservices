@@ -16,6 +16,7 @@ internal static class EndpointExtension
         app.MapGet("/currencies", CurrencyEndpoint.GetAsync).Produces((int)HttpStatusCode.OK, typeof(IListPaged<CurrencyShortInfo>)).WithName("get_currencies");
         app.MapPost("/currencies", CurrencyEndpoint.PostAsync).Produces((int)HttpStatusCode.OK, typeof(Guid));
         app.MapPut("/currencies/{id}", CurrencyEndpoint.PutAsync).Produces((int)HttpStatusCode.Accepted, typeof(Guid));
+        app.MapDelete("/currencies/{id}", CurrencyEndpoint.DeleteAsync).Produces((int)HttpStatusCode.NoContent);
 
         return app;
     }

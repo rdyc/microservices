@@ -6,119 +6,118 @@ namespace FW.Core.MongoDB.Projections;
 
 public static class DocumentProjection
 {
-    public static IServiceCollection For<TView>(this IServiceCollection services, Action<DocumentProjectionBuilder<TView>> setup)
-        where TView : IDocument
+    public static IServiceCollection Projection<TDocument>(
+        this IServiceCollection services,
+        string collectionName,
+        Action<DocumentProjectionBuilder<TDocument>> builder)
+        where TDocument : IDocument
     {
-        setup(new DocumentProjectionBuilder<TView>(services));
+        builder(new DocumentProjectionBuilder<TDocument>(services, collectionName));
+
         return services;
     }
 }
 
-public class DocumentProjectionBuilder<TView>
-    where TView : IDocument
+public class DocumentProjectionBuilder<TDocument>
+    where TDocument : IDocument
 {
     public readonly IServiceCollection services;
+    public readonly string collectionName;
 
-    public DocumentProjectionBuilder(IServiceCollection services)
+    public DocumentProjectionBuilder(IServiceCollection services, string collectionName)
     {
         this.services = services;
+        this.collectionName = collectionName;
     }
 
-    public DocumentProjectionBuilder<TView> AddOn<TEvent>(Func<EventEnvelope<TEvent>, TView> handler) where TEvent : notnull
+    public DocumentProjectionBuilder<TDocument> AddOn<TEvent>(Func<EventEnvelope<TEvent>, TDocument> onHandle)
+        where TEvent : notnull
     {
-        services.AddSingleton(handler);
-        services.AddTransient<IEventHandler<EventEnvelope<TEvent>>, AddProjection<TView, TEvent>>();
+        services.AddTransient<IEventHandler<EventEnvelope<TEvent>>>(sp =>
+        {
+            var collection = sp.GetRequiredService<IMongoDatabase>()
+                .GetCollection<TDocument>(collectionName);
 
-        return this;
-    }
-
-    public DocumentProjectionBuilder<TView> UpdateOn<TEvent>(
-        Func<TEvent, Guid> getViewId,
-        Func<TView, UpdateDefinition<TView>> prepare,
-        Action<EventEnvelope<TEvent>, TView> handler) where TEvent : notnull
-    {
-        services.AddSingleton(getViewId);
-        services.AddSingleton(handler);
-        services.AddSingleton(prepare);
-        services.AddTransient<IEventHandler<EventEnvelope<TEvent>>, UpdateProjection<TView, TEvent>>();
+            return new AddProjection<TDocument, TEvent>(collection, onHandle);
+        });
 
         return this;
     }
 
-    /* public DocumentProjectionBuilder<TView, TDbContext> QueryWith<TQuery>(
-        Func<IQueryable<TView>, TQuery, CancellationToken, Task<TView>> handler
-    )
+    public DocumentProjectionBuilder<TDocument> UpdateOn<TEvent>(
+        Func<TEvent, Guid> onGet,
+        Func<TDocument, UpdateDefinition<TDocument>> onUpdate,
+        Action<EventEnvelope<TEvent>, TDocument> onHandle
+    ) where TEvent : notnull
     {
-        services.AddEntityFrameworkQueryHandler<TDbContext, TQuery, TView>(handler);
+        services.AddTransient<IEventHandler<EventEnvelope<TEvent>>>(sp =>
+        {
+            var collection = sp.GetRequiredService<IMongoDatabase>()
+                .GetCollection<TDocument>(collectionName);
+
+            return new UpdateProjection<TDocument, TEvent>(collection, onHandle, onGet, onUpdate);
+        });
 
         return this;
-    } */
-
-    /* public DocumentProjectionBuilder<TView, TDbContext> QueryWith<TQuery>(
-        Func<IQueryable<TView>, TQuery, CancellationToken, Task<IReadOnlyList<TView>>> handler
-    )
-    {
-        services.AddEntityFrameworkQueryHandler<TDbContext, TQuery, TView>(handler);
-
-        return this;
-    } */
+    }
 }
 
-public class AddProjection<TView, TEvent> : IEventHandler<EventEnvelope<TEvent>>
-    where TView : IDocument
+public class AddProjection<TDocument, TEvent> : IEventHandler<EventEnvelope<TEvent>>
+    where TDocument : IDocument
     where TEvent : notnull
 {
-    private readonly IMongoCollection<TView> collection;
-    private readonly Func<EventEnvelope<TEvent>, TView> create;
+    private readonly IMongoCollection<TDocument> collection;
+    private readonly Func<EventEnvelope<TEvent>, TDocument> onCreate;
 
-    public AddProjection(IMongoDatabase mongoDb, Func<EventEnvelope<TEvent>, TView> create)
+    public AddProjection(IMongoCollection<TDocument> collection, Func<EventEnvelope<TEvent>, TDocument> onCreate)
     {
-        this.collection = mongoDb.GetCollection<TView>("currency_shortinfo");
-        this.create = create;
+        this.collection = collection;
+        this.onCreate = onCreate;
     }
 
     public async Task Handle(EventEnvelope<TEvent> eventEnvelope, CancellationToken cancellationToken)
     {
-        var view = create(eventEnvelope);
+        var view = onCreate(eventEnvelope);
 
         await collection.InsertOneAsync(view, default, cancellationToken);
     }
 }
 
-public class UpdateProjection<TView, TEvent> : IEventHandler<EventEnvelope<TEvent>>
-    where TView : IDocument
+public class UpdateProjection<TDocument, TEvent> : IEventHandler<EventEnvelope<TEvent>>
+    where TDocument : IDocument
     where TEvent : notnull
 {
-    private readonly IMongoCollection<TView> collection;
-    private readonly Func<TEvent, Guid> getViewId;
-    private readonly Func<TView, UpdateDefinition<TView>> prepare;
-    private readonly Action<EventEnvelope<TEvent>, TView> handler;
+    private readonly IMongoCollection<TDocument> collection;
+    private readonly Func<TEvent, Guid> onGet;
+    private readonly Func<TDocument, UpdateDefinition<TDocument>> onUpdate;
+    private readonly Action<EventEnvelope<TEvent>, TDocument> onHandle;
 
     public UpdateProjection(
-        IMongoDatabase mongoDb,
-        Func<TEvent, Guid> getViewId,
-        Func<TView, UpdateDefinition<TView>> prepare,
-        Action<EventEnvelope<TEvent>, TView> handler)
+        IMongoCollection<TDocument> collection,
+        Action<EventEnvelope<TEvent>, TDocument> onHandle,
+        Func<TEvent, Guid> onGet,
+        Func<TDocument, UpdateDefinition<TDocument>> onUpdate
+    )
     {
-        this.collection = mongoDb.GetCollection<TView>("currency_shortinfo");
-        this.getViewId = getViewId;
-        this.handler = handler;
-        this.prepare = prepare;
+        this.collection = collection;
+        this.onHandle = onHandle;
+        this.onGet = onGet;
+        this.onUpdate = onUpdate;
     }
 
     public async Task Handle(EventEnvelope<TEvent> eventEnvelope, CancellationToken cancellationToken)
     {
-        var viewId = getViewId(eventEnvelope.Data);
-        var filter = Builders<TView>.Filter.Eq(doc => doc.Id, viewId);
+        var viewId = onGet(eventEnvelope.Data);
+        var filter = Builders<TDocument>.Filter.Eq(doc => doc.Id, viewId);
         var view = await collection.Find(filter).SingleOrDefaultAsync(cancellationToken);
 
         if (view == null)
-            throw new InvalidOperationException($"{typeof(TView).Name} with id {viewId} wasn't found");
+            throw new InvalidOperationException($"{typeof(TDocument).Name} with id {viewId} wasn't found");
 
-        handler(eventEnvelope, view);
+        onHandle(eventEnvelope, view);
 
-        var updateDefinition = prepare.Invoke(view);
+        var update = onUpdate.Invoke(view);
 
-        await collection.UpdateOneAsync<TView>(e => e.Id == viewId, updateDefinition, default, cancellationToken);
+        await collection.UpdateOneAsync<TDocument>(e => e.Id == viewId, update, default, cancellationToken);
     }
 }
