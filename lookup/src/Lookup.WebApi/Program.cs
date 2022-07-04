@@ -2,6 +2,7 @@ using System.Net;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using EventStore.Client;
+using FluentValidation;
 using FW.Core;
 using FW.Core.EventStoreDB.OptimisticConcurrency;
 using FW.Core.Exceptions;
@@ -67,6 +68,7 @@ if (app.Environment.IsDevelopment())
 app.UseExceptionHandlingMiddleware(exception => exception switch
     {
         AggregateNotFoundException _ => HttpStatusCode.NotFound,
+        ValidationException _ => HttpStatusCode.BadRequest,
         WrongExpectedVersionException => HttpStatusCode.PreconditionFailed,
         _ => HttpStatusCode.InternalServerError
     })

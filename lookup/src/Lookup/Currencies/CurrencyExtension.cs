@@ -48,13 +48,13 @@ internal static class CurrencyExtension
 
     private static IServiceCollection AddProjections(this IServiceCollection services) =>
         services
-            .For<CurrencyShortInfo>(builder =>
+            .Projection<CurrencyShortInfo>("currency_shortinfo", builder =>
                 builder
                     .AddOn<CurrencyRegistered>(CurrencyShortInfoProjection.Handle)
                     .UpdateOn<CurrencyModified>(
-                        getViewId: e => e.Id,
-                        handler: CurrencyShortInfoProjection.Handle,
-                        prepare: (view) => Builders<CurrencyShortInfo>.Update
+                        onGet: e => e.Id,
+                        onHandle: CurrencyShortInfoProjection.Handle,
+                        onUpdate: (view) => Builders<CurrencyShortInfo>.Update
                             .Set(e => e.Name, view.Name)
                             .Set(e => e.Code, view.Code)
                             .Set(e => e.Symbol, view.Symbol)

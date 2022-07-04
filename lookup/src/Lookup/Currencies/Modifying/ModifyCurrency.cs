@@ -1,6 +1,7 @@
 using FW.Core.EventStoreDB.OptimisticConcurrency;
 using FW.Core.EventStoreDB.Repository;
 using MediatR;
+using MongoDB.Driver;
 
 namespace Lookup.Currencies.Modifying;
 
@@ -8,12 +9,12 @@ public record ModifyCurrency(Guid? Id, string Name, string Code, string Symbol) 
 
 internal class ValidateModifyCurrency : CurrencyValidator<ModifyCurrency>
 {
-    public ValidateModifyCurrency()
+    public ValidateModifyCurrency(IMongoDatabase database) : base(database)
     {
         ValidateId();
-        ValidateName();
-        ValidateCode();
-        ValidateSymbol();
+        ValidateName(true);
+        ValidateCode(true);
+        ValidateSymbol(true);
     }
 }
 

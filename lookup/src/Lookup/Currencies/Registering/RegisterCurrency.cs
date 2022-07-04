@@ -1,6 +1,7 @@
 using FW.Core.EventStoreDB.OptimisticConcurrency;
 using FW.Core.EventStoreDB.Repository;
 using MediatR;
+using MongoDB.Driver;
 
 namespace Lookup.Currencies.Registering;
 
@@ -8,7 +9,7 @@ public record RegisterCurrency(string Name, string Code, string Symbol, Currency
 
 internal class ValidateRegisterCurrency : CurrencyValidator<RegisterCurrency>
 {
-    public ValidateRegisterCurrency()
+    public ValidateRegisterCurrency(IMongoDatabase database) : base(database)
     {
         ValidateName();
         ValidateCode();

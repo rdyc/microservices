@@ -4,6 +4,7 @@ using FW.Core.EventStoreDB.Subscriptions;
 using FW.Core.MongoDB;
 using Lookup.Currencies;
 using MediatR;
+using MediatR.Pipeline;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -13,7 +14,9 @@ public static class LookupExtension
 {
     public static IServiceCollection AddLookup(this IServiceCollection services, IConfiguration configuration) =>
         services
-            .AddTransient(typeof(IPipelineBehavior<,>), typeof(ValidationBehaviour<,>))
+            .AddScoped(typeof(IPipelineBehavior<,>), typeof(ValidationBehaviour<,>))
+            .AddScoped(typeof(IRequestPreProcessor<>), typeof(GenericRequestPreProcessor<>))
+            .AddScoped(typeof(IRequestPostProcessor<,>), typeof(GenericRequestPostProcessor<,>))
             .AddMongoDb(configuration)
             .AddEventStoreDB(configuration)
             .AddEventStoreDBSubscriptionToAll(new EventStoreDBSubscriptionToAllOptions

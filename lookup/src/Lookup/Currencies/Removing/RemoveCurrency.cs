@@ -1,6 +1,7 @@
 using FW.Core.EventStoreDB.OptimisticConcurrency;
 using FW.Core.EventStoreDB.Repository;
 using MediatR;
+using MongoDB.Driver;
 
 namespace Lookup.Currencies.Removing;
 
@@ -8,7 +9,7 @@ public record RemoveCurrency(Guid? Id) : CurrencyCommand(Id, default, default, d
 
 internal class ValidateRemoveCurrency : CurrencyValidator<RemoveCurrency>
 {
-    public ValidateRemoveCurrency()
+    public ValidateRemoveCurrency(IMongoDatabase database) : base(database)
     {
         ValidateId();
     }
