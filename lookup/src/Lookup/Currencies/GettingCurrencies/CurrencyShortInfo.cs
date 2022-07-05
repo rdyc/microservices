@@ -3,17 +3,29 @@ using FW.Core.MongoDB;
 using Lookup.Currencies.Modifying;
 using Lookup.Currencies.Registering;
 using Lookup.Currencies.Removing;
+using MongoDB.Bson.Serialization.Attributes;
 
 namespace Lookup.Currencies.GettingCurrencies;
 
+[BsonCollection("currency_shortinfo")]
 public record CurrencyShortInfo : Document//, IVersionedProjection
 {
-    // public Guid Id { get; set; }
+    [BsonElement("name")]
     public string Name { get; set; } = default!;
+
+    [BsonElement("code")]
     public string Code { get; set; } = default!;
+
+    [BsonElement("symbol")]
     public string Symbol { get; set; } = default!;
+
+    [BsonElement("status")]
     public CurrencyStatus Status { get; set; } = default!;
+
+    [BsonElement("version")]
     public int Version { get; set; }
+
+    [BsonElement("position")]
     public ulong LastProcessedPosition { get; set; }
 }
 

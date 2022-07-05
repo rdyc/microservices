@@ -8,10 +8,11 @@ public static class DocumentProjection
 {
     public static IServiceCollection Projection<TDocument>(
         this IServiceCollection services,
-        string collectionName,
         Action<DocumentProjectionBuilder<TDocument>> builder)
         where TDocument : IDocument
     {
+        var collectionName = MongoHelper.GetCollectionName<TDocument>();
+
         builder(new DocumentProjectionBuilder<TDocument>(services, collectionName));
 
         return services;

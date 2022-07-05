@@ -1,7 +1,7 @@
 using System.ComponentModel.DataAnnotations;
 using System.Net;
 
-namespace FW.Core.WebApi.Middlewares.ExceptionHandling;
+namespace FW.Core.WebApi.Middlewares;
 
 public record HttpStatusCodeInfo
 {

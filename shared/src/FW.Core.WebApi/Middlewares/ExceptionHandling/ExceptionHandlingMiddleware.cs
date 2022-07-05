@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Http.Json;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
-namespace FW.Core.WebApi.Middlewares.ExceptionHandling;
+namespace FW.Core.WebApi.Middlewares;
 
 public class ExceptionHandlingMiddleware
 {

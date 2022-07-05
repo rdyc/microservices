@@ -7,7 +7,7 @@ using FW.Core;
 using FW.Core.EventStoreDB.OptimisticConcurrency;
 using FW.Core.Exceptions;
 using FW.Core.Kafka;
-using FW.Core.WebApi.Middlewares.ExceptionHandling;
+using FW.Core.WebApi.Middlewares;
 using FW.Core.WebApi.OptimisticConcurrency;
 using FW.Core.WebApi.Tracing;
 using Lookup;
@@ -82,7 +82,8 @@ app.UseExceptionHandlingMiddleware(exception => exception switch
             new HttpStatusCodeInfo(HttpStatusCode.InternalServerError, exception.Message)
     })
     .UseCorrelationIdMiddleware()
-    .UseOptimisticConcurrencyMiddleware();
+    .UseOptimisticConcurrencyMiddleware()
+    .UseResponseTimeMiddleware();
 
 app.UseLookupEndpoints();
 

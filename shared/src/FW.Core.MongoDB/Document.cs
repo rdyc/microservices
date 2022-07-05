@@ -7,6 +7,7 @@ public interface IDocument
 {
     [BsonId]
     [BsonRepresentation(BsonType.String)]
+    [BsonElement("id")]
     Guid Id { get; set; }
 
     // DateTime CreatedAt { get; }

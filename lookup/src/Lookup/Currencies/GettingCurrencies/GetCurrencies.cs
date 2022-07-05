@@ -1,3 +1,4 @@
+using FW.Core.MongoDB;
 using FW.Core.MongoDB.Extensions;
 using FW.Core.Pagination;
 using MediatR;
@@ -13,7 +14,8 @@ internal class HandleGetCurrencies : IRequestHandler<GetCurrencies, IListPaged<C
 
     public HandleGetCurrencies(IMongoDatabase mongoDb)
     {
-        this.collection = mongoDb.GetCollection<CurrencyShortInfo>("currency_shortinfo");
+        var collectionName = MongoHelper.GetCollectionName<CurrencyShortInfo>();
+        collection = mongoDb.GetCollection<CurrencyShortInfo>(collectionName);
     }
 
     public async Task<IListPaged<CurrencyShortInfo>> Handle(GetCurrencies request, CancellationToken cancellationToken)
