@@ -12,9 +12,9 @@ internal class ValidateModifyCurrency : CurrencyValidator<ModifyCurrency>
     public ValidateModifyCurrency(IMongoDatabase database) : base(database)
     {
         ValidateId();
-        ValidateName(true);
+        ValidateName();
         ValidateCode(true);
-        ValidateSymbol(true);
+        ValidateSymbol();
     }
 }
 

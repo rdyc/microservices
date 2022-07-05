@@ -1,37 +1,38 @@
-using System;
 using System.ComponentModel.DataAnnotations;
 using System.Net;
 
 namespace FW.Core.WebApi.Middlewares.ExceptionHandling;
 
-public class HttpStatusCodeInfo
+public record HttpStatusCodeInfo
 {
-    public HttpStatusCode Code { get; }
-    public string Message { get; }
-
-    public HttpStatusCodeInfo(HttpStatusCode code, string message)
+    public HttpStatusCodeInfo(HttpStatusCode code, string message, IDictionary<string, string[]>? errors = null)
     {
-        Code = code;
+        Code = (int)code;
+        Status = code.ToString();
         Message = message;
+        Errors = errors;
     }
+
+    public int Code { get; init; } = default!;
+    public string Status { get; init; } = default!;
+    public string Message { get; init; } = default!;
+    public IDictionary<string, string[]>? Errors { get; init; } = default!;
 }
 
 public static class ExceptionToHttpStatusMapper
 {
-    public static Func<Exception, HttpStatusCode>? CustomMap { get; set; }
+    public static Func<Exception, HttpStatusCodeInfo>? CustomMap { get; set; }
 
     public static HttpStatusCodeInfo Map(Exception exception)
     {
-        var code = exception switch
+        return exception switch
         {
-            UnauthorizedAccessException _ => HttpStatusCode.Unauthorized,
-            NotImplementedException _ => HttpStatusCode.NotImplemented,
-            InvalidOperationException _ => HttpStatusCode.Conflict,
-            ArgumentException _ => HttpStatusCode.BadRequest,
-            ValidationException _ => HttpStatusCode.BadRequest,
-            _ => CustomMap?.Invoke(exception) ?? HttpStatusCode.InternalServerError
+            UnauthorizedAccessException _ => new HttpStatusCodeInfo(HttpStatusCode.Unauthorized, exception.Message),
+            NotImplementedException _ => new HttpStatusCodeInfo(HttpStatusCode.NotImplemented, exception.Message),
+            InvalidOperationException _ => new HttpStatusCodeInfo(HttpStatusCode.Conflict, exception.Message),
+            ArgumentException _ => new HttpStatusCodeInfo(HttpStatusCode.BadRequest, exception.Message),
+            ValidationException _ => new HttpStatusCodeInfo(HttpStatusCode.BadRequest, exception.Message),
+            _ => CustomMap?.Invoke(exception) ?? new HttpStatusCodeInfo(HttpStatusCode.InternalServerError, exception.Message)
         };
-
-        return new HttpStatusCodeInfo(code, exception.Message);
     }
 }

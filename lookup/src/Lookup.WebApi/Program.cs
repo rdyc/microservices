@@ -11,6 +11,7 @@ using FW.Core.WebApi.Middlewares.ExceptionHandling;
 using FW.Core.WebApi.OptimisticConcurrency;
 using FW.Core.WebApi.Tracing;
 using Lookup;
+using Lookup.WebApi;
 using Lookup.WebApi.Endpoints;
 using Microsoft.AspNetCore.Http.Json;
 using Swashbuckle.AspNetCore.SwaggerUI;
@@ -29,7 +30,9 @@ builder.Services
     .Configure<JsonOptions>(options =>
     {
         options.SerializerOptions.WriteIndented = false;
-        options.SerializerOptions.Converters.Add(new JsonStringEnumConverter(JsonNamingPolicy.CamelCase, false));
+        options.SerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
+        options.SerializerOptions.DictionaryKeyPolicy = JsonNamingPolicy.CamelCase;
+        options.SerializerOptions.Converters.Add(new JsonStringEnumConverter());
     })
     .AddEndpointsApiExplorer()
     .AddSwaggerGen(options =>
@@ -67,10 +70,16 @@ if (app.Environment.IsDevelopment())
 
 app.UseExceptionHandlingMiddleware(exception => exception switch
     {
-        AggregateNotFoundException _ => HttpStatusCode.NotFound,
-        ValidationException _ => HttpStatusCode.BadRequest,
-        WrongExpectedVersionException => HttpStatusCode.PreconditionFailed,
-        _ => HttpStatusCode.InternalServerError
+        AggregateNotFoundException _ =>
+            new HttpStatusCodeInfo(HttpStatusCode.NotFound, exception.Message),
+        WrongExpectedVersionException =>
+            new HttpStatusCodeInfo(HttpStatusCode.PreconditionFailed, exception.Message),
+        ValidationException validationException =>
+            new HttpStatusCodeInfo(HttpStatusCode.UnprocessableEntity,
+                validationException.Message,
+                validationException.Errors.ToDictionary()),
+        _ =>
+            new HttpStatusCodeInfo(HttpStatusCode.InternalServerError, exception.Message)
     })
     .UseCorrelationIdMiddleware()
     .UseOptimisticConcurrencyMiddleware();

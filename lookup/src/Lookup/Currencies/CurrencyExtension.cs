@@ -26,9 +26,9 @@ internal static class CurrencyExtension
 
     private static IServiceCollection AddCommandValidators(this IServiceCollection services) =>
         services
-            .AddScoped<IValidator<RegisterCurrency>, ValidateRegisterCurrency>()
-            .AddScoped<IValidator<ModifyCurrency>, ValidateModifyCurrency>()
-            .AddScoped<IValidator<RemoveCurrency>, ValidateRemoveCurrency>();
+            .AddSingleton<IValidator<RegisterCurrency>, ValidateRegisterCurrency>()
+            .AddSingleton<IValidator<ModifyCurrency>, ValidateModifyCurrency>()
+            .AddSingleton<IValidator<RemoveCurrency>, ValidateRemoveCurrency>();
 
     private static IServiceCollection AddCommandHandlers(this IServiceCollection services) =>
         services

@@ -23,10 +23,9 @@ public class CurrencyValidator<T> : AbstractValidator<T>
             .MustExistCurrency(collection);
     }
 
-    protected void ValidateName(bool isUpdating = false)
+    protected void ValidateName()
     {
-        RuleFor(p => p.Name).NotEmpty()
-            .MustUniqueCurrencyName(collection, isUpdating);
+        RuleFor(p => p.Name).NotEmpty();;
     }
 
     protected void ValidateCode(bool isUpdating = false)
@@ -35,10 +34,9 @@ public class CurrencyValidator<T> : AbstractValidator<T>
             .MustUniqueCurrencyCode(collection, isUpdating);
     }
 
-    protected void ValidateSymbol(bool isUpdating = false)
+    protected void ValidateSymbol()
     {
-        RuleFor(p => p.Symbol).NotEmpty().MaximumLength(3)
-            .MustUniqueCurrencySymbol(collection, isUpdating);
+        RuleFor(p => p.Symbol).NotEmpty().MaximumLength(3);
     }
 }
 
@@ -50,43 +48,15 @@ public static class ValidatorExtension
         where T : CurrencyCommand
     {
         return ruleBuilder
-            .MustAsync(async (type, value, context, cancellationToken) =>
+            .MustAsync(async (value, cancellationToken) =>
             {
-                var data = await collection.Find(e => e.Id == value)
-                    .SingleOrDefaultAsync(cancellationToken);
+                var count = await collection.CountDocumentsAsync(e => e.Id == value, null, cancellationToken);
 
-                if (data == null)
+                if (count == 0)
                     throw AggregateNotFoundException.For<T>(value);
-
-                if (!context.RootContextData.ContainsKey(value.ToString()))
-                {
-                    context.RootContextData[value.ToString()] = data;
-                }
 
                 return true;
             });
-    }
-
-    public static IRuleBuilderOptions<T, string> MustUniqueCurrencyName<T>(
-        this IRuleBuilder<T, string> ruleBuilder,
-        IMongoCollection<CurrencyShortInfo> collection,
-        bool isUpdating = false)
-        where T : CurrencyCommand
-    {
-        return ruleBuilder
-            .MustAsync(async (type, value, context, cancellationToken) =>
-            {
-                var builder = Builders<CurrencyShortInfo>.Filter;
-                var filter = builder.Eq(e => e.Name, value);
-
-                if (isUpdating)
-                {
-                    filter = builder.And(filter, builder.Ne(e => e.Id, type.Id));
-                }
-
-                return await collection.CountDocumentsAsync(filter, null, cancellationToken) == 0;
-            })
-            .WithMessage("The name already used");
     }
 
     public static IRuleBuilderOptions<T, string> MustUniqueCurrencyCode<T>(
@@ -96,40 +66,18 @@ public static class ValidatorExtension
         where T : CurrencyCommand
     {
         return ruleBuilder
-            .MustAsync(async (type, value, context, cancellationToken) =>
+            .MustAsync(async (instance, value, cancellationToken) =>
             {
                 var builder = Builders<CurrencyShortInfo>.Filter;
                 var filter = builder.Eq(e => e.Code, value);
 
                 if (isUpdating)
                 {
-                    filter = builder.And(filter, builder.Ne(e => e.Id, type.Id));
+                    filter = builder.And(filter, builder.Ne(e => e.Id, instance.Id));
                 }
 
                 return await collection.CountDocumentsAsync(filter, null, cancellationToken) == 0;
             })
-            .WithMessage("The code already used");
-    }
-
-    public static IRuleBuilderOptions<T, string> MustUniqueCurrencySymbol<T>(
-        this IRuleBuilder<T, string> ruleBuilder,
-        IMongoCollection<CurrencyShortInfo> collection,
-        bool isUpdating = false)
-        where T : CurrencyCommand
-    {
-        return ruleBuilder
-            .MustAsync(async (type, value, context, cancellationToken) =>
-            {
-                var builder = Builders<CurrencyShortInfo>.Filter;
-                var filter = builder.Eq(e => e.Symbol, value);
-
-                if (isUpdating)
-                {
-                    filter = builder.And(filter, builder.Ne(e => e.Id, type.Id));
-                }
-
-                return await collection.CountDocumentsAsync(filter, null, cancellationToken) == 0;
-            })
-            .WithMessage("The symbol already used");
+            .WithMessage("The currency code already used");
     }
 }
