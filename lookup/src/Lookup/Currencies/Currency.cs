@@ -35,12 +35,6 @@ public class Currency : Aggregate
             case CurrencyRemoved currency:
                 Apply(currency);
                 return;
-                /*case ShoppingCartConfirmed cartOpened:
-                    Apply(cartOpened);
-                    return;
-                case ShoppingCartCanceled cartCanceled:
-                    Apply(cartCanceled);
-                    return; */
         }
     }
 

@@ -1,32 +1,9 @@
 using FluentValidation;
 using MediatR;
-using MediatR.Pipeline;
 
-namespace Lookup;
+namespace FW.Core.Validation;
 
-internal class GenericRequestPreProcessor<TRequest> : IRequestPreProcessor<TRequest>
-    where TRequest : IRequest
-{
-    public Task Process(TRequest request, CancellationToken cancellationToken)
-    {
-        Console.WriteLine("- Starting Up");
-
-        return Task.CompletedTask;
-    }
-}
-
-internal class GenericRequestPostProcessor<TRequest, TResponse> : IRequestPostProcessor<TRequest, TResponse>
-    where TRequest : IRequest<TResponse>
-{
-    public Task Process(TRequest request, TResponse response, CancellationToken cancellationToken)
-    {
-        Console.WriteLine("- All Done");
-
-        return Task.CompletedTask;
-    }
-}
-
-internal class ValidationBehaviour<TRequest, TResponse> : IPipelineBehavior<TRequest, TResponse>
+public class ValidationBehaviour<TRequest, TResponse> : IPipelineBehavior<TRequest, TResponse>
     where TRequest : IRequest<TResponse>
 {
     private readonly IEnumerable<IValidator<TRequest>> validator;

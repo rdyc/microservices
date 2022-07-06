@@ -1,3 +1,4 @@
+using FW.Core.Commands;
 using FW.Core.EventStoreDB.OptimisticConcurrency;
 using FW.Core.EventStoreDB.Repository;
 using MediatR;
@@ -18,7 +19,7 @@ internal class ValidateModifyCurrency : CurrencyValidator<ModifyCurrency>
     }
 }
 
-internal class HandleModifyCurrency : IRequestHandler<ModifyCurrency, Guid>
+internal class HandleModifyCurrency : ICommandHandler<ModifyCurrency>
 {
     private readonly IEventStoreDBRepository<Currency> repository;
     private readonly IEventStoreDBAppendScope scope;
@@ -29,7 +30,7 @@ internal class HandleModifyCurrency : IRequestHandler<ModifyCurrency, Guid>
         this.scope = scope;
     }
 
-    public async Task<Guid> Handle(ModifyCurrency command, CancellationToken cancellationToken)
+    public async Task<Unit> Handle(ModifyCurrency command, CancellationToken cancellationToken)
     {
         var (id, name, code, symbol, _) = command;
 
@@ -43,6 +44,6 @@ internal class HandleModifyCurrency : IRequestHandler<ModifyCurrency, Guid>
             )
         );
 
-        return id.Value;
+        return Unit.Value;
     }
 }

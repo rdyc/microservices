@@ -1,4 +1,6 @@
+using FW.Core.Commands;
 using FW.Core.Events;
+using FW.Core.Queries;
 using FW.Core.Tracing;
 using FW.Core.Tracing.Causation;
 using FW.Core.Tracing.Correlation;
@@ -13,14 +15,10 @@ public static class Config
     public static IServiceCollection AddCoreServices(this IServiceCollection services)
     {
         services.AddMediatR()
-            // .AddScoped<ICommandBus, CommandBus>()
-            // .AddScoped<IQueryBus, QueryBus>()
+            .AddScoped<ICommandBus, CommandBus>()
+            .AddScoped<IQueryBus, QueryBus>()
             .AddTracing()
             .AddEventBus();
-
-        // services.TryAddScoped<IExternalCommandBus, ExternalCommandBus>();
-
-        // services.TryAddScoped<IIdGenerator, NulloIdGenerator>();
 
         return services;
     }

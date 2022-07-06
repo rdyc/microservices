@@ -1,14 +1,15 @@
-using FluentValidation;
+using FW.Core.Commands;
 using FW.Core.Events;
 using FW.Core.EventStoreDB.Repository;
 using FW.Core.MongoDB.Projections;
 using FW.Core.Pagination;
+using FW.Core.Queries;
+using FW.Core.Validation;
 using Lookup.Currencies.GettingCurrencies;
 using Lookup.Currencies.GettingCurrencyHistory;
 using Lookup.Currencies.Modifying;
 using Lookup.Currencies.Registering;
 using Lookup.Currencies.Removing;
-using MediatR;
 using Microsoft.Extensions.DependencyInjection;
 using MongoDB.Driver;
 
@@ -21,28 +22,28 @@ internal static class CurrencyExtension
             .AddScoped<IEventStoreDBRepository<Currency>, EventStoreDBRepository<Currency>>()
             .AddCommandValidators()
             .AddCommandHandlers()
+            .AddEventHandlers()
             .AddProjections()
-            .AddQueryHandlers()
-            .AddEventHandlers();
+            .AddQueryHandlers();
 
     private static IServiceCollection AddCommandValidators(this IServiceCollection services) =>
         services
-            .AddSingleton<IValidator<RegisterCurrency>, ValidateRegisterCurrency>()
-            .AddSingleton<IValidator<ModifyCurrency>, ValidateModifyCurrency>()
-            .AddSingleton<IValidator<RemoveCurrency>, ValidateRemoveCurrency>();
+            .AddCommandValidator<RegisterCurrency, ValidateRegisterCurrency>()
+            .AddCommandValidator<ModifyCurrency, ValidateModifyCurrency>()
+            .AddCommandValidator<RemoveCurrency, ValidateRemoveCurrency>();
 
     private static IServiceCollection AddCommandHandlers(this IServiceCollection services) =>
         services
-            .AddTransient<IRequestHandler<RegisterCurrency, Guid>, HandleRegisterCurrency>()
-            .AddTransient<IRequestHandler<ModifyCurrency, Guid>, HandleModifyCurrency>()
-            .AddTransient<IRequestHandler<RemoveCurrency, Guid>, HandleRemoveCurrency>();
+            .AddCommandHandler<RegisterCurrency, HandleRegisterCurrency>()
+            .AddCommandHandler<ModifyCurrency, HandleModifyCurrency>()
+            .AddCommandHandler<RemoveCurrency, HandleRemoveCurrency>();
 
     private static IServiceCollection AddQueryHandlers(this IServiceCollection services) =>
         services
-            .AddTransient<IRequestHandler<GetCurrencies, IListPaged<CurrencyShortInfo>>, HandleGetCurrencies>()
-            .AddTransient<IRequestHandler<GetCurrencyList, IListUnpaged<CurrencyShortInfo>>, HandleGetCurrencyList>()
-            .AddTransient<IRequestHandler<GetCurrencyById, CurrencyShortInfo>, HandleGetCurrencyById>()
-            .AddTransient<IRequestHandler<GetCurrencyHistory, IListPaged<CurrencyHistory>>, HandleGetCurrencyHistory>();
+            .AddQueryHandler<GetCurrencies, IListPaged<CurrencyShortInfo>, HandleGetCurrencies>()
+            .AddQueryHandler<GetCurrencyList, IListUnpaged<CurrencyShortInfo>, HandleGetCurrencyList>()
+            .AddQueryHandler<GetCurrencyById, CurrencyShortInfo, HandleGetCurrencyById>()
+            .AddQueryHandler<GetCurrencyHistory, IListPaged<CurrencyHistory>, HandleGetCurrencyHistory>();
 
     private static IServiceCollection AddEventHandlers(this IServiceCollection services) =>
         services

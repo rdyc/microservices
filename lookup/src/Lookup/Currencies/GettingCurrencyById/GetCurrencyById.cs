@@ -1,14 +1,14 @@
 using FW.Core.Exceptions;
 using FW.Core.MongoDB;
+using FW.Core.Queries;
 using Lookup.Currencies.GettingCurrencies;
-using MediatR;
 using MongoDB.Driver;
 
 namespace Lookup.Currencies.GettingCurrencyHistory;
 
-public record GetCurrencyById(Guid Id) : IRequest<CurrencyShortInfo>;
+public record GetCurrencyById(Guid Id) : IQuery<CurrencyShortInfo>;
 
-internal class HandleGetCurrencyById : IRequestHandler<GetCurrencyById, CurrencyShortInfo>
+internal class HandleGetCurrencyById : IQueryHandler<GetCurrencyById, CurrencyShortInfo>
 {
     private readonly IMongoCollection<CurrencyShortInfo> collection;
 

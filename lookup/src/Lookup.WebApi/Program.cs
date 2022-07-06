@@ -59,6 +59,7 @@ if (app.Environment.IsDevelopment())
         .UseSwagger()
         .UseSwaggerUI(options =>
         {
+            options.DocumentTitle = "Lookup";
             options.DocExpansion(DocExpansion.None);
             options.EnableTryItOutByDefault();
             options.DisplayOperationId();

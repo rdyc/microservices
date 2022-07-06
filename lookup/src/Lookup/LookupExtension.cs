@@ -1,6 +1,7 @@
 using EventStore.Client;
 using FW.Core.EventStoreDB;
 using FW.Core.EventStoreDB.Subscriptions;
+using FW.Core.Validation;
 using FW.Core.MongoDB;
 using Lookup.Currencies;
 using MediatR;

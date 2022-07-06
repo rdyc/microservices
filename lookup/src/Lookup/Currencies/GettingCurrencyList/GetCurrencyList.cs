@@ -1,14 +1,14 @@
 using FW.Core.MongoDB;
 using FW.Core.Pagination;
+using FW.Core.Queries;
 using Lookup.Currencies.GettingCurrencies;
-using MediatR;
 using MongoDB.Driver;
 
 namespace Lookup.Currencies.GettingCurrencyHistory;
 
-public record GetCurrencyList(CurrencyStatus? Status) : IRequest<IListUnpaged<CurrencyShortInfo>>;
+public record GetCurrencyList(CurrencyStatus? Status) : IQuery<IListUnpaged<CurrencyShortInfo>>;
 
-internal class HandleGetCurrencyList : IRequestHandler<GetCurrencyList, IListUnpaged<CurrencyShortInfo>>
+internal class HandleGetCurrencyList : IQueryHandler<GetCurrencyList, IListUnpaged<CurrencyShortInfo>>
 {
     private readonly IMongoCollection<CurrencyShortInfo> collection;
 

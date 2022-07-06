@@ -1,3 +1,4 @@
+using FW.Core.Commands;
 using FW.Core.EventStoreDB.OptimisticConcurrency;
 using FW.Core.EventStoreDB.Repository;
 using MediatR;
@@ -15,7 +16,7 @@ internal class ValidateRemoveCurrency : CurrencyValidator<RemoveCurrency>
     }
 }
 
-internal class HandleRemoveCurrency : IRequestHandler<RemoveCurrency, Guid>
+internal class HandleRemoveCurrency : ICommandHandler<RemoveCurrency>
 {
     private readonly IEventStoreDBRepository<Currency> repository;
     private readonly IEventStoreDBAppendScope scope;
@@ -26,7 +27,7 @@ internal class HandleRemoveCurrency : IRequestHandler<RemoveCurrency, Guid>
         this.scope = scope;
     }
 
-    public async Task<Guid> Handle(RemoveCurrency command, CancellationToken cancellationToken)
+    public async Task<Unit> Handle(RemoveCurrency command, CancellationToken cancellationToken)
     {
         await scope.Do((expectedVersion, eventMetadata) =>
             repository.GetAndUpdate(
@@ -38,6 +39,6 @@ internal class HandleRemoveCurrency : IRequestHandler<RemoveCurrency, Guid>
             )
         );
 
-        return command.Id.Value;
+        return Unit.Value;
     }
 }
