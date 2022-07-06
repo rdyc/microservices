@@ -12,10 +12,10 @@ internal class HandleGetCurrencyHistory : IRequestHandler<GetCurrencyHistory, IL
 {
     private readonly IMongoCollection<CurrencyHistory> collection;
 
-    public HandleGetCurrencyHistory(IMongoDatabase mongoDb)
+    public HandleGetCurrencyHistory(IMongoDatabase database)
     {
         var collectionName = MongoHelper.GetCollectionName<CurrencyHistory>();
-        collection = mongoDb.GetCollection<CurrencyHistory>(collectionName);
+        collection = database.GetCollection<CurrencyHistory>(collectionName);
     }
 
     public async Task<IListPaged<CurrencyHistory>> Handle(GetCurrencyHistory request, CancellationToken cancellationToken)

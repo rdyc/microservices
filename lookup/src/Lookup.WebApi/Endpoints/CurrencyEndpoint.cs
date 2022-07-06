@@ -1,3 +1,4 @@
+using Lookup.Currencies;
 using Lookup.Currencies.GettingCurrencies;
 using Lookup.Currencies.GettingCurrencyHistory;
 using Lookup.Currencies.Modifying;
@@ -13,13 +14,51 @@ namespace Lookup.WebApi.Endpoints;
 public static class CurrencyEndpoint
 {
     [SwaggerOperation(Summary = "Retrieve all currencies", OperationId = "get_all", Tags = new[] { "Currency" })]
-    internal static async Task<IResult> GetAsync(int index, int size, IMediator mediator, ILoggerFactory logger, CancellationToken cancellationToken)
+    internal static async Task<IResult> GetAllAsync(int index, int size, IMediator mediator, ILoggerFactory logger, CancellationToken cancellationToken)
     {
         var log = logger.CreateLogger<Program>();
 
         try
         {
             var result = await mediator.Send(new GetCurrencies(index, size), cancellationToken);
+
+            return Results.Ok(result);
+        }
+        catch (OperationCanceledException ex) when (cancellationToken.IsCancellationRequested)
+        {
+            log.LogWarning(ex.Message);
+        }
+
+        return Results.NoContent();
+    }
+
+    [SwaggerOperation(Summary = "Retrieve currency", OperationId = "get_detail", Tags = new[] { "Currency" })]
+    internal static async Task<IResult> GetDetailAsync(Guid id, IMediator mediator, ILoggerFactory logger, CancellationToken cancellationToken)
+    {
+        var log = logger.CreateLogger<Program>();
+
+        try
+        {
+            var result = await mediator.Send(new GetCurrencyById(id), cancellationToken);
+
+            return Results.Ok(result);
+        }
+        catch (OperationCanceledException ex) when (cancellationToken.IsCancellationRequested)
+        {
+            log.LogWarning(ex.Message);
+        }
+
+        return Results.NoContent();
+    }
+
+    [SwaggerOperation(Summary = "Retrieve currency list", OperationId = "get_list", Tags = new[] { "Currency" })]
+    internal static async Task<IResult> GetListAsync(CurrencyStatus? status, IMediator mediator, ILoggerFactory logger, CancellationToken cancellationToken)
+    {
+        var log = logger.CreateLogger<Program>();
+
+        try
+        {
+            var result = await mediator.Send(new GetCurrencyList(status), cancellationToken);
 
             return Results.Ok(result);
         }
@@ -60,7 +99,7 @@ public static class CurrencyEndpoint
             var (name, code, symbol, status) = request;
             var result = await mediator.Send(new RegisterCurrency(name, code, symbol, status), cancellationToken);
 
-            return Results.Ok(result);
+            return Results.AcceptedAtRoute("get_currency", result);
         }
         catch (OperationCanceledException ex) when (cancellationToken.IsCancellationRequested)
         {
@@ -80,7 +119,7 @@ public static class CurrencyEndpoint
             var (name, code, symbol) = request;
             var result = await mediator.Send(new ModifyCurrency(id, name, code, symbol), cancellationToken);
 
-            return Results.AcceptedAtRoute("get_currencies", result);
+            return Results.AcceptedAtRoute("get_currency", result);
         }
         catch (OperationCanceledException ex) when (cancellationToken.IsCancellationRequested)
         {

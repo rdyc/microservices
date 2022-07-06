@@ -14,7 +14,9 @@ internal static class EndpointExtension
 
     private static WebApplication UseCurrencyEndpoints(this WebApplication app)
     {
-        app.MapGet("/currencies", CurrencyEndpoint.GetAsync).Produces((int)HttpStatusCode.OK, typeof(IListPaged<CurrencyShortInfo>)).WithName("get_currencies");
+        app.MapGet("/currencies", CurrencyEndpoint.GetAllAsync).Produces((int)HttpStatusCode.OK, typeof(IListPaged<CurrencyShortInfo>));
+        app.MapGet("/currencies/{id}", CurrencyEndpoint.GetDetailAsync).Produces((int)HttpStatusCode.OK, typeof(CurrencyShortInfo)).WithName("get_currency");
+        app.MapGet("/currencies/list", CurrencyEndpoint.GetListAsync).Produces((int)HttpStatusCode.OK, typeof(IListUnpaged<CurrencyShortInfo>));
         app.MapGet("/currencies/{id}/histories", CurrencyEndpoint.GetHistoryAsync).Produces((int)HttpStatusCode.OK, typeof(IListPaged<CurrencyHistory>));
         app.MapPost("/currencies", CurrencyEndpoint.PostAsync).Produces((int)HttpStatusCode.OK, typeof(Guid));
         app.MapPut("/currencies/{id}", CurrencyEndpoint.PutAsync).Produces((int)HttpStatusCode.Accepted, typeof(Guid));

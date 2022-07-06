@@ -40,6 +40,8 @@ internal static class CurrencyExtension
     private static IServiceCollection AddQueryHandlers(this IServiceCollection services) =>
         services
             .AddTransient<IRequestHandler<GetCurrencies, IListPaged<CurrencyShortInfo>>, HandleGetCurrencies>()
+            .AddTransient<IRequestHandler<GetCurrencyList, IListUnpaged<CurrencyShortInfo>>, HandleGetCurrencyList>()
+            .AddTransient<IRequestHandler<GetCurrencyById, CurrencyShortInfo>, HandleGetCurrencyById>()
             .AddTransient<IRequestHandler<GetCurrencyHistory, IListPaged<CurrencyHistory>>, HandleGetCurrencyHistory>();
 
     private static IServiceCollection AddEventHandlers(this IServiceCollection services) =>

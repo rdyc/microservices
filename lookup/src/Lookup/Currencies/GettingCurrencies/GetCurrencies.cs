@@ -12,10 +12,10 @@ internal class HandleGetCurrencies : IRequestHandler<GetCurrencies, IListPaged<C
 {
     private readonly IMongoCollection<CurrencyShortInfo> collection;
 
-    public HandleGetCurrencies(IMongoDatabase mongoDb)
+    public HandleGetCurrencies(IMongoDatabase database)
     {
         var collectionName = MongoHelper.GetCollectionName<CurrencyShortInfo>();
-        collection = mongoDb.GetCollection<CurrencyShortInfo>(collectionName);
+        collection = database.GetCollection<CurrencyShortInfo>(collectionName);
     }
 
     public async Task<IListPaged<CurrencyShortInfo>> Handle(GetCurrencies request, CancellationToken cancellationToken)

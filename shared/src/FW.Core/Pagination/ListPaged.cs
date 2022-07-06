@@ -1,5 +1,25 @@
 namespace FW.Core.Pagination;
 
+public interface IListUnpaged<T>
+    where T : class
+{
+    IEnumerable<T> Items { get; }
+}
+
+public record ListUnpaged<T> : IListUnpaged<T>
+    where T : class
+{
+    private ListUnpaged(IEnumerable<T> items)
+    {
+        Items = items;
+    }
+
+    public static IListUnpaged<T> Create(IEnumerable<T> items) =>
+        new ListUnpaged<T>(items);
+
+    public IEnumerable<T> Items { get; init; } = default!;
+}
+
 public interface IListPaged<T>
     where T : class
 {
