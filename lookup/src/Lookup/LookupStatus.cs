@@ -1,9 +1,9 @@
 using System.Text.Json.Serialization;
 
-namespace Lookup.Currencies;
+namespace Lookup;
 
 [JsonConverter(typeof(JsonStringEnumConverter))]
-public enum CurrencyStatus
+public enum LookupStatus
 {
     Active,
     Inactive,

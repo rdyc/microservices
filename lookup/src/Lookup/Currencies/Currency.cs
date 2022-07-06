@@ -1,7 +1,7 @@
 using FW.Core.Aggregates;
-using Lookup.Currencies.Modifying;
-using Lookup.Currencies.Registering;
-using Lookup.Currencies.Removing;
+using Lookup.Currencies.ModifyingCurrency;
+using Lookup.Currencies.RegisteringCurrency;
+using Lookup.Currencies.RemovingCurrency;
 
 namespace Lookup.Currencies;
 
@@ -10,9 +10,9 @@ public class Currency : Aggregate
     public string Name { get; private set; } = default!;
     public string Code { get; private set; } = default!;
     public string Symbol { get; private set; } = default!;
-    public CurrencyStatus Status { get; private set; } = default!;
+    public LookupStatus Status { get; private set; } = default!;
 
-    public static Currency Register(Guid? id, string name, string code, string symbol, CurrencyStatus status)
+    public static Currency Register(Guid? id, string name, string code, string symbol, LookupStatus status)
     {
         if (id is null)
             throw new ArgumentNullException(nameof(id));
@@ -38,7 +38,7 @@ public class Currency : Aggregate
         }
     }
 
-    private Currency(Guid id, string name, string code, string symbol, CurrencyStatus status)
+    private Currency(Guid id, string name, string code, string symbol, LookupStatus status)
     {
         var evt = CurrencyRegistered.Create(id, name, code, symbol, status);
 
@@ -52,12 +52,12 @@ public class Currency : Aggregate
         Name = evt.Name;
         Code = evt.Code;
         Symbol = evt.Symbol;
-        Status = CurrencyStatus.Active;
+        Status = LookupStatus.Active;
     }
 
     public void Modify(string name, string code, string symbol)
     {
-        if (Status == CurrencyStatus.Removed)
+        if (Status == LookupStatus.Removed)
             throw new InvalidOperationException($"The currency was removed");
 
         var evt = CurrencyModified.Create(Id, name, code, symbol);
@@ -77,7 +77,7 @@ public class Currency : Aggregate
 
     public void Remove()
     {
-        if (Status == CurrencyStatus.Removed)
+        if (Status == LookupStatus.Removed)
             throw new InvalidOperationException($"The currency already removed");
 
         var evt = CurrencyRemoved.Create(Id);
@@ -90,6 +90,6 @@ public class Currency : Aggregate
     {
         Version++;
 
-        Status = CurrencyStatus.Removed;
+        Status = LookupStatus.Removed;
     }
 }

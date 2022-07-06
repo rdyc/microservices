@@ -8,10 +8,12 @@ using MediatR;
 using MediatR.Pipeline;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Lookup.Attributes;
+using Lookup.Histories;
 
 namespace Lookup;
 
-public static class LookupExtension
+public static class LookupService
 {
     public static IServiceCollection AddLookup(this IServiceCollection services, IConfiguration configuration) =>
         services
@@ -23,7 +25,9 @@ public static class LookupExtension
             .AddEventStoreDBSubscriptionToAll(new EventStoreDBSubscriptionToAllOptions
             {
                 SubscriptionId = "lookup-currency",
-                FilterOptions = new(EventTypeFilter.Prefix("Lookup_Currencies_"))
+                FilterOptions = new(EventTypeFilter.Prefix("Lookup_"))
             })
-            .AddCurrency();
+            .AddCurrency()
+            .AddAttribute()
+            .AddHistory();
 }

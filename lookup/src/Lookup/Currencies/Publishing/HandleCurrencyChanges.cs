@@ -2,9 +2,9 @@ using FW.Core.Events;
 
 namespace Lookup.Currencies.Publishing;
 
-public record CurrencyRegistered(Guid Id, string Name, string Code, string Symbol, CurrencyStatus Status) : IExternalEvent
+public record CurrencyRegistered(Guid Id, string Name, string Code, string Symbol, LookupStatus Status) : IExternalEvent
 {
-    public static CurrencyRegistered From(Registering.CurrencyRegistered registered)
+    public static CurrencyRegistered From(RegisteringCurrency.CurrencyRegistered registered)
     {
         var (id, code, name, symbol, status) = registered;
 
@@ -14,7 +14,7 @@ public record CurrencyRegistered(Guid Id, string Name, string Code, string Symbo
 
 public record CurrencyModified(Guid Id, string Name, string Code, string Symbol) : IExternalEvent
 {
-    public static CurrencyModified From(Modifying.CurrencyModified modified)
+    public static CurrencyModified From(ModifyingCurrency.CurrencyModified modified)
     {
         var (id, code, name, symbol) = modified;
 
@@ -24,7 +24,7 @@ public record CurrencyModified(Guid Id, string Name, string Code, string Symbol)
 
 public record CurrencyRemoved(Guid Id) : IExternalEvent
 {
-    public static CurrencyRemoved From(Removing.CurrencyRemoved removed)
+    public static CurrencyRemoved From(RemovingCurrency.CurrencyRemoved removed)
     {
         return new CurrencyRemoved(removed.Id);
     }

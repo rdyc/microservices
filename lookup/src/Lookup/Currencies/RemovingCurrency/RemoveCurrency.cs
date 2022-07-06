@@ -4,7 +4,7 @@ using FW.Core.EventStoreDB.Repository;
 using MediatR;
 using MongoDB.Driver;
 
-namespace Lookup.Currencies.Removing;
+namespace Lookup.Currencies.RemovingCurrency;
 
 public record RemoveCurrency(Guid? Id) : CurrencyCommand(Id, default, default, default, default);
 

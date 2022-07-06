@@ -6,7 +6,7 @@ using MongoDB.Driver;
 
 namespace Lookup.Currencies.GettingCurrencyHistory;
 
-public record GetCurrencyList(CurrencyStatus? Status) : IQuery<IListUnpaged<CurrencyShortInfo>>;
+public record GetCurrencyList(LookupStatus? Status) : IQuery<IListUnpaged<CurrencyShortInfo>>;
 
 internal class HandleGetCurrencyList : IQueryHandler<GetCurrencyList, IListUnpaged<CurrencyShortInfo>>
 {
@@ -20,7 +20,7 @@ internal class HandleGetCurrencyList : IQueryHandler<GetCurrencyList, IListUnpag
 
     public async Task<IListUnpaged<CurrencyShortInfo>> Handle(GetCurrencyList request, CancellationToken cancellationToken)
     {
-        var filter = Builders<CurrencyShortInfo>.Filter.Eq(e => e.Status, request.Status.HasValue ? request.Status : CurrencyStatus.Active);
+        var filter = Builders<CurrencyShortInfo>.Filter.Eq(e => e.Status, request.Status.HasValue ? request.Status : LookupStatus.Active);
 
         var data = await collection.Find(filter).ToListAsync(cancellationToken);
 

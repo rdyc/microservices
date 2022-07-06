@@ -1,28 +1,28 @@
 using FluentValidation;
 using FW.Core.Exceptions;
 using FW.Core.MongoDB;
-using Lookup.Currencies.GettingCurrencies;
+using Lookup.Attributes.GettingAttributes;
 using MongoDB.Driver;
 
-namespace Lookup.Currencies;
+namespace Lookup.Attributes;
 
-public class CurrencyValidator<T> : AbstractValidator<T>
-    where T : CurrencyCommand
+public class AttributeValidator<T> : AbstractValidator<T>
+    where T : AttributeCommand
 {
-    private readonly IMongoCollection<CurrencyShortInfo> collection;
+    private readonly IMongoCollection<AttributeShortInfo> collection;
 
-    public CurrencyValidator(IMongoDatabase database)
+    public AttributeValidator(IMongoDatabase database)
     {
         ClassLevelCascadeMode = CascadeMode.Stop;
-        var collectionName = MongoHelper.GetCollectionName<CurrencyShortInfo>();
-        collection = database.GetCollection<CurrencyShortInfo>(collectionName);
+        var collectionName = MongoHelper.GetCollectionName<AttributeShortInfo>();
+        collection = database.GetCollection<AttributeShortInfo>(collectionName);
     }
 
     protected void ValidateId()
     {
         RuleFor(p => p.Id).NotEmpty();
         Transform(p => p.Id, t => t.Value)
-            .MustExistCurrency(collection);
+            .MustExistAttribute(collection);
     }
 
     protected void ValidateName()
@@ -30,24 +30,19 @@ public class CurrencyValidator<T> : AbstractValidator<T>
         RuleFor(p => p.Name).NotEmpty();;
     }
 
-    protected void ValidateCode(bool isUpdating = false)
+    protected void ValidateUnit(bool isUpdating = false)
     {
-        RuleFor(p => p.Code).NotEmpty().MaximumLength(3)
-            .MustUniqueCurrencyCode(collection, isUpdating);
-    }
-
-    protected void ValidateSymbol()
-    {
-        RuleFor(p => p.Symbol).NotEmpty().MaximumLength(3);
+        RuleFor(p => p.Unit).NotEmpty().MaximumLength(3)
+            .MustUniqueAttributeUnit(collection, isUpdating);
     }
 }
 
 public static class ValidatorExtension
 {
-    public static IRuleBuilderOptions<T, Guid> MustExistCurrency<T>(
+    public static IRuleBuilderOptions<T, Guid> MustExistAttribute<T>(
         this IRuleBuilder<T, Guid> ruleBuilder,
-        IMongoCollection<CurrencyShortInfo> collection)
-        where T : CurrencyCommand
+        IMongoCollection<AttributeShortInfo> collection)
+        where T : AttributeCommand
     {
         return ruleBuilder
             .MustAsync(async (value, cancellationToken) =>
@@ -61,17 +56,17 @@ public static class ValidatorExtension
             });
     }
 
-    public static IRuleBuilderOptions<T, string> MustUniqueCurrencyCode<T>(
+    public static IRuleBuilderOptions<T, string> MustUniqueAttributeUnit<T>(
         this IRuleBuilder<T, string> ruleBuilder,
-        IMongoCollection<CurrencyShortInfo> collection,
+        IMongoCollection<AttributeShortInfo> collection,
         bool isUpdating = false)
-        where T : CurrencyCommand
+        where T : AttributeCommand
     {
         return ruleBuilder
             .MustAsync(async (instance, value, cancellationToken) =>
             {
-                var builder = Builders<CurrencyShortInfo>.Filter;
-                var filter = builder.Eq(e => e.Code, value);
+                var builder = Builders<AttributeShortInfo>.Filter;
+                var filter = builder.Eq(e => e.Unit, value);
 
                 if (isUpdating)
                 {
@@ -80,6 +75,6 @@ public static class ValidatorExtension
 
                 return await collection.CountDocumentsAsync(filter, null, cancellationToken) == 0;
             })
-            .WithMessage("The currency code already used");
+            .WithMessage("The attribute unit already used");
     }
 }

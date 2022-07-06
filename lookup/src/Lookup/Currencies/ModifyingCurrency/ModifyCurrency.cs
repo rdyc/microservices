@@ -4,7 +4,7 @@ using FW.Core.EventStoreDB.Repository;
 using MediatR;
 using MongoDB.Driver;
 
-namespace Lookup.Currencies.Modifying;
+namespace Lookup.Currencies.ModifyingCurrency;
 
 public record ModifyCurrency(Guid? Id, string Name, string Code, string Symbol) : CurrencyCommand(Id, Name, Code, Symbol, default);
 

@@ -4,9 +4,9 @@ using FW.Core.EventStoreDB.Repository;
 using MediatR;
 using MongoDB.Driver;
 
-namespace Lookup.Currencies.Registering;
+namespace Lookup.Currencies.RegisteringCurrency;
 
-public record RegisterCurrency(string Name, string Code, string Symbol, CurrencyStatus Status) : CurrencyCommand(Guid.NewGuid(), Name, Code, Symbol, Status);
+public record RegisterCurrency(Guid? Id, string Name, string Code, string Symbol, LookupStatus Status) : CurrencyCommand(Id, Name, Code, Symbol, Status);
 
 internal class ValidateRegisterCurrency : CurrencyValidator<RegisterCurrency>
 {

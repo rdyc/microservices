@@ -7,15 +7,16 @@ using FW.Core.Queries;
 using FW.Core.Validation;
 using Lookup.Currencies.GettingCurrencies;
 using Lookup.Currencies.GettingCurrencyHistory;
-using Lookup.Currencies.Modifying;
-using Lookup.Currencies.Registering;
-using Lookup.Currencies.Removing;
+using Lookup.Currencies.ModifyingCurrency;
+using Lookup.Currencies.RegisteringCurrency;
+using Lookup.Currencies.RemovingCurrency;
+using Lookup.Histories.GettingHistories;
 using Microsoft.Extensions.DependencyInjection;
 using MongoDB.Driver;
 
 namespace Lookup.Currencies;
 
-internal static class CurrencyExtension
+internal static class CurrencyService
 {
     internal static IServiceCollection AddCurrency(this IServiceCollection services) =>
         services
@@ -42,8 +43,7 @@ internal static class CurrencyExtension
         services
             .AddQueryHandler<GetCurrencies, IListPaged<CurrencyShortInfo>, HandleGetCurrencies>()
             .AddQueryHandler<GetCurrencyList, IListUnpaged<CurrencyShortInfo>, HandleGetCurrencyList>()
-            .AddQueryHandler<GetCurrencyById, CurrencyShortInfo, HandleGetCurrencyById>()
-            .AddQueryHandler<GetCurrencyHistory, IListPaged<CurrencyHistory>, HandleGetCurrencyHistory>();
+            .AddQueryHandler<GetCurrencyById, CurrencyShortInfo, HandleGetCurrencyById>();
 
     private static IServiceCollection AddEventHandlers(this IServiceCollection services) =>
         services
@@ -75,7 +75,7 @@ internal static class CurrencyExtension
                             .Set(e => e.LastProcessedPosition, view.LastProcessedPosition)
                     )
             )
-            .Projection<CurrencyHistory>(builder =>
+            .Projection<History>(builder =>
                 builder
                     .AddOn<CurrencyRegistered>(CurrencyHistoryProjection.Handle)
                     .AddOn<CurrencyModified>(CurrencyHistoryProjection.Handle)

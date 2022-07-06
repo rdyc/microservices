@@ -1,9 +1,8 @@
-using Lookup.Currencies;
 using Lookup.Currencies.GettingCurrencies;
 using Lookup.Currencies.GettingCurrencyHistory;
-using Lookup.Currencies.Modifying;
-using Lookup.Currencies.Registering;
-using Lookup.Currencies.Removing;
+using Lookup.Currencies.ModifyingCurrency;
+using Lookup.Currencies.RegisteringCurrency;
+using Lookup.Currencies.RemovingCurrency;
 using Lookup.WebApi.Requests;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
@@ -52,32 +51,13 @@ public static class CurrencyEndpoint
     }
 
     [SwaggerOperation(Summary = "Retrieve currency list", OperationId = "get_list", Tags = new[] { "Currency" })]
-    internal static async Task<IResult> GetListAsync(CurrencyStatus? status, IMediator mediator, ILoggerFactory logger, CancellationToken cancellationToken)
+    internal static async Task<IResult> GetListAsync(LookupStatus? status, IMediator mediator, ILoggerFactory logger, CancellationToken cancellationToken)
     {
         var log = logger.CreateLogger<Program>();
 
         try
         {
             var result = await mediator.Send(new GetCurrencyList(status), cancellationToken);
-
-            return Results.Ok(result);
-        }
-        catch (OperationCanceledException ex) when (cancellationToken.IsCancellationRequested)
-        {
-            log.LogWarning(ex.Message);
-        }
-
-        return Results.NoContent();
-    }
-
-    [SwaggerOperation(Summary = "Retrieve currency histories", OperationId = "get_history", Tags = new[] { "Currency" })]
-    internal static async Task<IResult> GetHistoryAsync(Guid id, int index, int size, IMediator mediator, ILoggerFactory logger, CancellationToken cancellationToken)
-    {
-        var log = logger.CreateLogger<Program>();
-
-        try
-        {
-            var result = await mediator.Send(new GetCurrencyHistory(id, index, size), cancellationToken);
 
             return Results.Ok(result);
         }
@@ -96,10 +76,12 @@ public static class CurrencyEndpoint
 
         try
         {
+            var id = Guid.NewGuid();
             var (name, code, symbol, status) = request;
-            var result = await mediator.Send(new RegisterCurrency(name, code, symbol, status), cancellationToken);
 
-            return Results.AcceptedAtRoute("get_currency", result);
+            await mediator.Send(new RegisterCurrency(id, name, code, symbol, status), cancellationToken);
+
+            return Results.Created(string.Empty, id);
         }
         catch (OperationCanceledException ex) when (cancellationToken.IsCancellationRequested)
         {
@@ -117,9 +99,10 @@ public static class CurrencyEndpoint
         try
         {
             var (name, code, symbol) = request;
-            var result = await mediator.Send(new ModifyCurrency(id, name, code, symbol), cancellationToken);
 
-            return Results.AcceptedAtRoute("get_currency", result);
+            await mediator.Send(new ModifyCurrency(id, name, code, symbol), cancellationToken);
+
+            return Results.Accepted(string.Empty, id);
         }
         catch (OperationCanceledException ex) when (cancellationToken.IsCancellationRequested)
         {

@@ -1,4 +1,4 @@
-namespace Lookup.Currencies.Removing;
+namespace Lookup.Currencies.RemovingCurrency;
 
 public record CurrencyRemoved(Guid Id)
 {
