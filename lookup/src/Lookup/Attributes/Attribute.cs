@@ -1,7 +1,7 @@
 using FW.Core.Aggregates;
-using Lookup.Attributes.Modifying;
-using Lookup.Attributes.Registering;
-using Lookup.Attributes.Removing;
+using Lookup.Attributes.ModifyingAttribute;
+using Lookup.Attributes.RegisteringAttribute;
+using Lookup.Attributes.RemovingAttribute;
 
 namespace Lookup.Attributes;
 

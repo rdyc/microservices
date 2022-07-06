@@ -1,4 +1,4 @@
-namespace Lookup.Attributes.Removing;
+namespace Lookup.Attributes.RemovingAttribute;
 
 public record AttributeRemoved(Guid Id)
 {

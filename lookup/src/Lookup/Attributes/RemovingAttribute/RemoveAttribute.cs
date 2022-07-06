@@ -4,7 +4,7 @@ using FW.Core.EventStoreDB.Repository;
 using MediatR;
 using MongoDB.Driver;
 
-namespace Lookup.Attributes.Removing;
+namespace Lookup.Attributes.RemovingAttribute;
 
 public record RemoveAttribute(Guid? Id) : AttributeCommand(Id, default, default, default, default);
 

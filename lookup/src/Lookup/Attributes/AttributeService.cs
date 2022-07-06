@@ -1,17 +1,17 @@
 using FW.Core.Commands;
+using FW.Core.Events;
 using FW.Core.EventStoreDB.Repository;
 using FW.Core.MongoDB.Projections;
 using FW.Core.Pagination;
 using FW.Core.Queries;
 using FW.Core.Validation;
-using Lookup.Attributes.GettingAttributes;
 using Lookup.Attributes.GettingAttributeHistory;
-using Lookup.Attributes.Modifying;
-using Lookup.Attributes.Registering;
-using Lookup.Attributes.Removing;
+using Lookup.Attributes.GettingAttributes;
+using Lookup.Attributes.ModifyingAttribute;
+using Lookup.Attributes.RegisteringAttribute;
+using Lookup.Attributes.RemovingAttribute;
 using Microsoft.Extensions.DependencyInjection;
 using MongoDB.Driver;
-using Lookup.Histories.GettingHistories;
 
 namespace Lookup.Attributes;
 
@@ -43,34 +43,33 @@ internal static class AttributeService
             .AddQueryHandler<GetAttributeList, IListUnpaged<AttributeShortInfo>, HandleGetAttributeList>()
             .AddQueryHandler<GetAttributeById, AttributeShortInfo, HandleGetAttributeById>();
 
-    private static IServiceCollection AddProjections(this IServiceCollection services) =>
+    private static IServiceCollection AddEventHandlers(this IServiceCollection services) =>
         services
-            .Projection<AttributeShortInfo>(builder =>
-                builder
-                    .AddOn<AttributeRegistered>(AttributeShortInfoProjection.Handle)
-                    .UpdateOn<AttributeModified>(
-                        onGet: e => e.Id,
-                        onHandle: AttributeShortInfoProjection.Handle,
-                        onUpdate: (view) => Builders<AttributeShortInfo>.Update
-                            .Set(e => e.Name, view.Name)
-                            .Set(e => e.Type, view.Type)
-                            .Set(e => e.Unit, view.Unit)
-                            .Set(e => e.Version, view.Version)
-                            .Set(e => e.LastProcessedPosition, view.LastProcessedPosition)
-                    )
-                    .UpdateOn<AttributeRemoved>(
-                        onGet: e => e.Id,
-                        onHandle: AttributeShortInfoProjection.Handle,
-                        onUpdate: (view) => Builders<AttributeShortInfo>.Update
-                            .Set(e => e.Status, view.Status)
-                            .Set(e => e.Version, view.Version)
-                            .Set(e => e.LastProcessedPosition, view.LastProcessedPosition)
-                    )
-            )
-            .Projection<History>(builder =>
-                builder
-                    .AddOn<AttributeRegistered>(AttributeHistoryProjection.Handle)
-                    .AddOn<AttributeModified>(AttributeHistoryProjection.Handle)
-                    .AddOn<AttributeRemoved>(AttributeHistoryProjection.Handle)
-            );
+            .AddEventHandler<EventEnvelope<AttributeRegistered>, HandleAttributeChanged>()
+            .AddEventHandler<EventEnvelope<AttributeModified>, HandleAttributeChanged>()
+            .AddEventHandler<EventEnvelope<AttributeRemoved>, HandleAttributeChanged>();
+
+    private static IServiceCollection AddProjections(this IServiceCollection services) =>
+        services.Projection<AttributeShortInfo>(builder =>
+            builder
+                .AddOn<AttributeRegistered>(AttributeShortInfoProjection.Handle)
+                .UpdateOn<AttributeModified>(
+                    onGet: e => e.Id,
+                    onHandle: AttributeShortInfoProjection.Handle,
+                    onUpdate: (view) => Builders<AttributeShortInfo>.Update
+                        .Set(e => e.Name, view.Name)
+                        .Set(e => e.Type, view.Type)
+                        .Set(e => e.Unit, view.Unit)
+                        .Set(e => e.Version, view.Version)
+                        .Set(e => e.LastProcessedPosition, view.LastProcessedPosition)
+                )
+                .UpdateOn<AttributeRemoved>(
+                    onGet: e => e.Id,
+                    onHandle: AttributeShortInfoProjection.Handle,
+                    onUpdate: (view) => Builders<AttributeShortInfo>.Update
+                        .Set(e => e.Status, view.Status)
+                        .Set(e => e.Version, view.Version)
+                        .Set(e => e.LastProcessedPosition, view.LastProcessedPosition)
+                )
+        );
 }

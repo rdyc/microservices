@@ -1,8 +1,8 @@
 using Lookup.Attributes.GettingAttributeHistory;
 using Lookup.Attributes.GettingAttributes;
-using Lookup.Attributes.Modifying;
-using Lookup.Attributes.Registering;
-using Lookup.Attributes.Removing;
+using Lookup.Attributes.ModifyingAttribute;
+using Lookup.Attributes.RegisteringAttribute;
+using Lookup.Attributes.RemovingAttribute;
 using Lookup.WebApi.Requests;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;

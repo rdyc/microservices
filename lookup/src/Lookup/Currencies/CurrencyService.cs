@@ -10,7 +10,6 @@ using Lookup.Currencies.GettingCurrencyHistory;
 using Lookup.Currencies.ModifyingCurrency;
 using Lookup.Currencies.RegisteringCurrency;
 using Lookup.Currencies.RemovingCurrency;
-using Lookup.Histories.GettingHistories;
 using Microsoft.Extensions.DependencyInjection;
 using MongoDB.Driver;
 
@@ -47,38 +46,31 @@ internal static class CurrencyService
 
     private static IServiceCollection AddEventHandlers(this IServiceCollection services) =>
         services
-            .AddEventHandler<EventEnvelope<Publishing.CurrencyRegistered>, Publishing.HandleCurrencyChanges>()
-            .AddEventHandler<EventEnvelope<Publishing.CurrencyModified>, Publishing.HandleCurrencyChanges>()
-            .AddEventHandler<EventEnvelope<Publishing.CurrencyRemoved>, Publishing.HandleCurrencyChanges>();
+            .AddEventHandler<EventEnvelope<CurrencyRegistered>, HandleCurrencyChanged>()
+            .AddEventHandler<EventEnvelope<CurrencyModified>, HandleCurrencyChanged>()
+            .AddEventHandler<EventEnvelope<CurrencyRemoved>, HandleCurrencyChanged>();
 
     private static IServiceCollection AddProjections(this IServiceCollection services) =>
-        services
-            .Projection<CurrencyShortInfo>(builder =>
-                builder
-                    .AddOn<CurrencyRegistered>(CurrencyShortInfoProjection.Handle)
-                    .UpdateOn<CurrencyModified>(
-                        onGet: e => e.Id,
-                        onHandle: CurrencyShortInfoProjection.Handle,
-                        onUpdate: (view) => Builders<CurrencyShortInfo>.Update
-                            .Set(e => e.Name, view.Name)
-                            .Set(e => e.Code, view.Code)
-                            .Set(e => e.Symbol, view.Symbol)
-                            .Set(e => e.Version, view.Version)
-                            .Set(e => e.LastProcessedPosition, view.LastProcessedPosition)
-                    )
-                    .UpdateOn<CurrencyRemoved>(
-                        onGet: e => e.Id,
-                        onHandle: CurrencyShortInfoProjection.Handle,
-                        onUpdate: (view) => Builders<CurrencyShortInfo>.Update
-                            .Set(e => e.Status, view.Status)
-                            .Set(e => e.Version, view.Version)
-                            .Set(e => e.LastProcessedPosition, view.LastProcessedPosition)
-                    )
-            )
-            .Projection<History>(builder =>
-                builder
-                    .AddOn<CurrencyRegistered>(CurrencyHistoryProjection.Handle)
-                    .AddOn<CurrencyModified>(CurrencyHistoryProjection.Handle)
-                    .AddOn<CurrencyRemoved>(CurrencyHistoryProjection.Handle)
-            );
+        services.Projection<CurrencyShortInfo>(builder =>
+            builder
+                .AddOn<CurrencyRegistered>(CurrencyShortInfoProjection.Handle)
+                .UpdateOn<CurrencyModified>(
+                    onGet: e => e.Id,
+                    onHandle: CurrencyShortInfoProjection.Handle,
+                    onUpdate: (view) => Builders<CurrencyShortInfo>.Update
+                        .Set(e => e.Name, view.Name)
+                        .Set(e => e.Code, view.Code)
+                        .Set(e => e.Symbol, view.Symbol)
+                        .Set(e => e.Version, view.Version)
+                        .Set(e => e.LastProcessedPosition, view.LastProcessedPosition)
+                )
+                .UpdateOn<CurrencyRemoved>(
+                    onGet: e => e.Id,
+                    onHandle: CurrencyShortInfoProjection.Handle,
+                    onUpdate: (view) => Builders<CurrencyShortInfo>.Update
+                        .Set(e => e.Status, view.Status)
+                        .Set(e => e.Version, view.Version)
+                        .Set(e => e.LastProcessedPosition, view.LastProcessedPosition)
+                )
+        );
 }

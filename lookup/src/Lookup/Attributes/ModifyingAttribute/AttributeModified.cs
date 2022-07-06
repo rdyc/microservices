@@ -1,4 +1,4 @@
-namespace Lookup.Attributes.Modifying;
+namespace Lookup.Attributes.ModifyingAttribute;
 
 public record AttributeModified(Guid Id, string Name, AttributeType Type, string Unit)
 {

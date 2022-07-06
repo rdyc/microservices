@@ -4,7 +4,7 @@ using FW.Core.EventStoreDB.Repository;
 using MediatR;
 using MongoDB.Driver;
 
-namespace Lookup.Attributes.Registering;
+namespace Lookup.Attributes.RegisteringAttribute;
 
 public record RegisterAttribute(Guid? Id, string Name, AttributeType Type, string Unit, LookupStatus Status) : AttributeCommand(Id, Name, Type, Unit, Status);
 

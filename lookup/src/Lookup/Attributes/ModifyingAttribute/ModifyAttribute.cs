@@ -4,7 +4,7 @@ using FW.Core.EventStoreDB.Repository;
 using MediatR;
 using MongoDB.Driver;
 
-namespace Lookup.Attributes.Modifying;
+namespace Lookup.Attributes.ModifyingAttribute;
 
 public record ModifyAttribute(Guid? Id, string Name, AttributeType Type, string Unit) : AttributeCommand(Id, Name, Type, Unit, default);
 
