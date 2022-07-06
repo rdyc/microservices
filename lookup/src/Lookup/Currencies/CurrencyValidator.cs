@@ -50,7 +50,7 @@ public static class ValidatorExtension
         return ruleBuilder
             .MustAsync(async (value, cancellationToken) =>
             {
-                var count = await collection.CountDocumentsAsync(e => e.Id == value, null, cancellationToken);
+                var count = await collection.CountDocumentsAsync(e => e.Id == value && e.Status != CurrencyStatus.Removed, null, cancellationToken);
 
                 if (count == 0)
                     throw AggregateNotFoundException.For<T>(value);

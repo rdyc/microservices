@@ -4,6 +4,7 @@ using FW.Core.EventStoreDB.Repository;
 using FW.Core.MongoDB.Projections;
 using FW.Core.Pagination;
 using Lookup.Currencies.GettingCurrencies;
+using Lookup.Currencies.GettingCurrencyHistory;
 using Lookup.Currencies.Modifying;
 using Lookup.Currencies.Registering;
 using Lookup.Currencies.Removing;
@@ -38,7 +39,8 @@ internal static class CurrencyExtension
 
     private static IServiceCollection AddQueryHandlers(this IServiceCollection services) =>
         services
-            .AddTransient<IRequestHandler<GetCurrencies, IListPaged<CurrencyShortInfo>>, HandleGetCurrencies>();
+            .AddTransient<IRequestHandler<GetCurrencies, IListPaged<CurrencyShortInfo>>, HandleGetCurrencies>()
+            .AddTransient<IRequestHandler<GetCurrencyHistory, IListPaged<CurrencyHistory>>, HandleGetCurrencyHistory>();
 
     private static IServiceCollection AddEventHandlers(this IServiceCollection services) =>
         services
@@ -61,5 +63,19 @@ internal static class CurrencyExtension
                             .Set(e => e.Version, view.Version)
                             .Set(e => e.LastProcessedPosition, view.LastProcessedPosition)
                     )
+                    .UpdateOn<CurrencyRemoved>(
+                        onGet: e => e.Id,
+                        onHandle: CurrencyShortInfoProjection.Handle,
+                        onUpdate: (view) => Builders<CurrencyShortInfo>.Update
+                            .Set(e => e.Status, view.Status)
+                            .Set(e => e.Version, view.Version)
+                            .Set(e => e.LastProcessedPosition, view.LastProcessedPosition)
+                    )
+            )
+            .Projection<CurrencyHistory>(builder =>
+                builder
+                    .AddOn<CurrencyRegistered>(CurrencyHistoryProjection.Handle)
+                    .AddOn<CurrencyModified>(CurrencyHistoryProjection.Handle)
+                    .AddOn<CurrencyRemoved>(CurrencyHistoryProjection.Handle)
             );
 }

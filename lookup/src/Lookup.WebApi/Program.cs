@@ -68,7 +68,10 @@ if (app.Environment.IsDevelopment())
         });
 }
 
-app.UseExceptionHandlingMiddleware(exception => exception switch
+app.UseResponseTimeMiddleware()
+    .UseCorrelationIdMiddleware()
+    .UseOptimisticConcurrencyMiddleware()
+    .UseExceptionHandlingMiddleware(exception => exception switch
     {
         AggregateNotFoundException _ =>
             new HttpStatusCodeInfo(HttpStatusCode.NotFound, exception.Message),
@@ -80,10 +83,7 @@ app.UseExceptionHandlingMiddleware(exception => exception switch
                 validationException.Errors.ToDictionary()),
         _ =>
             new HttpStatusCodeInfo(HttpStatusCode.InternalServerError, exception.Message)
-    })
-    .UseCorrelationIdMiddleware()
-    .UseOptimisticConcurrencyMiddleware()
-    .UseResponseTimeMiddleware();
+    });
 
 app.UseLookupEndpoints();
 

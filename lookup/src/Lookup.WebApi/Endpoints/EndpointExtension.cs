@@ -1,6 +1,7 @@
 using System.Net;
 using FW.Core.Pagination;
 using Lookup.Currencies.GettingCurrencies;
+using Lookup.Currencies.GettingCurrencyHistory;
 
 namespace Lookup.WebApi.Endpoints;
 
@@ -14,6 +15,7 @@ internal static class EndpointExtension
     private static WebApplication UseCurrencyEndpoints(this WebApplication app)
     {
         app.MapGet("/currencies", CurrencyEndpoint.GetAsync).Produces((int)HttpStatusCode.OK, typeof(IListPaged<CurrencyShortInfo>)).WithName("get_currencies");
+        app.MapGet("/currencies/{id}/histories", CurrencyEndpoint.GetHistoryAsync).Produces((int)HttpStatusCode.OK, typeof(IListPaged<CurrencyHistory>));
         app.MapPost("/currencies", CurrencyEndpoint.PostAsync).Produces((int)HttpStatusCode.OK, typeof(Guid));
         app.MapPut("/currencies/{id}", CurrencyEndpoint.PutAsync).Produces((int)HttpStatusCode.Accepted, typeof(Guid));
         app.MapDelete("/currencies/{id}", CurrencyEndpoint.DeleteAsync).Produces((int)HttpStatusCode.NoContent);
