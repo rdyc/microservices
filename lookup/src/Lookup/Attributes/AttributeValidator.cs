@@ -32,7 +32,7 @@ public class AttributeValidator<T> : AbstractValidator<T>
 
     protected void ValidateUnit(bool isUpdating = false)
     {
-        RuleFor(p => p.Unit).NotEmpty().MaximumLength(3)
+        RuleFor(p => p.Unit).NotEmpty().MaximumLength(5)
             .MustUniqueAttributeUnit(collection, isUpdating);
     }
 }

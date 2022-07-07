@@ -22,6 +22,7 @@ internal static class AttributeService
             .AddScoped<IEventStoreDBRepository<Attribute>, EventStoreDBRepository<Attribute>>()
             .AddCommandValidators()
             .AddCommandHandlers()
+            .AddEventHandlers()
             .AddProjections()
             .AddQueryHandlers();
 

@@ -1,4 +1,5 @@
 using FW.Core;
+using FW.Core.Kafka;
 using Validator;
 
 IHost host = Host.CreateDefaultBuilder(args)
@@ -7,7 +8,7 @@ IHost host = Host.CreateDefaultBuilder(args)
         IConfiguration configuration = hostContext.Configuration;
 
         services
-            // .AddKafkaConsumer()
+            .AddKafkaConsumer()
             .AddCoreServices()
             .AddValidator(configuration);
     })
