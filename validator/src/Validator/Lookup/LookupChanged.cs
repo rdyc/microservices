@@ -1,5 +1,6 @@
 using FW.Core.Commands;
 using FW.Core.Events;
+using Newtonsoft.Json.Linq;
 using Validator.Lookup.Attributes;
 using Validator.Lookup.Currencies;
 
@@ -44,18 +45,26 @@ internal class HandleLookupChanged : IEventHandler<EventEnvelope<LookupChanged>>
     public Task Handle(EventEnvelope<LookupChanged> @event, CancellationToken cancellationToken)
     {
         var (data, _) = @event;
+        var jObject = (JObject)data.Data;
+
+        if (jObject == null)
+            throw new InvalidOperationException("An event object should not null");
 
         return (data.Context, data.State) switch
         {
-            // Todo object data cast did not work!
-            (Context.Attribute, State.Added) => Dispatch((AttributeRegistered)data.Data),
-            (Context.Attribute, State.Updated) => Dispatch((AttributeModified)data.Data),
-            (Context.Attribute, State.Deleted) => Dispatch((AttributeRemoved)data.Data),
-            (Context.Currency, State.Added) => Dispatch((CurrencyRegistered)data.Data),
-            (Context.Currency, State.Updated) => Dispatch((CurrencyModified)data.Data),
-            (Context.Currency, State.Deleted) => Dispatch((CurrencyRemoved)data.Data),
+            (Context.Attribute, State.Added) => Dispatch(ToEvent<AttributeRegistered>(jObject)),
+            (Context.Attribute, State.Updated) => Dispatch(ToEvent<AttributeModified>(jObject)),
+            (Context.Attribute, State.Deleted) => Dispatch(ToEvent<AttributeRemoved>(jObject)),
+            (Context.Currency, State.Added) => Dispatch(ToEvent<CurrencyRegistered>(jObject)),
+            (Context.Currency, State.Updated) => Dispatch(ToEvent<CurrencyModified>(jObject)),
+            (Context.Currency, State.Deleted) => Dispatch(ToEvent<CurrencyRemoved>(jObject)),
             (_, _) => throw new InvalidOperationException($"Unmathced event handler conditions for context {data.Context} and state {data.State}.")
         };
+    }
+
+    private static T ToEvent<T>(JObject jObject)
+    {
+        return jObject.ToObject<T>() ?? throw new InvalidCastException($"Nullable object result for {typeof(T)}");
     }
 
     private async Task Dispatch(AttributeRegistered @event)

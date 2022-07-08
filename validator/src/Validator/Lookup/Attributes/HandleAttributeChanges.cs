@@ -69,7 +69,7 @@ internal class HandleAttributeChanges :
             .Set(e => e.Type, type)
             .Set(e => e.Unit, unit);
 
-        await collection.UpdateOneAsync(e => e.Id == id, update, default, cancellationToken);
+        await collection.UpdateOneAsync(e => e.Id == id, update, new UpdateOptions { IsUpsert = true }, cancellationToken);
 
         return Unit.Value;
     }

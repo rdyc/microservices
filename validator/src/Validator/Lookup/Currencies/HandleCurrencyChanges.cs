@@ -62,7 +62,7 @@ internal class HandleCurrencyChanges :
             .Set(e => e.Code, code)
             .Set(e => e.Symbol, symbol);
 
-        await collection.UpdateOneAsync(e => e.Id == id, update, default, cancellationToken);
+        await collection.UpdateOneAsync(e => e.Id == id, update, new UpdateOptions { IsUpsert = true }, cancellationToken);
 
         return Unit.Value;
     }
