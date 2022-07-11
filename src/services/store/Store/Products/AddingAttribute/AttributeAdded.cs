@@ -1,10 +1,10 @@
 namespace Store.Products.AddingAttribute;
 
 public record AttributeAdded(
-    Guid Id,
-    ProductAttribute ProductAttribute
+    Guid AttributeId,
+    string Value
 )
 {
-    public static AttributeAdded Create(Guid id, ProductAttribute productAttribute)
-        => new(id, productAttribute);
+    public static AttributeAdded Create(Guid attributeId, string value)
+        => new(attributeId, value);
 }

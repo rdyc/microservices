@@ -7,18 +7,22 @@ namespace Store.Products.AddingAttribute;
 
 public record AddAttribute(
     Guid ProductId, 
-    ProductAttribute ProductAttribute
+    Guid AttributeId,
+    string Value
 ) : ICommand
 {
-    public static AddAttribute Create(Guid productId, ProductAttribute productAttribute)
+    public static AddAttribute Create(Guid productId, Guid attributeId, string value)
     {
         if (productId == Guid.Empty)
-            throw new ArgumentOutOfRangeException(nameof(productId));
+            throw new ArgumentNullException(nameof(productId));
 
-        if (productAttribute is null)
-            throw new ArgumentNullException(nameof(productAttribute));
+        if (attributeId == Guid.Empty)
+            throw new ArgumentNullException(nameof(attributeId));
 
-        return new (productId, productAttribute);
+        if (string.IsNullOrEmpty(value))
+            throw new ArgumentNullException(nameof(value));
+
+        return new (productId, attributeId, value);
     }
 }
 
@@ -35,12 +39,12 @@ internal class HandleAddAttribute : ICommandHandler<AddAttribute>
 
     public async Task<Unit> Handle(AddAttribute request, CancellationToken cancellationToken)
     {
-        var (id, productAttribute) = request;
+        var (productId, attributeId, value) = request;
 
         await scope.Do((expectedVersion, eventMetadata) =>
             repository.GetAndUpdate(
-                id,
-                (product) => product.AddAttribute(productAttribute),
+                productId,
+                (product) => product.AddAttribute(attributeId, value),
                 expectedVersion,
                 eventMetadata,
                 cancellationToken

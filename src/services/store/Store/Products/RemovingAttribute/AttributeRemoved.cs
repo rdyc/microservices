@@ -1,10 +1,9 @@
 namespace Store.Products.RemovingAttribute;
 
 public record AttributeRemoved(
-    Guid Id,
-    ProductAttribute ProductAttribute
+    Guid AttributeId
 )
 {
-    public static AttributeRemoved Create(Guid id, ProductAttribute productAttribute)
-        => new(id, productAttribute);
+    public static AttributeRemoved Create(Guid attributeId)
+        => new(attributeId);
 }

@@ -16,7 +16,7 @@ public class Product : Aggregate
     public string SKU { get; private set; } = default!;
     public string Name { get; private set; } = default!;
     public string Description { get; private set; } = default!;
-    public IList<ProductAttribute> ProductAttributes { get; private set; } = default!;
+    public IList<ProductAttribute> Attributes { get; private set; } = default!;
     public Currency Currency { get; private set; } = default!;
     public decimal Price { get; private set; } = default!;
     public int Stock { get; private set; } = default!;
@@ -80,7 +80,7 @@ public class Product : Aggregate
         if (Status == ProductStatus.Discontinue)
             throw new InvalidOperationException($"The product was discontinued");
 
-        var evt = ProductModified.Create(Id, sku, name, description);
+        var evt = ProductModified.Create(sku, name, description);
 
         Enqueue(evt);
         Apply(evt);
@@ -95,12 +95,12 @@ public class Product : Aggregate
         Description = evt.Description;
     }
 
-    public void AddAttribute(ProductAttribute productAttribute)
+    public void AddAttribute(Guid attributeId, string value)
     {
         if (Status == ProductStatus.Discontinue)
             throw new InvalidOperationException($"Adding attribute for the product in '{Status}' status is not allowed.");
 
-        var @event = AttributeAdded.Create(Id, productAttribute);
+        var @event = AttributeAdded.Create(attributeId, value);
 
         Enqueue(@event);
         Apply(@event);
@@ -108,33 +108,33 @@ public class Product : Aggregate
 
     public void Apply(AttributeAdded @event)
     {
-        var newProductAttribute = @event.ProductAttribute;
+        var (attributeId, value) = @event;
+        var newAttribute = ProductAttribute.From(attributeId, value) ;
+        var existingAttribute = FindAttributeMatchingWith(newAttribute);
 
-        var existingProductAttribute = FindAttributeMatchingWith(newProductAttribute);
-
-        if (existingProductAttribute is null)
+        if (existingAttribute is null)
         {
-            ProductAttributes.Add(newProductAttribute);
+            Attributes.Add(newAttribute);
             return;
         }
 
-        ProductAttributes.Replace(
-            existingProductAttribute,
-            existingProductAttribute.MergeWith(newProductAttribute)
+        Attributes.Replace(
+            existingAttribute,
+            existingAttribute.MergeWith(newAttribute)
         );
     }
 
-    public void RemoveAttribute(ProductAttribute productAttribute)
+    public void RemoveAttribute(Guid attributeId)
     {
         if (Status == ProductStatus.Discontinue)
             throw new InvalidOperationException($"Adding attribute for the product in '{Status}' status is not allowed.");
 
-        var existingProductAttribute = FindAttributeMatchingWith(productAttribute);
+        var existingAttribute = FindAttributeMatchingWith(attributeId);
 
-        if (existingProductAttribute is null)
-            throw new InvalidOperationException($"Product attribute with id `{productAttribute.AttributeId}` was not found in cart.");
+        if (existingAttribute is null)
+            throw new InvalidOperationException($"An attribute with id `{attributeId}` was not found in product.");
 
-        var @event = AttributeRemoved.Create(Id, productAttribute);
+        var @event = AttributeRemoved.Create(attributeId);
 
         Enqueue(@event);
         Apply(@event);
@@ -142,23 +142,15 @@ public class Product : Aggregate
 
     public void Apply(AttributeRemoved @event)
     {
-        var productAttributeToBeRemoved = @event.ProductAttribute;
+        var existingAttribute = FindAttributeMatchingWith(@event.AttributeId);
 
-        var existingProductAttribute = FindAttributeMatchingWith(productAttributeToBeRemoved);
-
-        if (existingProductAttribute == null)
+        if (existingAttribute == null)
             return;
 
-        if (existingProductAttribute.HasTheSameValue(productAttributeToBeRemoved))
+        if (existingAttribute.HasTheSameValue(existingAttribute))
         {
-            ProductAttributes.Remove(existingProductAttribute);
-            return;
+            Attributes.Remove(existingAttribute);
         }
-
-        ProductAttributes.Replace(
-            existingProductAttribute,
-            existingProductAttribute.Subtract(productAttributeToBeRemoved)
-        );
     }
 
     public void UpdatePrice(Currency currency, decimal price)
@@ -166,7 +158,7 @@ public class Product : Aggregate
         if (Status == ProductStatus.Discontinue)
             throw new InvalidOperationException($"The product has discontinued");
 
-        var evt = PriceChanged.Create(Id, currency, price);
+        var evt = PriceChanged.Create(currency, price);
 
         Enqueue(evt);
         Apply(evt);
@@ -175,7 +167,7 @@ public class Product : Aggregate
     public void Apply(PriceChanged evt)
     {
         if (Status == ProductStatus.Discontinue)
-            throw new InvalidOperationException($"The product has discountinued");
+            throw new InvalidOperationException($"The product has discontinued");
 
         Version++;
 
@@ -188,7 +180,7 @@ public class Product : Aggregate
         if (Status == ProductStatus.Discontinue)
             throw new InvalidOperationException($"The product has discontinued");
 
-        var evt = StockChanged.Create(Id, stock);
+        var evt = StockChanged.Create(stock);
 
         Enqueue(evt);
         Apply(evt);
@@ -197,7 +189,7 @@ public class Product : Aggregate
     public void Apply(StockChanged evt)
     {
         if (Status == ProductStatus.Discontinue)
-            throw new InvalidOperationException($"The product has discountinued");
+            throw new InvalidOperationException($"The product has discontinued");
 
         Version++;
 
@@ -222,8 +214,13 @@ public class Product : Aggregate
         Status = ProductStatus.Discontinue;
     }
 
+    private ProductAttribute? FindAttributeMatchingWith(Guid attributeId)
+    {
+        return Attributes.SingleOrDefault(e => e.MatchesAttribute(attributeId));
+    }
+
     private ProductAttribute? FindAttributeMatchingWith(ProductAttribute productAttribute)
     {
-        return ProductAttributes.SingleOrDefault(e => e.MatchesAttribute(productAttribute));
+        return Attributes.SingleOrDefault(e => e.MatchesAttributeAndValue(productAttribute));
     }
 }

@@ -1,54 +1,43 @@
-using Attribute = Store.Attributes.Attribute;
-
 namespace Store.Products;
 
-public class ProductAttribute
+public record ProductAttribute
 {
-    public Guid AttributeId => Attribute.Id;
-    public Attribute Attribute { get; private set; } = default!;
-    public string Value { get; private set; } = default!;
+    public Guid AttributeId { get; }
+    public string Value { get; }
 
-    public ProductAttribute(Attribute attribute, string value)
+    public ProductAttribute(Guid attributeId, string value)
     {
-        Attribute = attribute;
+        AttributeId = attributeId;
         Value = value;
     }
 
-    public static ProductAttribute From(Guid? attributeId, Attribute attribute, string value)
+    public static ProductAttribute From(Guid? attributeId, string value)
     {
         if (!attributeId.HasValue)
             throw new ArgumentNullException(nameof(attributeId));
 
-        if (attribute is null)
-            throw new ArgumentNullException(nameof(attribute));
+        if (string.IsNullOrEmpty(value))
+            throw new ArgumentNullException(nameof(value));
 
-        return value switch
-        {
-            null => throw new ArgumentNullException(nameof(value)),
-            // <= 0 => throw new ArgumentOutOfRangeException(nameof(value), "Value has to be a positive number"),
-            _ => new ProductAttribute(attribute, value)
-        };
+        return new ProductAttribute(attributeId.Value, value);
     }
 
-    public bool MatchesAttribute(ProductAttribute productAttribute)
+    public bool MatchesAttribute(Guid attributeId)
     {
-        return AttributeId == productAttribute.AttributeId;
+        return AttributeId == attributeId;
+    }
+
+    public bool MatchesAttributeAndValue(ProductAttribute productAttribute)
+    {
+        return AttributeId == productAttribute.AttributeId && Value == productAttribute.Value;
     }
 
     public ProductAttribute MergeWith(ProductAttribute productAttribute)
     {
-        if (!MatchesAttribute(productAttribute))
+        if (!MatchesAttributeAndValue(productAttribute))
             throw new ArgumentException("Product attribute does not match.");
 
-        return From(AttributeId, productAttribute.Attribute, productAttribute.Value);
-    }
-
-    public ProductAttribute Subtract(ProductAttribute productAttribute)
-    {
-        if (!MatchesAttribute(productAttribute))
-            throw new ArgumentException("Product attribute not match.");
-
-        return From(AttributeId, productAttribute.Attribute, productAttribute.Value);
+        return From(productAttribute.AttributeId, productAttribute.Value);
     }
 
     public bool HasTheSameValue(ProductAttribute productAttribute)

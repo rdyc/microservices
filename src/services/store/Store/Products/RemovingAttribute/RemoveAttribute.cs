@@ -7,18 +7,18 @@ namespace Store.Products.RemovingAttribute;
 
 public record RemoveAttribute(
     Guid ProductId, 
-    ProductAttribute ProductAttribute
+    Guid AttributeId
 ) : ICommand
 {
-    public static RemoveAttribute Create(Guid productId, ProductAttribute productAttribute)
+    public static RemoveAttribute Create(Guid productId, Guid attributeId)
     {
         if (productId == Guid.Empty)
             throw new ArgumentOutOfRangeException(nameof(productId));
 
-        if (productAttribute is null)
-            throw new ArgumentNullException(nameof(productAttribute));
+        if (attributeId == Guid.Empty)
+            throw new ArgumentNullException(nameof(attributeId));
 
-        return new (productId, productAttribute);
+        return new (productId, attributeId);
     }
 }
 
@@ -35,12 +35,12 @@ internal class HandleRemoveAttribute : ICommandHandler<RemoveAttribute>
 
     public async Task<Unit> Handle(RemoveAttribute request, CancellationToken cancellationToken)
     {
-        var (id, productAttribute) = request;
+        var (productId, attributeId) = request;
 
         await scope.Do((expectedVersion, eventMetadata) =>
             repository.GetAndUpdate(
-                id,
-                (product) => product.RemoveAttribute(productAttribute),
+                productId,
+                (product) => product.RemoveAttribute(attributeId),
                 expectedVersion,
                 eventMetadata,
                 cancellationToken
