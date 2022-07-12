@@ -1,6 +1,6 @@
 using FluentValidation.Results;
 
-namespace Lookup.WebApi;
+namespace FW.Core.Validation;
 
 public static class FluentValidationExtensions
 {

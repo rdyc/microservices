@@ -7,11 +7,12 @@ using FW.Core;
 using FW.Core.EventStoreDB.OptimisticConcurrency;
 using FW.Core.Exceptions;
 using FW.Core.Kafka;
+using FW.Core.MongoDB.Settings;
+using FW.Core.Validation;
 using FW.Core.WebApi.Middlewares;
 using FW.Core.WebApi.OptimisticConcurrency;
 using FW.Core.WebApi.Tracing;
 using Lookup;
-using Lookup.WebApi;
 using Lookup.WebApi.Endpoints;
 using Microsoft.AspNetCore.Http.Json;
 using Swashbuckle.AspNetCore.SwaggerUI;
@@ -47,7 +48,7 @@ builder.Services
         sp => sp.GetRequiredService<EventStoreDBExpectedStreamRevisionProvider>().TrySet,
         sp => () => sp.GetRequiredService<EventStoreDBNextStreamRevisionProvider>().Value?.ToString()
     )
-    .Configure<FW.Core.MongoDB.Settings.MongoDbSettings>(builder.Configuration.GetSection(nameof(FW.Core.MongoDB.Settings.MongoDbSettings)))
+    .Configure<MongoDbSettings>(builder.Configuration.GetSection(nameof(MongoDbSettings)))
     .AddLookupServices(config);
 
 var app = builder.Build();
