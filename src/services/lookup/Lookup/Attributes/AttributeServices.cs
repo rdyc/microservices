@@ -5,7 +5,8 @@ using FW.Core.MongoDB.Projections;
 using FW.Core.Pagination;
 using FW.Core.Queries;
 using FW.Core.Validation;
-using Lookup.Attributes.GettingAttributeHistory;
+using Lookup.Attributes.GettingAttributeById;
+using Lookup.Attributes.GettingAttributeList;
 using Lookup.Attributes.GettingAttributes;
 using Lookup.Attributes.ModifyingAttribute;
 using Lookup.Attributes.RegisteringAttribute;
@@ -57,7 +58,7 @@ internal static class AttributeServices
                 .UpdateOn<AttributeModified>(
                     onGet: e => e.Id,
                     onHandle: AttributeShortInfoProjection.Handle,
-                    onUpdate: (view) => Builders<AttributeShortInfo>.Update
+                    onUpdate: (view, update) => update
                         .Set(e => e.Name, view.Name)
                         .Set(e => e.Type, view.Type)
                         .Set(e => e.Unit, view.Unit)
@@ -67,7 +68,7 @@ internal static class AttributeServices
                 .UpdateOn<AttributeRemoved>(
                     onGet: e => e.Id,
                     onHandle: AttributeShortInfoProjection.Handle,
-                    onUpdate: (view) => Builders<AttributeShortInfo>.Update
+                    onUpdate: (view, update) => update
                         .Set(e => e.Status, view.Status)
                         .Set(e => e.Version, view.Version)
                         .Set(e => e.LastProcessedPosition, view.LastProcessedPosition)

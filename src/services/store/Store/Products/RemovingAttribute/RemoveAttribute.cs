@@ -1,7 +1,12 @@
+using FluentValidation;
 using FW.Core.Commands;
 using FW.Core.EventStoreDB.OptimisticConcurrency;
 using FW.Core.EventStoreDB.Repository;
+using FW.Core.MongoDB;
 using MediatR;
+using MongoDB.Driver;
+using Store.Attributes;
+using Attribute = Store.Attributes.Attribute;
 
 namespace Store.Products.RemovingAttribute;
 
@@ -19,6 +24,19 @@ public record RemoveAttribute(
             throw new ArgumentNullException(nameof(attributeId));
 
         return new (productId, attributeId);
+    }
+}
+
+internal class ValidateRemoveAttribute : AbstractValidator<RemoveAttribute>
+{
+    public ValidateRemoveAttribute(IMongoDatabase database)
+    {
+        var collectionName = MongoHelper.GetCollectionName<Attribute>();
+        var collection = database.GetCollection<Attribute>(collectionName);
+
+        ClassLevelCascadeMode = CascadeMode.Stop;
+
+        RuleFor(p => p.AttributeId).NotEmpty().MustExistAttribute(collection);
     }
 }
 

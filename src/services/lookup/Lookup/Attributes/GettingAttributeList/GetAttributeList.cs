@@ -4,7 +4,7 @@ using FW.Core.Queries;
 using Lookup.Attributes.GettingAttributes;
 using MongoDB.Driver;
 
-namespace Lookup.Attributes.GettingAttributeHistory;
+namespace Lookup.Attributes.GettingAttributeList;
 
 public record GetAttributeList(LookupStatus? Status) : IQuery<IListUnpaged<AttributeShortInfo>>;
 

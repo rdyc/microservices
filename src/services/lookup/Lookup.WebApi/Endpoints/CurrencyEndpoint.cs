@@ -1,5 +1,6 @@
 using Lookup.Currencies.GettingCurrencies;
-using Lookup.Currencies.GettingCurrencyHistory;
+using Lookup.Currencies.GettingCurrencyById;
+using Lookup.Currencies.GettingCurrencyList;
 using Lookup.Currencies.ModifyingCurrency;
 using Lookup.Currencies.RegisteringCurrency;
 using Lookup.Currencies.RemovingCurrency;

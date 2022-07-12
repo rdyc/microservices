@@ -4,7 +4,7 @@ using FW.Core.Queries;
 using Lookup.Attributes.GettingAttributes;
 using MongoDB.Driver;
 
-namespace Lookup.Attributes.GettingAttributeHistory;
+namespace Lookup.Attributes.GettingAttributeById;
 
 public record GetAttributeById(Guid Id) : IQuery<AttributeShortInfo>;
 

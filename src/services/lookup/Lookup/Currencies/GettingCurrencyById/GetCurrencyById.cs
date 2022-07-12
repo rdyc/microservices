@@ -4,7 +4,7 @@ using FW.Core.Queries;
 using Lookup.Currencies.GettingCurrencies;
 using MongoDB.Driver;
 
-namespace Lookup.Currencies.GettingCurrencyHistory;
+namespace Lookup.Currencies.GettingCurrencyById;
 
 public record GetCurrencyById(Guid Id) : IQuery<CurrencyShortInfo>;
 

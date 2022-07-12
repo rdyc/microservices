@@ -1,9 +1,17 @@
+using FW.Core.MongoDB;
+using MongoDB.Bson.Serialization.Attributes;
+
 namespace Store.Attributes;
 
-public class Attribute
+[BsonCollection("attribute")]
+public record Attribute : Document
 {
-    public Guid Id { get; private set; } = default!;
-    public string Name { get; private set; } = default!;
-    public AttributeType Type { get; private set; } = default!;
-    public string Unit { get; private set; } = default!;
+    [BsonElement("name")]
+    public string Name { get; } = default!;
+
+    [BsonElement("type")]
+    public AttributeType Type { get; } = default!;
+
+    [BsonElement("unit")]
+    public string Unit { get; } = default!;
 }

@@ -23,25 +23,23 @@ public static class ProductValidatorExtension
             });
     }
 
-    /* public static IRuleBuilderOptions<T, string> MustUniqueProductCode<T>(
+    public static IRuleBuilderOptions<T, string> MustUniqueProductSKU<T>(
         this IRuleBuilder<T, string> ruleBuilder,
         IMongoCollection<ProductShortInfo> collection,
         bool isUpdating = false)
-        where T : ProductCommand
     {
-        return ruleBuilder
-            .MustAsync(async (instance, value, cancellationToken) =>
+        return ruleBuilder.MustAsync(async (value, cancellationToken) =>
             {
                 var builder = Builders<ProductShortInfo>.Filter;
-                var filter = builder.Eq(e => e.Code, value);
+                var filter = builder.Eq(e => e.SKU, value);
 
                 if (isUpdating)
                 {
-                    filter = builder.And(filter, builder.Ne(e => e.Id, instance.Id));
+                    filter = builder.And(filter, builder.Ne(e => e.SKU, value));
                 }
 
                 return await collection.CountDocumentsAsync(filter, null, cancellationToken) == 0;
             })
-            .WithMessage("The product code already used");
-    } */
+            .WithMessage("The product sku already used");
+    }
 }

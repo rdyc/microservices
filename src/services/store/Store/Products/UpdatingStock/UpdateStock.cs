@@ -1,3 +1,4 @@
+using FluentValidation;
 using FW.Core.Commands;
 using FW.Core.EventStoreDB.OptimisticConcurrency;
 using FW.Core.EventStoreDB.Repository;
@@ -19,6 +20,16 @@ public record UpdateStock(
             throw new InvalidOperationException(nameof(stock));
 
         return new UpdateStock(productId, stock);
+    }
+}
+
+internal class ValidateUpdateStock : AbstractValidator<UpdateStock>
+{
+    public ValidateUpdateStock()
+    {
+        ClassLevelCascadeMode = CascadeMode.Stop;
+
+        RuleFor(p => p.Stock).GreaterThanOrEqualTo(0);
     }
 }
 

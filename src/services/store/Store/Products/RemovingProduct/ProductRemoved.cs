@@ -1,9 +1,9 @@
 namespace Store.Products.RemovingProduct;
 
-public record ProductRemoved(Guid Id)
+public record ProductRemoved(Guid ProductId)
 {
-    public static ProductRemoved Create(Guid id)
+    public static ProductRemoved Create(Guid productId)
     {
-        return new ProductRemoved(id);
+        return new ProductRemoved(productId);
     }
 }

@@ -26,6 +26,9 @@ internal class ValidateModifyProduct : AbstractValidator<ModifyProduct>
         ClassLevelCascadeMode = CascadeMode.Stop;
 
         RuleFor(p => p.Id).NotEmpty().MustExistProduct(collection);
+        RuleFor(p => p.SKU).NotEmpty().MustUniqueProductSKU(collection, true);
+        RuleFor(p => p.Name).NotEmpty();
+        RuleFor(p => p.Description).NotEmpty();
     }
 }
 

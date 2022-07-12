@@ -6,7 +6,8 @@ using FW.Core.Pagination;
 using FW.Core.Queries;
 using FW.Core.Validation;
 using Lookup.Currencies.GettingCurrencies;
-using Lookup.Currencies.GettingCurrencyHistory;
+using Lookup.Currencies.GettingCurrencyById;
+using Lookup.Currencies.GettingCurrencyList;
 using Lookup.Currencies.ModifyingCurrency;
 using Lookup.Currencies.RegisteringCurrency;
 using Lookup.Currencies.RemovingCurrency;
@@ -57,7 +58,7 @@ internal static class CurrencyServices
                 .UpdateOn<CurrencyModified>(
                     onGet: e => e.Id,
                     onHandle: CurrencyShortInfoProjection.Handle,
-                    onUpdate: (view) => Builders<CurrencyShortInfo>.Update
+                    onUpdate: (view, update) => update
                         .Set(e => e.Name, view.Name)
                         .Set(e => e.Code, view.Code)
                         .Set(e => e.Symbol, view.Symbol)
@@ -67,7 +68,7 @@ internal static class CurrencyServices
                 .UpdateOn<CurrencyRemoved>(
                     onGet: e => e.Id,
                     onHandle: CurrencyShortInfoProjection.Handle,
-                    onUpdate: (view) => Builders<CurrencyShortInfo>.Update
+                    onUpdate: (view, update) => update
                         .Set(e => e.Status, view.Status)
                         .Set(e => e.Version, view.Version)
                         .Set(e => e.LastProcessedPosition, view.LastProcessedPosition)

@@ -18,12 +18,18 @@ public record RegisterProduct(
 
 internal class ValidateRegisterProduct : AbstractValidator<RegisterProduct>
 {
+    private readonly IMongoCollection<ProductShortInfo> collection;
+
     public ValidateRegisterProduct(IMongoDatabase database)
     {
         var collectionName = MongoHelper.GetCollectionName<ProductShortInfo>();
-        var collection = database.GetCollection<ProductShortInfo>(collectionName);
+        collection = database.GetCollection<ProductShortInfo>(collectionName);
 
         ClassLevelCascadeMode = CascadeMode.Stop;
+
+        RuleFor(p => p.SKU).NotEmpty().MustUniqueProductSKU(collection);
+        RuleFor(p => p.Name).NotEmpty();
+        RuleFor(p => p.Description).NotEmpty();
     }
 }
 

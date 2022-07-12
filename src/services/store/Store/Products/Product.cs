@@ -68,7 +68,7 @@ public class Product : Aggregate
 
     public void Apply(ProductRegistered evt)
     {
-        Id = evt.Id;
+        Id = evt.ProductId;
         SKU = evt.SKU;
         Name = evt.Name;
         Description = evt.Description;
@@ -80,7 +80,7 @@ public class Product : Aggregate
         if (Status == ProductStatus.Discontinue)
             throw new InvalidOperationException($"The product was discontinued");
 
-        var evt = ProductModified.Create(sku, name, description);
+        var evt = ProductModified.Create(Id, sku, name, description);
 
         Enqueue(evt);
         Apply(evt);
@@ -95,12 +95,12 @@ public class Product : Aggregate
         Description = evt.Description;
     }
 
-    public void AddAttribute(Guid attributeId, string value)
+    public void AddAttribute(ProductAttribute productAttribute)
     {
         if (Status == ProductStatus.Discontinue)
             throw new InvalidOperationException($"Adding attribute for the product in '{Status}' status is not allowed.");
 
-        var @event = AttributeAdded.Create(attributeId, value);
+        var @event = AttributeAdded.Create(Id, productAttribute);
 
         Enqueue(@event);
         Apply(@event);
@@ -108,8 +108,8 @@ public class Product : Aggregate
 
     public void Apply(AttributeAdded @event)
     {
-        var (attributeId, value) = @event;
-        var newAttribute = ProductAttribute.From(attributeId, value) ;
+        var (_, id, name, type, unit, value) = @event;
+        var newAttribute = ProductAttribute.From(id, name, type, unit, value);
         var existingAttribute = FindAttributeMatchingWith(newAttribute);
 
         if (existingAttribute is null)
@@ -134,7 +134,7 @@ public class Product : Aggregate
         if (existingAttribute is null)
             throw new InvalidOperationException($"An attribute with id `{attributeId}` was not found in product.");
 
-        var @event = AttributeRemoved.Create(attributeId);
+        var @event = AttributeRemoved.Create(Id, existingAttribute);
 
         Enqueue(@event);
         Apply(@event);
@@ -158,7 +158,7 @@ public class Product : Aggregate
         if (Status == ProductStatus.Discontinue)
             throw new InvalidOperationException($"The product has discontinued");
 
-        var evt = PriceChanged.Create(currency, price);
+        var evt = PriceChanged.Create(Id, currency, price);
 
         Enqueue(evt);
         Apply(evt);
@@ -180,7 +180,7 @@ public class Product : Aggregate
         if (Status == ProductStatus.Discontinue)
             throw new InvalidOperationException($"The product has discontinued");
 
-        var evt = StockChanged.Create(stock);
+        var evt = StockChanged.Create(Id, stock);
 
         Enqueue(evt);
         Apply(evt);

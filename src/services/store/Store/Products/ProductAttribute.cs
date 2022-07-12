@@ -1,47 +1,55 @@
+using Store.Attributes;
+
 namespace Store.Products;
 
 public record ProductAttribute
+(
+    Guid Id,
+    string Name,
+    AttributeType Type,
+    string Unit,
+    string Value
+)
 {
-    public Guid AttributeId { get; }
-    public string Value { get; }
-
-    public ProductAttribute(Guid attributeId, string value)
+    public static ProductAttribute From(Guid? id, string name, AttributeType type, string unit, string value)
     {
-        AttributeId = attributeId;
-        Value = value;
-    }
+        if (!id.HasValue)
+            throw new ArgumentNullException(nameof(id));
 
-    public static ProductAttribute From(Guid? attributeId, string value)
-    {
-        if (!attributeId.HasValue)
-            throw new ArgumentNullException(nameof(attributeId));
+        if (string.IsNullOrEmpty(name))
+            throw new ArgumentNullException(nameof(name));
+
+        if (string.IsNullOrEmpty(unit))
+            throw new ArgumentNullException(nameof(unit));
 
         if (string.IsNullOrEmpty(value))
             throw new ArgumentNullException(nameof(value));
 
-        return new ProductAttribute(attributeId.Value, value);
+        return new ProductAttribute(id.Value, name, type, unit, value);
     }
 
     public bool MatchesAttribute(Guid attributeId)
     {
-        return AttributeId == attributeId;
+        return Id == attributeId;
     }
 
-    public bool MatchesAttributeAndValue(ProductAttribute productAttribute)
+    public bool MatchesAttributeAndValue(ProductAttribute attribute)
     {
-        return AttributeId == productAttribute.AttributeId && Value == productAttribute.Value;
+        return Id == attribute.Id && Value == attribute.Value;
     }
 
-    public ProductAttribute MergeWith(ProductAttribute productAttribute)
+    public ProductAttribute MergeWith(ProductAttribute attribute)
     {
-        if (!MatchesAttributeAndValue(productAttribute))
+        if (!MatchesAttributeAndValue(attribute))
             throw new ArgumentException("Product attribute does not match.");
 
-        return From(productAttribute.AttributeId, productAttribute.Value);
+        var (id, name, type, unit, value) = attribute;
+
+        return From(id, name, type, unit, value);
     }
 
-    public bool HasTheSameValue(ProductAttribute productAttribute)
+    public bool HasTheSameValue(ProductAttribute attribute)
     {
-        return Value == productAttribute.Value;
+        return Value == attribute.Value;
     }
 }

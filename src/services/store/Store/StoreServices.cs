@@ -7,6 +7,7 @@ using MediatR;
 using MediatR.Pipeline;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Store.Products;
 
 namespace Store;
 
@@ -23,7 +24,6 @@ public static class StoreServices
             {
                 SubscriptionId = "store",
                 FilterOptions = new(EventTypeFilter.Prefix("Store_"))
-            });
-            // .AddProduct()
-            // .AddHistory();
+            })
+            .AddProduct();
 }
