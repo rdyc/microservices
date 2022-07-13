@@ -24,7 +24,7 @@ public static class LookupServices
             .AddEventStoreDB(configuration)
             .AddEventStoreDBSubscriptionToAll(new EventStoreDBSubscriptionToAllOptions
             {
-                SubscriptionId = "lookup-currency",
+                SubscriptionId = "lookup",
                 FilterOptions = new(EventTypeFilter.Prefix("Lookup_"))
             })
             .AddCurrency()

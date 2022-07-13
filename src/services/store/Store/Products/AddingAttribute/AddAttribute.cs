@@ -5,8 +5,8 @@ using FW.Core.EventStoreDB.Repository;
 using FW.Core.MongoDB;
 using MediatR;
 using MongoDB.Driver;
-using Store.Attributes;
-using Attribute = Store.Attributes.Attribute;
+using Store.Lookup.Attributes;
+using Attribute = Store.Lookup.Attributes.Attribute;
 
 namespace Store.Products.AddingAttribute;
 

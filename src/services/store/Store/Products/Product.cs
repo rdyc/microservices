@@ -1,11 +1,12 @@
 using FW.Core.Aggregates;
 using FW.Core.Extensions;
-using Store.Currencies;
+using Store.Lookup.Currencies;
 using Store.Products.AddingAttribute;
 using Store.Products.ModifyingProduct;
 using Store.Products.RegisteringProduct;
 using Store.Products.RemovingAttribute;
 using Store.Products.RemovingProduct;
+using Store.Products.SellingProduct;
 using Store.Products.UpdatingPrice;
 using Store.Products.UpdatingStock;
 
@@ -13,7 +14,7 @@ namespace Store.Products;
 
 public class Product : Aggregate
 {
-    public string SKU { get; private set; } = default!;
+    public string Sku { get; private set; } = default!;
     public string Name { get; private set; } = default!;
     public string Description { get; private set; } = default!;
     public IList<ProductAttribute> Attributes { get; private set; } = default!;
@@ -27,12 +28,12 @@ public class Product : Aggregate
         if (id is null)
             throw new ArgumentNullException(nameof(id));
 
-        return new Product(id.Value, sku, name, description);
+        return new Product(id.Value, sku, name, description, ProductStatus.Available);
     }
 
-    private Product(Guid id, string sku, string name, string description)
+    private Product(Guid id, string sku, string name, string description, ProductStatus status)
     {
-        var evt = ProductRegistered.Create(id, sku, name, description);
+        var evt = ProductRegistered.Create(id, sku, name, description, status);
 
         Enqueue(evt);
         Apply(evt);
@@ -60,6 +61,9 @@ public class Product : Aggregate
             case StockChanged stockChanged:
                 Apply(stockChanged);
                 return;
+            case ProductSold productSold:
+                Apply(productSold);
+                return;
             case ProductRemoved productRemoved:
                 Apply(productRemoved);
                 return;
@@ -69,10 +73,10 @@ public class Product : Aggregate
     public void Apply(ProductRegistered evt)
     {
         Id = evt.ProductId;
-        SKU = evt.SKU;
+        Sku = evt.Sku;
         Name = evt.Name;
         Description = evt.Description;
-        Status = ProductStatus.Available;
+        Status = evt.Status;
     }
 
     public void Modify(string sku, string name, string description)
@@ -90,7 +94,7 @@ public class Product : Aggregate
     {
         Version++;
 
-        SKU = evt.SKU;
+        Sku = evt.Sku;
         Name = evt.Name;
         Description = evt.Description;
     }
@@ -166,9 +170,6 @@ public class Product : Aggregate
 
     public void Apply(PriceChanged evt)
     {
-        if (Status == ProductStatus.Discontinue)
-            throw new InvalidOperationException($"The product has discontinued");
-
         Version++;
 
         Currency = evt.Currency;
@@ -188,12 +189,27 @@ public class Product : Aggregate
 
     public void Apply(StockChanged evt)
     {
-        if (Status == ProductStatus.Discontinue)
-            throw new InvalidOperationException($"The product has discontinued");
-
         Version++;
 
         Stock = evt.Stock;
+    }
+
+    public void Sold(int quantity)
+    {
+        if (Status == ProductStatus.Discontinue)
+            throw new InvalidOperationException($"The product has discontinued");
+
+        var evt = ProductSold.Create(Id, quantity);
+
+        Enqueue(evt);
+        Apply(evt);
+    }
+
+    public void Apply(ProductSold evt)
+    {
+        Version++;
+
+        Stock -= evt.Quantity;
     }
 
     public void Remove()

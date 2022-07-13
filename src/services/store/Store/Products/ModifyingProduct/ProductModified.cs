@@ -2,7 +2,7 @@ namespace Store.Products.ModifyingProduct;
 
 public record ProductModified(
     Guid ProductId,
-    string SKU,
+    string Sku,
     string Name,
     string Description)
 {

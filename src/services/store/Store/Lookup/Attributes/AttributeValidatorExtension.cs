@@ -1,7 +1,7 @@
 using FluentValidation;
 using MongoDB.Driver;
 
-namespace Store.Attributes;
+namespace Store.Lookup.Attributes;
 
 public static class AttributeValidatorExtension
 {

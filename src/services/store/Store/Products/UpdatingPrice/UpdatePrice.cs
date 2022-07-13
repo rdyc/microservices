@@ -5,7 +5,7 @@ using FW.Core.EventStoreDB.Repository;
 using FW.Core.MongoDB;
 using MediatR;
 using MongoDB.Driver;
-using Store.Currencies;
+using Store.Lookup.Currencies;
 
 namespace Store.Products.UpdatingPrice;
 

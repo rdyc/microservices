@@ -8,6 +8,7 @@ using MediatR.Pipeline;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Store.Products;
+using Store.Lookup;
 
 namespace Store;
 
@@ -25,5 +26,6 @@ public static class StoreServices
                 SubscriptionId = "store",
                 FilterOptions = new(EventTypeFilter.Prefix("Store_"))
             })
+            .AddLookup()
             .AddProduct();
 }

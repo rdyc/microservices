@@ -1,4 +1,4 @@
-using Store.Currencies;
+using Store.Lookup.Currencies;
 
 namespace Store.Products.UpdatingPrice;
 

@@ -6,6 +6,7 @@ using Store.Products.ModifyingProduct;
 using Store.Products.RegisteringProduct;
 using Store.Products.RemovingAttribute;
 using Store.Products.RemovingProduct;
+using Store.Products.SellingProduct;
 using Store.Products.UpdatingPrice;
 using Store.Products.UpdatingStock;
 
@@ -44,6 +45,9 @@ public record ProductHistory : Document, IVersionedProjection
                 return;
             case StockChanged stockChanged:
                 Apply(stockChanged);
+                return;
+            case ProductSold productSold:
+                Apply(productSold);
                 return;
             case ProductRemoved productRemoved:
                 Apply(productRemoved);
@@ -85,6 +89,12 @@ public record ProductHistory : Document, IVersionedProjection
     {
         AggregateId = @event.ProductId;
         Description = $"Product stock changed with id {@event.ProductId}";
+    }
+
+    public void Apply(ProductSold @event)
+    {
+        AggregateId = @event.ProductId;
+        Description = $"Product id {@event.ProductId} has been sold for {@event.Quantity} items";
     }
 
     public void Apply(ProductRemoved @event)

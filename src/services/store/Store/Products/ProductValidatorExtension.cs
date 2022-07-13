@@ -31,11 +31,11 @@ public static class ProductValidatorExtension
         return ruleBuilder.MustAsync(async (value, cancellationToken) =>
             {
                 var builder = Builders<ProductShortInfo>.Filter;
-                var filter = builder.Eq(e => e.SKU, value);
+                var filter = builder.Eq(e => e.Sku, value);
 
                 if (isUpdating)
                 {
-                    filter = builder.And(filter, builder.Ne(e => e.SKU, value));
+                    filter = builder.And(filter, builder.Ne(e => e.Sku, value));
                 }
 
                 return await collection.CountDocumentsAsync(filter, null, cancellationToken) == 0;

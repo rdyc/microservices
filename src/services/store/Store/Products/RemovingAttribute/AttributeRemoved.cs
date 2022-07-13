@@ -1,4 +1,4 @@
-using Store.Attributes;
+using Store.Lookup.Attributes;
 
 namespace Store.Products.RemovingAttribute;
 

@@ -7,15 +7,15 @@ using FW.Core;
 using FW.Core.EventStoreDB.OptimisticConcurrency;
 using FW.Core.Exceptions;
 using FW.Core.Kafka;
+using FW.Core.MongoDB.Settings;
+using FW.Core.Validation;
 using FW.Core.WebApi.Middlewares;
 using FW.Core.WebApi.OptimisticConcurrency;
 using FW.Core.WebApi.Tracing;
+using Microsoft.AspNetCore.Http.Json;
 using Store;
 using Store.WebApi.Endpoints;
-using Microsoft.AspNetCore.Http.Json;
 using Swashbuckle.AspNetCore.SwaggerUI;
-using FW.Core.Validation;
-using FW.Core.MongoDB.Settings;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -42,7 +42,7 @@ builder.Services
         options.DescribeAllParametersInCamelCase();
     })
     .AddCoreServices()
-    // .AddKafkaProducerAndConsumer()
+    .AddKafkaProducerAndConsumer()
     .AddCorrelationIdMiddleware()
     .AddOptimisticConcurrencyMiddleware(
         sp => sp.GetRequiredService<EventStoreDBExpectedStreamRevisionProvider>().TrySet,

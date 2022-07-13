@@ -40,8 +40,7 @@ public class EventStoreDBSubscriptionToAll
     {
         this.eventBus = eventBus ?? throw new ArgumentNullException(nameof(eventBus));
         this.eventStoreClient = eventStoreClient ?? throw new ArgumentNullException(nameof(eventStoreClient));
-        this.checkpointRepository =
-            checkpointRepository ?? throw new ArgumentNullException(nameof(checkpointRepository));
+        this.checkpointRepository = checkpointRepository ?? throw new ArgumentNullException(nameof(checkpointRepository));
         this.logger = logger ?? throw new ArgumentNullException(nameof(logger));
     }
 

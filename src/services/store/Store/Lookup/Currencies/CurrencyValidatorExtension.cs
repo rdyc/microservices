@@ -1,7 +1,7 @@
 using FluentValidation;
 using MongoDB.Driver;
 
-namespace Store.Currencies;
+namespace Store.Lookup.Currencies;
 
 public static class CurrencyValidatorExtension
 {
