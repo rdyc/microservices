@@ -1,43 +1,92 @@
+using System.Net;
+using System.Text.Json;
+using System.Text.Json.Serialization;
+using EventStore.Client;
+using FluentValidation;
+using FW.Core;
+using FW.Core.EventStoreDB.OptimisticConcurrency;
+using FW.Core.Exceptions;
+using FW.Core.Kafka;
+using FW.Core.MongoDB.Settings;
+using FW.Core.Validation;
+using FW.Core.WebApi.Middlewares;
+using FW.Core.WebApi.OptimisticConcurrency;
+using FW.Core.WebApi.Tracing;
+using Microsoft.AspNetCore.Http.Json;
+using Cart;
+using Cart.WebApi.Endpoints;
+using Swashbuckle.AspNetCore.SwaggerUI;
+
 var builder = WebApplication.CreateBuilder(args);
 
+using var loggerFactory = LoggerFactory.Create(config =>
+    config.SetMinimumLevel(LogLevel.Trace)
+        .AddConsole()
+);
+
+var config = builder.Configuration;
+
 // Add services to the container.
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
-builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+builder.Services
+    .Configure<JsonOptions>(options =>
+    {
+        options.SerializerOptions.WriteIndented = false;
+        options.SerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
+        options.SerializerOptions.DictionaryKeyPolicy = JsonNamingPolicy.CamelCase;
+        options.SerializerOptions.Converters.Add(new JsonStringEnumConverter());
+    })
+    .AddEndpointsApiExplorer()
+    .AddSwaggerGen(options =>
+    {
+        options.EnableAnnotations();
+        options.DescribeAllParametersInCamelCase();
+    })
+    .AddCoreServices()
+    .AddKafkaProducerAndConsumer()
+    .AddCorrelationIdMiddleware()
+    .AddOptimisticConcurrencyMiddleware(
+        sp => sp.GetRequiredService<EventStoreDBExpectedStreamRevisionProvider>().TrySet,
+        sp => () => sp.GetRequiredService<EventStoreDBNextStreamRevisionProvider>().Value?.ToString()
+    )
+    .Configure<MongoDbSettings>(builder.Configuration.GetSection(nameof(MongoDbSettings)))
+    .AddCartServices(config);
 
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
-    app.UseSwagger();
-    app.UseSwaggerUI();
+    app.UseStaticFiles()
+        .UseSwagger()
+        .UseSwaggerUI(options =>
+        {
+            options.DocumentTitle = "Cart";
+            options.DocExpansion(DocExpansion.None);
+            options.EnableTryItOutByDefault();
+            options.DisplayOperationId();
+            options.DisplayRequestDuration();
+            options.InjectStylesheet("css/theme-dark.css");
+            options.InjectJavascript("js/json-folding.js");
+        });
 }
 
-app.UseHttpsRedirection();
+app.UseResponseTimeMiddleware()
+    .UseCorrelationIdMiddleware()
+    .UseOptimisticConcurrencyMiddleware()
+    .UseExceptionHandlingMiddleware(exception => exception switch
+    {
+        AggregateNotFoundException _ =>
+            new HttpStatusCodeInfo(HttpStatusCode.NotFound, exception.Message),
+        WrongExpectedVersionException =>
+            new HttpStatusCodeInfo(HttpStatusCode.PreconditionFailed, exception.Message),
+        ValidationException validationException =>
+            new HttpStatusCodeInfo(HttpStatusCode.UnprocessableEntity,
+                validationException.Message,
+                validationException.Errors.ToDictionary()),
+        _ =>
+            new HttpStatusCodeInfo(HttpStatusCode.InternalServerError, exception.Message)
+    });
 
-var summaries = new[]
-{
-    "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
-};
-
-app.MapGet("/weatherforecast", () =>
-{
-    var forecast =  Enumerable.Range(1, 5).Select(index =>
-        new WeatherForecast
-        (
-            DateTime.Now.AddDays(index),
-            Random.Shared.Next(-20, 55),
-            summaries[Random.Shared.Next(summaries.Length)]
-        ))
-        .ToArray();
-    return forecast;
-})
-.WithName("GetWeatherForecast");
+app.UseCartEndpoints();
 
 app.Run();
-
-record WeatherForecast(DateTime Date, int TemperatureC, string? Summary)
-{
-    public int TemperatureF => 32 + (int)(TemperatureC / 0.5556);
-}
