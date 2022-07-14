@@ -1,9 +1,9 @@
-using FW.Core.BackgroundWorkers;
+using EventStore.Client;
 using FW.Core.EventStoreDB.OptimisticConcurrency;
 using FW.Core.EventStoreDB.Subscriptions;
-using EventStore.Client;
-using Microsoft.Extensions.DependencyInjection;
+using FW.Core.HostedServices;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
 namespace FW.Core.EventStoreDB;
@@ -52,21 +52,16 @@ public static class EventStoreDBConfigExtensions
                 .AddTransient<ISubscriptionCheckpointRepository, EventStoreDBSubscriptionCheckpointRepository>();
         }
 
-        return services.AddHostedService(serviceProvider =>
+        return services.AddHostedService(sp =>
             {
-                var logger =
-                    serviceProvider.GetRequiredService<ILogger<BackgroundWorker>>();
+                var logger = sp.GetRequiredService<ILogger<BackgroundHostedService>>();
+                var esdbSubscription = sp.GetRequiredService<EventStoreDBSubscriptionToAll>();
 
-                var eventStoreDBSubscriptionToAll =
-                    serviceProvider.GetRequiredService<EventStoreDBSubscriptionToAll>();
-
-                return new BackgroundWorker(
-                    logger,
-                    ct =>
-                        eventStoreDBSubscriptionToAll.SubscribeToAll(
-                            subscriptionOptions ?? new EventStoreDBSubscriptionToAllOptions(),
-                            ct
-                        )
+                return new BackgroundHostedService(logger, cancellationToken =>
+                    esdbSubscription.SubscribeToAll(
+                        subscriptionOptions ?? new EventStoreDBSubscriptionToAllOptions(),
+                        cancellationToken
+                    )
                 );
             }
         );

@@ -10,11 +10,11 @@ using Store.Products.GettingProducts;
 namespace Store.Products.ModifyingProduct;
 
 public record ModifyProduct(
-    Guid Id,
+    Guid ProductId,
     string SKU,
     string Name,
     string Description
-) : ICommand;
+) : IProduct, ICommand;
 
 internal class ValidateModifyProduct : AbstractValidator<ModifyProduct>
 {
@@ -25,10 +25,10 @@ internal class ValidateModifyProduct : AbstractValidator<ModifyProduct>
 
         ClassLevelCascadeMode = CascadeMode.Stop;
 
-        RuleFor(p => p.Id).NotEmpty().MustExistProduct(collection);
+        RuleFor(p => p.ProductId).NotEmpty().MustExistProduct(collection);
         RuleFor(p => p.SKU).NotEmpty().MustUniqueProductSKU(collection, true);
-        RuleFor(p => p.Name).NotEmpty();
-        RuleFor(p => p.Description).NotEmpty();
+        RuleFor(p => p.Name).NotEmpty().MaximumLength(50);
+        RuleFor(p => p.Description).NotEmpty().MaximumLength(250);
     }
 }
 

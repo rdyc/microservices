@@ -1,20 +1,36 @@
+using FluentValidation;
 using FW.Core.Commands;
 using FW.Core.EventStoreDB.OptimisticConcurrency;
 using FW.Core.EventStoreDB.Repository;
+using FW.Core.MongoDB;
+using Lookup.Attributes.GettingAttributes;
 using MediatR;
 using MongoDB.Driver;
 
 namespace Lookup.Attributes.ModifyingAttribute;
 
-public record ModifyAttribute(Guid? Id, string Name, AttributeType Type, string Unit) : AttributeCommand(Id, Name, Type, Unit, default);
+public record ModifyAttribute(
+    Guid AttributeId,
+    string Name,
+    AttributeType Type,
+    string Unit
+) : IAttribute, ICommand;
 
-internal class ValidateModifyAttribute : AttributeValidator<ModifyAttribute>
+internal class ValidateModifyAttribute : AbstractValidator<ModifyAttribute>
 {
-    public ValidateModifyAttribute(IMongoDatabase database) : base(database)
+    private readonly IMongoCollection<AttributeShortInfo> collection;
+    public ValidateModifyAttribute(IMongoDatabase database)
     {
-        ValidateId();
-        ValidateName();
-        ValidateUnit(true);
+        var collectionName = MongoHelper.GetCollectionName<AttributeShortInfo>();
+        collection = database.GetCollection<AttributeShortInfo>(collectionName);
+
+        ClassLevelCascadeMode = CascadeMode.Stop;
+
+        RuleFor(p => p.AttributeId).NotEmpty()
+            .MustExistAttribute(collection);
+        RuleFor(p => p.Name).NotEmpty();
+        RuleFor(p => p.Unit).NotEmpty().MaximumLength(5)
+            .MustUniqueAttributeUnit(collection, true);
     }
 }
 
@@ -23,7 +39,9 @@ internal class HandleModifyAttribute : ICommandHandler<ModifyAttribute>
     private readonly IEventStoreDBRepository<Attribute> repository;
     private readonly IEventStoreDBAppendScope scope;
 
-    public HandleModifyAttribute(IEventStoreDBRepository<Attribute> repository, IEventStoreDBAppendScope scope)
+    public HandleModifyAttribute(
+        IEventStoreDBRepository<Attribute> repository,
+        IEventStoreDBAppendScope scope)
     {
         this.repository = repository;
         this.scope = scope;
@@ -31,11 +49,11 @@ internal class HandleModifyAttribute : ICommandHandler<ModifyAttribute>
 
     public async Task<Unit> Handle(ModifyAttribute request, CancellationToken cancellationToken)
     {
-        var (id, name, type, unit, _) = request;
+        var (attributeId, name, type, unit) = request;
 
         await scope.Do((expectedVersion, eventMetadata) =>
             repository.GetAndUpdate(
-                id.Value,
+                attributeId,
                 (attribute) => attribute.Modify(name, type, unit),
                 expectedVersion,
                 eventMetadata,

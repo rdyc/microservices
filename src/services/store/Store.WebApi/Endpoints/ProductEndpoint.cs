@@ -1,24 +1,24 @@
+using MediatR;
+using Microsoft.AspNetCore.Mvc;
+using Store.Products.AddingAttribute;
 using Store.Products.GettingProductById;
+using Store.Products.GettingProductHistory;
 using Store.Products.GettingProducts;
 using Store.Products.ModifyingProduct;
 using Store.Products.RegisteringProduct;
-using Store.Products.RemovingProduct;
-using Store.WebApi.Requests;
-using MediatR;
-using Microsoft.AspNetCore.Mvc;
-using Swashbuckle.AspNetCore.Annotations;
 using Store.Products.RemovingAttribute;
-using Store.Products.AddingAttribute;
+using Store.Products.RemovingProduct;
 using Store.Products.UpdatingPrice;
 using Store.Products.UpdatingStock;
-using Store.Products.GettingProductHistory;
+using Store.WebApi.Requests;
+using Swashbuckle.AspNetCore.Annotations;
 
 namespace Store.WebApi.Endpoints;
 
 public static class ProductEndpoint
 {
     [SwaggerOperation(Summary = "Retrieve all products", OperationId = "get_products", Tags = new[] { "Product" })]
-    internal static async Task<IResult> GetProducts(int index, int size, IMediator mediator, ILoggerFactory logger, CancellationToken cancellationToken)
+    internal static async Task<IResult> Products(int index, int size, IMediator mediator, ILoggerFactory logger, CancellationToken cancellationToken)
     {
         var log = logger.CreateLogger<Program>();
 
@@ -37,7 +37,7 @@ public static class ProductEndpoint
     }
 
     [SwaggerOperation(Summary = "Retrieve product", OperationId = "get_product", Tags = new[] { "Product" })]
-    internal static async Task<IResult> GetProductById(Guid productId, IMediator mediator, ILoggerFactory logger, CancellationToken cancellationToken)
+    internal static async Task<IResult> Product(Guid productId, IMediator mediator, ILoggerFactory logger, CancellationToken cancellationToken)
     {
         var log = logger.CreateLogger<Program>();
 
@@ -56,13 +56,13 @@ public static class ProductEndpoint
     }
 
     [SwaggerOperation(Summary = "Retrieve product histories", OperationId = "get_history", Tags = new[] { "Product" })]
-    internal static async Task<IResult> GetProductHistories(Guid productId, int index, int size, IMediator mediator, ILoggerFactory logger, CancellationToken cancellationToken)
+    internal static async Task<IResult> Histories(Guid productId, int index, int size, IMediator mediator, ILoggerFactory logger, CancellationToken cancellationToken)
     {
         var log = logger.CreateLogger<Program>();
 
         try
         {
-            var result = await mediator.Send(new GetProductHistory(productId), cancellationToken);
+            var result = await mediator.Send(GetProductHistory.Create(productId, index, size), cancellationToken);
 
             return Results.Ok(result);
         }
@@ -75,7 +75,7 @@ public static class ProductEndpoint
     }
 
     [SwaggerOperation(Summary = "Register a new product", OperationId = "register", Tags = new[] { "Product" })]
-    internal static async Task<IResult> RegisterProduct([FromBody] ProductCreateRequest request, IMediator mediator, ILoggerFactory logger, CancellationToken cancellationToken)
+    internal static async Task<IResult> Create([FromBody] ProductCreateRequest request, IMediator mediator, ILoggerFactory logger, CancellationToken cancellationToken)
     {
         var log = logger.CreateLogger<Program>();
 
@@ -97,7 +97,7 @@ public static class ProductEndpoint
     }
 
     [SwaggerOperation(Summary = "Modify existing product", OperationId = "modify", Tags = new[] { "Product" })]
-    internal static async Task<IResult> ModifyProduct(Guid productId, [FromBody] ProductModifyRequest request, IMediator mediator, ILoggerFactory logger, CancellationToken cancellationToken)
+    internal static async Task<IResult> Update(Guid productId, [FromBody] ProductModifyRequest request, IMediator mediator, ILoggerFactory logger, CancellationToken cancellationToken)
     {
         var log = logger.CreateLogger<Program>();
 
@@ -198,7 +198,7 @@ public static class ProductEndpoint
     }
 
     [SwaggerOperation(Summary = "Remove existing product", OperationId = "remove", Tags = new[] { "Product" })]
-    internal static async Task<IResult> RemoveProduct(Guid productId, IMediator mediator, ILoggerFactory logger, CancellationToken cancellationToken)
+    internal static async Task<IResult> Delete(Guid productId, IMediator mediator, ILoggerFactory logger, CancellationToken cancellationToken)
     {
         var log = logger.CreateLogger<Program>();
 

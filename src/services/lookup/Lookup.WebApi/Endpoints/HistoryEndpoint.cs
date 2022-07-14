@@ -7,7 +7,7 @@ namespace Lookup.WebApi.Endpoints;
 public static class HistoryEndpoint
 {
     [SwaggerOperation(Summary = "Retrieve lookup histories", OperationId = "get", Tags = new[] { "History" })]
-    internal static async Task<IResult> GetHistoryAsync(Guid id, int index, int size, IMediator mediator, ILoggerFactory logger, CancellationToken cancellationToken)
+    internal static async Task<IResult> Histories(Guid id, int index, int size, IMediator mediator, ILoggerFactory logger, CancellationToken cancellationToken)
     {
         var log = logger.CreateLogger<Program>();
 

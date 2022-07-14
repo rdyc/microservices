@@ -9,7 +9,7 @@ using Store.Products.GettingProducts;
 
 namespace Store.Products.RemovingProduct;
 
-public record RemoveProduct(Guid Id) : ICommand;
+public record RemoveProduct(Guid ProductId) : IProduct, ICommand;
 
 internal class ValidateRemoveProduct : AbstractValidator<RemoveProduct>
 {
@@ -20,7 +20,7 @@ internal class ValidateRemoveProduct : AbstractValidator<RemoveProduct>
 
         ClassLevelCascadeMode = CascadeMode.Stop;
 
-        RuleFor(p => p.Id).NotEmpty().MustExistProduct(collection);
+        RuleFor(p => p.ProductId).NotEmpty().MustExistProduct(collection);
     }
 }
 
@@ -39,7 +39,7 @@ internal class HandleRemoveProduct : ICommandHandler<RemoveProduct>
     {
         await scope.Do((expectedVersion, eventMetadata) =>
             repository.GetAndUpdate(
-                request.Id,
+                request.ProductId,
                 (product) => product.Remove(),
                 expectedVersion,
                 eventMetadata,

@@ -13,16 +13,16 @@ internal static class EndpointBuilder
 
     private static WebApplication UseProductEndpoints(this WebApplication app)
     {
-        app.MapGet("/products", ProductEndpoint.GetProducts).Produces((int)HttpStatusCode.OK, typeof(IListPaged<ProductShortInfo>));
-        app.MapPost("/products", ProductEndpoint.RegisterProduct).Produces((int)HttpStatusCode.Created, typeof(Guid));
-        app.MapGet("/products/{productId}", ProductEndpoint.GetProductById).Produces((int)HttpStatusCode.OK, typeof(ProductDetail));
-        app.MapPut("/products/{productId}", ProductEndpoint.ModifyProduct).Produces((int)HttpStatusCode.Accepted, typeof(Guid));
-        app.MapGet("/products/{productId}/histories", ProductEndpoint.GetProductHistories).Produces((int)HttpStatusCode.OK, typeof(IListPaged<ProductHistory>));
+        app.MapGet("/products", ProductEndpoint.Products).Produces((int)HttpStatusCode.OK, typeof(IListPaged<ProductShortInfo>));
+        app.MapPost("/products", ProductEndpoint.Create).Produces((int)HttpStatusCode.Created, typeof(Guid));
+        app.MapGet("/products/{productId}", ProductEndpoint.Product).Produces((int)HttpStatusCode.OK, typeof(ProductDetail));
+        app.MapPut("/products/{productId}", ProductEndpoint.Update).Produces((int)HttpStatusCode.Accepted, typeof(Guid));
+        app.MapGet("/products/{productId}/histories", ProductEndpoint.Histories).Produces((int)HttpStatusCode.OK, typeof(IListPaged<ProductHistory>));
         app.MapPost("/products/{productId}/attributes", ProductEndpoint.AddAttribute).Produces((int)HttpStatusCode.Accepted, typeof(Guid));
         app.MapDelete("/products/{productId}/attributes/{attributeId}", ProductEndpoint.RemoveAttribute).Produces((int)HttpStatusCode.Accepted, typeof(Guid));
         app.MapPut("/products/{productId}/price", ProductEndpoint.UpdatePrice).Produces((int)HttpStatusCode.Accepted, typeof(Guid));
         app.MapPut("/products/{productId}/stock", ProductEndpoint.UpdateStock).Produces((int)HttpStatusCode.Accepted, typeof(Guid));
-        app.MapDelete("/products/{productId}", ProductEndpoint.RemoveProduct).Produces((int)HttpStatusCode.NoContent);
+        app.MapDelete("/products/{productId}", ProductEndpoint.Delete).Produces((int)HttpStatusCode.NoContent);
 
         return app;
     }

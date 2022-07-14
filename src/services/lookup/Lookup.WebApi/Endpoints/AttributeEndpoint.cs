@@ -14,7 +14,7 @@ namespace Lookup.WebApi.Endpoints;
 public static class AttributeEndpoint
 {
     [SwaggerOperation(Summary = "Retrieve all attributes", OperationId = "get_all", Tags = new[] { "Attribute" })]
-    internal static async Task<IResult> GetAllAsync(int index, int size, IMediator mediator, ILoggerFactory logger, CancellationToken cancellationToken)
+    internal static async Task<IResult> Attributes(int index, int size, IMediator mediator, ILoggerFactory logger, CancellationToken cancellationToken)
     {
         var log = logger.CreateLogger<Program>();
 
@@ -33,7 +33,7 @@ public static class AttributeEndpoint
     }
 
     [SwaggerOperation(Summary = "Retrieve attribute", OperationId = "get_detail", Tags = new[] { "Attribute" })]
-    internal static async Task<IResult> GetDetailAsync(Guid id, IMediator mediator, ILoggerFactory logger, CancellationToken cancellationToken)
+    internal static async Task<IResult> Attribute(Guid id, IMediator mediator, ILoggerFactory logger, CancellationToken cancellationToken)
     {
         var log = logger.CreateLogger<Program>();
 
@@ -52,7 +52,7 @@ public static class AttributeEndpoint
     }
 
     [SwaggerOperation(Summary = "Retrieve attribute list", OperationId = "get_list", Tags = new[] { "Attribute" })]
-    internal static async Task<IResult> GetListAsync(LookupStatus? status, IMediator mediator, ILoggerFactory logger, CancellationToken cancellationToken)
+    internal static async Task<IResult> AttributeList(LookupStatus? status, IMediator mediator, ILoggerFactory logger, CancellationToken cancellationToken)
     {
         var log = logger.CreateLogger<Program>();
 
@@ -71,7 +71,7 @@ public static class AttributeEndpoint
     }
 
     [SwaggerOperation(Summary = "Register a new attribute", OperationId = "post", Tags = new[] { "Attribute" })]
-    internal static async Task<IResult> PostAsync([FromBody] AttributeCreateRequest request, IMediator mediator, ILoggerFactory logger, CancellationToken cancellationToken)
+    internal static async Task<IResult> Create([FromBody] AttributeCreateRequest request, IMediator mediator, ILoggerFactory logger, CancellationToken cancellationToken)
     {
         var log = logger.CreateLogger<Program>();
 
@@ -93,7 +93,7 @@ public static class AttributeEndpoint
     }
 
     [SwaggerOperation(Summary = "Modify existing attribute", OperationId = "put", Tags = new[] { "Attribute" })]
-    internal static async Task<IResult> PutAsync(Guid id, [FromBody] AttributeModifyRequest request, IMediator mediator, ILoggerFactory logger, CancellationToken cancellationToken)
+    internal static async Task<IResult> Update(Guid id, [FromBody] AttributeModifyRequest request, IMediator mediator, ILoggerFactory logger, CancellationToken cancellationToken)
     {
         var log = logger.CreateLogger<Program>();
 
@@ -114,7 +114,7 @@ public static class AttributeEndpoint
     }
 
     [SwaggerOperation(Summary = "Remove existing attribute", OperationId = "delete", Tags = new[] { "Attribute" })]
-    internal static async Task<IResult> DeleteAsync(Guid id, IMediator mediator, ILoggerFactory logger, CancellationToken cancellationToken)
+    internal static async Task<IResult> Delete(Guid id, IMediator mediator, ILoggerFactory logger, CancellationToken cancellationToken)
     {
         var log = logger.CreateLogger<Program>();
 

@@ -65,7 +65,7 @@ public static class ProductServices
             .AddQueryHandler<GetProducts, IListPaged<ProductShortInfo>, HandleGetProducts>()
             .AddQueryHandler<GetProductById, ProductDetail, HandleGetProductById>()
             .AddQueryHandler<GetProductAtVersion, Product, HandleGetProductAtVersion>()
-            .AddQueryHandler<GetProductHistory, ProductHistory, HandleGetProductHistory>();
+            .AddQueryHandler<GetProductHistory, IListPaged<ProductHistory>, HandleGetProductHistory>();
 
     private static IServiceCollection AddProjections(this IServiceCollection services) =>
         services
@@ -180,10 +180,7 @@ public static class ProductServices
 
     private static IServiceCollection AddProjects(this IServiceCollection services) =>
         services
-            .Project<ProductRegistered, ProductHistory>(
-                getId: @event => @event.ProductId,
-                filterBy: (productId, filter) => filter.Eq(e => e.AggregateId, productId)
-            )
+            .Project<ProductRegistered, ProductHistory>()
             .Project<ProductModified, ProductHistory>(
                 getId: @event => @event.ProductId,
                 filterBy: (productId, filter) => filter.Eq(e => e.AggregateId, productId)

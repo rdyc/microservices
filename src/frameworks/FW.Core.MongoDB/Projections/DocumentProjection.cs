@@ -21,8 +21,8 @@ public static class DocumentProjection
 
     public static IServiceCollection Project<TEvent, TDocument>(
         this IServiceCollection services,
-        Func<TEvent, Guid> getId,
-        Func<Guid, FilterDefinitionBuilder<TDocument>, FilterDefinition<TDocument>> filterBy)
+        Func<TEvent, Guid>? getId = null,
+        Func<Guid, FilterDefinitionBuilder<TDocument>, FilterDefinition<TDocument>>? filterBy = null)
         where TDocument : IDocument, IVersionedProjection
         where TEvent : notnull
     {
@@ -157,13 +157,13 @@ public class DocumentProjection<TEvent, TDocument> :
     where TEvent : notnull
 {
     private readonly IMongoCollection<TDocument> collection;
-    private readonly Func<TEvent, Guid> getId;
-    private readonly Func<Guid, FilterDefinitionBuilder<TDocument>, FilterDefinition<TDocument>> filterBy;
+    private readonly Func<TEvent, Guid>? getId;
+    private readonly Func<Guid, FilterDefinitionBuilder<TDocument>, FilterDefinition<TDocument>>? filterBy;
 
     public DocumentProjection(
         IMongoCollection<TDocument> collection,
-        Func<TEvent, Guid> getId,
-        Func<Guid, FilterDefinitionBuilder<TDocument>, FilterDefinition<TDocument>> filterBy
+        Func<TEvent, Guid>? getId = null,
+        Func<Guid, FilterDefinitionBuilder<TDocument>, FilterDefinition<TDocument>>? filterBy = null
     )
     {
         this.collection = collection;
@@ -175,13 +175,17 @@ public class DocumentProjection<TEvent, TDocument> :
     {
         var (@event, eventMetadata) = eventEnvelope;
 
-        var viewId = getId(@event); 
-        var filterBuilder = Builders<TDocument>.Filter;
-        var filter = filterBy.Invoke(viewId, filterBuilder);
-        var entity = await collection.Find(filter).SingleOrDefaultAsync(cancellationToken);
+        TDocument entity = (TDocument)Activator.CreateInstance(typeof(TDocument));
 
-        if (entity == null)
-            throw new InvalidOperationException($"{typeof(TDocument).Name} with id {viewId} wasn't found");
+        if (getId != null && filterBy != null)
+        {
+            var viewId = getId.Invoke(@event);
+            var filter = filterBy.Invoke(viewId, Builders<TDocument>.Filter);
+            entity = await collection.Find(filter).SingleOrDefaultAsync(cancellationToken);
+
+            if (entity == null)
+                throw new InvalidOperationException($"{typeof(TDocument).Name} with id {viewId} wasn't found");
+        }
 
         var eventLogPosition = eventMetadata.LogPosition;
 

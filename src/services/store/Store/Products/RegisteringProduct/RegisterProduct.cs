@@ -10,11 +10,11 @@ using Store.Products.GettingProducts;
 namespace Store.Products.RegisteringProduct;
 
 public record RegisterProduct(
-    Guid Id,
+    Guid ProductId,
     string SKU,
     string Name,
     string Description
-) : ICommand;
+) : IProduct, ICommand;
 
 internal class ValidateRegisterProduct : AbstractValidator<RegisterProduct>
 {
@@ -46,11 +46,11 @@ internal class HandleRegisterProduct : ICommandHandler<RegisterProduct>
 
     public async Task<Unit> Handle(RegisterProduct request, CancellationToken cancellationToken)
     {
-        var (id, sku, name, description) = request;
+        var (productId, sku, name, description) = request;
 
         await scope.Do((_, eventMetadata) =>
             repository.Add(
-                Product.Register(id, sku, name, description),
+                Product.Register(productId, sku, name, description),
                 eventMetadata,
                 cancellationToken
             )

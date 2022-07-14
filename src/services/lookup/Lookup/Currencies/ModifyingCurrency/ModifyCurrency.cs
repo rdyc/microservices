@@ -1,21 +1,38 @@
+using FluentValidation;
 using FW.Core.Commands;
 using FW.Core.EventStoreDB.OptimisticConcurrency;
 using FW.Core.EventStoreDB.Repository;
+using FW.Core.MongoDB;
+using Lookup.Currencies.GettingCurrencies;
 using MediatR;
 using MongoDB.Driver;
 
 namespace Lookup.Currencies.ModifyingCurrency;
 
-public record ModifyCurrency(Guid? Id, string Name, string Code, string Symbol) : CurrencyCommand(Id, Name, Code, Symbol, default);
+public record ModifyCurrency(
+    Guid CurrencyId,
+    string Name,
+    string Code,
+    string Symbol
+) : ICurrency, ICommand;
 
-internal class ValidateModifyCurrency : CurrencyValidator<ModifyCurrency>
+internal class ValidateModifyCurrency : AbstractValidator<ModifyCurrency>
 {
-    public ValidateModifyCurrency(IMongoDatabase database) : base(database)
+    private readonly IMongoCollection<CurrencyShortInfo> collection;
+
+    public ValidateModifyCurrency(IMongoDatabase database)
     {
-        ValidateId();
-        ValidateName();
-        ValidateCode(true);
-        ValidateSymbol();
+        var collectionName = MongoHelper.GetCollectionName<CurrencyShortInfo>();
+        collection = database.GetCollection<CurrencyShortInfo>(collectionName);
+
+        ClassLevelCascadeMode = CascadeMode.Stop;
+
+        RuleFor(p => p.CurrencyId).NotEmpty()
+            .MustExistCurrency(collection);
+        RuleFor(p => p.Name).NotEmpty();
+        RuleFor(p => p.Code).NotEmpty().MaximumLength(3)
+            .MustUniqueCurrencyCode(collection, true);
+        RuleFor(p => p.Symbol).NotEmpty().MaximumLength(3);
     }
 }
 
@@ -24,7 +41,9 @@ internal class HandleModifyCurrency : ICommandHandler<ModifyCurrency>
     private readonly IEventStoreDBRepository<Currency> repository;
     private readonly IEventStoreDBAppendScope scope;
 
-    public HandleModifyCurrency(IEventStoreDBRepository<Currency> repository, IEventStoreDBAppendScope scope)
+    public HandleModifyCurrency(
+        IEventStoreDBRepository<Currency> repository,
+        IEventStoreDBAppendScope scope)
     {
         this.repository = repository;
         this.scope = scope;
@@ -32,11 +51,11 @@ internal class HandleModifyCurrency : ICommandHandler<ModifyCurrency>
 
     public async Task<Unit> Handle(ModifyCurrency request, CancellationToken cancellationToken)
     {
-        var (id, name, code, symbol, _) = request;
+        var (currencyId, name, code, symbol) = request;
 
         await scope.Do((expectedVersion, eventMetadata) =>
             repository.GetAndUpdate(
-                id.Value,
+                currencyId,
                 (currency) => currency.Modify(name, code, symbol),
                 expectedVersion,
                 eventMetadata,

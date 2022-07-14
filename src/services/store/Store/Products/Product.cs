@@ -23,6 +23,8 @@ public class Product : Aggregate
     public int Stock { get; private set; } = default!;
     public ProductStatus Status { get; private set; } = default!;
 
+    private Product() { }
+
     public static Product Register(Guid? id, string sku, string name, string description)
     {
         if (id is null)

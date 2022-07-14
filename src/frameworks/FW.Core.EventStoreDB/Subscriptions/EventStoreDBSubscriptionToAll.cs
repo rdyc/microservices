@@ -52,8 +52,6 @@ public class EventStoreDBSubscriptionToAll
         this.subscriptionOptions = subscriptionOptions;
         cancellationToken = ct;
 
-        logger.LogInformation("Subscription to all '{SubscriptionId}'", subscriptionOptions.SubscriptionId);
-
         var checkpoint = await checkpointRepository.Load(SubscriptionId, ct);
 
         await eventStoreClient.SubscribeToAllAsync(

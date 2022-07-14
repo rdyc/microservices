@@ -1,11 +1,16 @@
 using FluentValidation;
-using Store.Products.GettingProducts;
-using MongoDB.Driver;
 using FW.Core.Exceptions;
+using MongoDB.Driver;
+using Store.Products.GettingProducts;
 
 namespace Store.Products;
 
-public static class ProductValidatorExtension
+public interface IProduct
+{
+    Guid ProductId { get; }
+}
+
+public static class ProductValidatorExtensions
 {
     public static IRuleBuilderOptions<T, Guid> MustExistProduct<T>(
         this IRuleBuilder<T, Guid> ruleBuilder,
@@ -26,16 +31,18 @@ public static class ProductValidatorExtension
     public static IRuleBuilderOptions<T, string> MustUniqueProductSKU<T>(
         this IRuleBuilder<T, string> ruleBuilder,
         IMongoCollection<ProductShortInfo> collection,
-        bool isUpdating = false)
+        bool isUpdating = false
+    ) where T : IProduct
     {
-        return ruleBuilder.MustAsync(async (value, cancellationToken) =>
+        return ruleBuilder
+            .MustAsync(async (instance, value, cancellationToken) =>
             {
                 var builder = Builders<ProductShortInfo>.Filter;
                 var filter = builder.Eq(e => e.Sku, value);
 
                 if (isUpdating)
                 {
-                    filter = builder.And(filter, builder.Ne(e => e.Sku, value));
+                    filter = builder.And(filter, builder.Ne(e => e.Id, instance.ProductId));
                 }
 
                 return await collection.CountDocumentsAsync(filter, null, cancellationToken) == 0;
