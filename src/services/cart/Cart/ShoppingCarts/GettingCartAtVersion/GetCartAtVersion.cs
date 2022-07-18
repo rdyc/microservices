@@ -9,7 +9,7 @@ namespace Cart.ShoppingCarts.GettingCartAtVersion;
 public record GetCartAtVersion(
     Guid CartId,
     ulong Version
-) : IQuery<ShoppingCartDetails>
+) : IQuery<ShoppingCart>
 {
     public static GetCartAtVersion Create(Guid? cartId, ulong? version)
     {
@@ -23,7 +23,7 @@ public record GetCartAtVersion(
     }
 }
 
-internal class HandleGetCartAtVersion : IQueryHandler<GetCartAtVersion, ShoppingCartDetails>
+internal class HandleGetCartAtVersion : IQueryHandler<GetCartAtVersion, ShoppingCart>
 {
     private readonly EventStoreClient eventStore;
 
@@ -32,9 +32,9 @@ internal class HandleGetCartAtVersion : IQueryHandler<GetCartAtVersion, Shopping
         this.eventStore = eventStore;
     }
 
-    public async Task<ShoppingCartDetails> Handle(GetCartAtVersion request, CancellationToken cancellationToken)
+    public async Task<ShoppingCart> Handle(GetCartAtVersion request, CancellationToken cancellationToken)
     {
-        var cart = await eventStore.AggregateStream<ShoppingCartDetails>(
+        var cart = await eventStore.AggregateStream<ShoppingCart>(
             request.CartId,
             cancellationToken,
             request.Version

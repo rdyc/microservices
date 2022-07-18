@@ -10,7 +10,7 @@ using MongoDB.Bson.Serialization.Attributes;
 namespace Cart.ShoppingCarts.GettingCartHistory;
 
 [BsonCollection("shopping_cart_history")]
-public record ShopppingCartHistory : Document, IVersionedProjection
+public record ShoppingCartHistory : Document, IVersionedProjection
 {
     [BsonElement("aggregate_id")]
     public Guid AggregateId { get; set; } = default!;

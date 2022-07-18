@@ -6,7 +6,6 @@ using Store.Lookup.Currencies;
 using Store.Products.AddingAttribute;
 using Store.Products.ModifyingProduct;
 using Store.Products.RegisteringProduct;
-using Store.Products.RemovingAttribute;
 using Store.Products.RemovingProduct;
 using Store.Products.SellingProduct;
 using Store.Products.UpdatingPrice;

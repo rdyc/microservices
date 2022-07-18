@@ -6,11 +6,11 @@ public record OpenShoppingCartRequest(
 
 public record ProductRequest(
     Guid? ProductId,
-    int? Quantity
+    int Quantity
 );
 
 public record AddProductRequest(
-    ProductRequest? Product
+    ProductRequest Product
 );
 
 public record PricedProductRequest(
@@ -20,7 +20,7 @@ public record PricedProductRequest(
 );
 
 public record RemoveProductRequest(
-    PricedProductRequest? Product
+    PricedProductRequest Product
 );
 
 public record ConfirmShoppingCartRequest;

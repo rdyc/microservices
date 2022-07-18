@@ -1,3 +1,4 @@
+using FluentValidation;
 using FW.Core.Commands;
 using FW.Core.EventStoreDB.OptimisticConcurrency;
 using FW.Core.EventStoreDB.Repository;
@@ -15,6 +16,16 @@ public record ConfirmShoppingCart(
             throw new ArgumentOutOfRangeException(nameof(cartId));
 
         return new ConfirmShoppingCart(cartId.Value);
+    }
+}
+
+internal class ValidateConfirmShoppingCart : AbstractValidator<ConfirmShoppingCart>
+{
+    public ValidateConfirmShoppingCart()
+    {
+        ClassLevelCascadeMode = CascadeMode.Stop;
+
+        RuleFor(p => p.CartId).NotEmpty();
     }
 }
 

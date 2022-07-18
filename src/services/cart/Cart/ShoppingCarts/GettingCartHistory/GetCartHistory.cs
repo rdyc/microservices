@@ -12,7 +12,7 @@ public record GetCartHistory(
     Guid CartId,
     int PageNumber,
     int PageSize
-) : IQuery<IListPaged<ShopppingCartHistory>>
+) : IQuery<IListPaged<ShoppingCartHistory>>
 {
     public static GetCartHistory Create(Guid? cartId, int? pageNumber = 1, int? pageSize = 20)
     {
@@ -29,21 +29,21 @@ public record GetCartHistory(
     }
 }
 
-internal class HandleGetCartHistory : IQueryHandler<GetCartHistory, IListPaged<ShopppingCartHistory>>
+internal class HandleGetCartHistory : IQueryHandler<GetCartHistory, IListPaged<ShoppingCartHistory>>
 {
-    private readonly IMongoCollection<ShopppingCartHistory> collection;
+    private readonly IMongoCollection<ShoppingCartHistory> collection;
 
     public HandleGetCartHistory(IMongoDatabase database)
     {
-        var collectionName = MongoHelper.GetCollectionName<ShopppingCartHistory>();
-        collection = database.GetCollection<ShopppingCartHistory>(collectionName);
+        var collectionName = MongoHelper.GetCollectionName<ShoppingCartHistory>();
+        collection = database.GetCollection<ShoppingCartHistory>(collectionName);
     }
 
-    public async Task<IListPaged<ShopppingCartHistory>> Handle(GetCartHistory request, CancellationToken cancellationToken)
+    public async Task<IListPaged<ShoppingCartHistory>> Handle(GetCartHistory request, CancellationToken cancellationToken)
     {
         var (cartId, index, size) = request;
 
-        var filter = Builders<ShopppingCartHistory>.Filter.Eq(e => e.AggregateId, cartId);
+        var filter = Builders<ShoppingCartHistory>.Filter.Eq(e => e.AggregateId, cartId);
 
         return await collection.FindWithPagingAsync(filter, index, size, cancellationToken);
     }

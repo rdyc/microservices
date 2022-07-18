@@ -3,111 +3,127 @@ using Cart.ShoppingCarts.CancelingCart;
 using Cart.ShoppingCarts.ConfirmingCart;
 using Cart.ShoppingCarts.OpeningCart;
 using Cart.ShoppingCarts.RemovingProduct;
+using FW.Core.Events;
 using FW.Core.Extensions;
-using FW.Core.Projections;
+using FW.Core.MongoDB;
+using MongoDB.Bson.Serialization.Attributes;
 
 namespace Cart.ShoppingCarts.GettingCartById;
 
-public class ShoppingCartDetails : IVersionedProjection
+[BsonCollection("shopping_cart_details")]
+public record ShoppingCartDetails : Document
 {
-    public Guid Id { get; set; }
+    [BsonElement("client_id")]
     public Guid ClientId { get; set; }
+
+    [BsonElement("status")]
     public ShoppingCartStatus Status { get; set; }
+
+    [BsonElement("products")]
     public IList<ShoppingCartProduct> Products { get; set; } = default!;
+
+    [BsonElement("total_price")]
     public decimal TotalPrice => Products.Sum(pi => pi.TotalPrice);
-    public long Version { get; set; }
 
+    [BsonElement("confirmed_at")]
+    public DateTime? ConfirmedAt { get; set; }
 
-    public void When(object @event)
-    {
-        switch (@event)
-        {
-            case ShoppingCartOpened cartOpened:
-                Apply(cartOpened);
-                return;
-            case ProductAdded cartOpened:
-                Apply(cartOpened);
-                return;
-            case ProductRemoved cartOpened:
-                Apply(cartOpened);
-                return;
-            case ShoppingCartConfirmed cartOpened:
-                Apply(cartOpened);
-                return;
-            case ShoppingCartCanceled cartCanceled:
-                Apply(cartCanceled);
-                return;
-        }
-    }
+    [BsonElement("canceled_at")]
+    public DateTime? CanceledAt { get; set; }
 
-    public void Apply(ShoppingCartOpened @event)
-    {
-        Id = @event.CartId;
-        ClientId = @event.ClientId;
-        Products = new List<ShoppingCartProduct>();
-        Status = @event.ShoppingCartStatus;
-        Version = 0;
-    }
+    [BsonElement("version")]
+    public ulong Version { get; set; }
 
-    public void Apply(ProductAdded @event)
-    {
-        Version++;
-
-        var newProduct = @event.Product;
-
-        var existinwProduct = FindProductMatchingWith(newProduct);
-
-        if (existinwProduct is null)
-        {
-            Products.Add(newProduct);
-            return;
-        }
-
-        Products.Replace(
-            existinwProduct,
-            existinwProduct.MergeWith(newProduct)
-        );
-    }
-
-    public void Apply(ProductRemoved @event)
-    {
-        Version++;
-
-        var productItemToBeRemoved = @event.Product;
-
-        var existinwProduct = FindProductMatchingWith(@event.Product);
-
-        if (existinwProduct == null)
-            return;
-
-        if (existinwProduct.HasTheSameQuantity(productItemToBeRemoved))
-        {
-            Products.Remove(existinwProduct);
-            return;
-        }
-
-        Products.Replace(
-            existinwProduct,
-            existinwProduct.Substract(productItemToBeRemoved)
-        );
-    }
-
-    public void Apply(ShoppingCartConfirmed @event)
-    {
-        Version++;
-
-        Status = ShoppingCartStatus.Confirmed;
-    }
-
-    public void Apply(ShoppingCartCanceled @event)
-    {
-        Version++;
-
-        Status = ShoppingCartStatus.Canceled;
-    }
-
-    private ShoppingCartProduct? FindProductMatchingWith(ShoppingCartProduct product)
-        => Products.SingleOrDefault(e => e.MatchesProductAndPrice(product));
-
+    [BsonElement("position")]
     public ulong LastProcessedPosition { get; set; }
+}
+
+public class ShoppingCartDetailsProjection
+{
+    public static ShoppingCartDetails Handle(EventEnvelope<ShoppingCartOpened> eventEnvelope)
+    {
+        var (cartId, clientId, status) = eventEnvelope.Data;
+
+        return new ShoppingCartDetails
+        {
+            Id = cartId,
+            ClientId = clientId,
+            Products = new List<ShoppingCartProduct>(),
+            Status = status
+        };
+    }
+
+    public static void Handle(EventEnvelope<ProductAdded> eventEnvelope, ShoppingCartDetails view)
+    {
+        if (view.LastProcessedPosition >= eventEnvelope.Metadata.LogPosition)
+            return;
+
+        var newProduct = eventEnvelope.Data.Product;
+        var existingProduct = FindProductMatchingWith(view.Products, newProduct);
+
+        if (existingProduct is null)
+        {
+            view.Products.Add(newProduct);
+        }
+        else
+        {
+            view.Products.Replace(
+                existingProduct,
+                existingProduct.MergeWith(newProduct)
+            );
+        }
+        view.Version = eventEnvelope.Metadata.StreamPosition;
+        view.LastProcessedPosition = eventEnvelope.Metadata.LogPosition;
+    }
+
+    public static void Handle(EventEnvelope<ProductRemoved> eventEnvelope, ShoppingCartDetails view)
+    {
+        if (view.LastProcessedPosition >= eventEnvelope.Metadata.LogPosition)
+            return;
+
+        var productItemToBeRemoved = eventEnvelope.Data.Product;
+        var existingProduct = FindProductMatchingWith(view.Products, eventEnvelope.Data.Product);
+
+        if (existingProduct != null)
+        {
+            if (existingProduct.HasTheSameQuantity(productItemToBeRemoved))
+            {
+                view.Products.Remove(existingProduct);
+            }
+            else
+            {
+                view.Products.Replace(
+                    existingProduct,
+                    existingProduct.Substract(productItemToBeRemoved)
+                );
+            }
+        }
+        view.Version = eventEnvelope.Metadata.StreamPosition;
+        view.LastProcessedPosition = eventEnvelope.Metadata.LogPosition;
+    }
+
+    public static void Handle(EventEnvelope<ShoppingCartConfirmed> eventEnvelope, ShoppingCartDetails view)
+    {
+        if (view.LastProcessedPosition >= eventEnvelope.Metadata.LogPosition)
+            return;
+
+        view.Status = ShoppingCartStatus.Confirmed;
+        view.ConfirmedAt = eventEnvelope.Data.ConfirmedAt;
+        view.Version = eventEnvelope.Metadata.StreamPosition;
+        view.LastProcessedPosition = eventEnvelope.Metadata.LogPosition;
+    }
+
+    public static void Handle(EventEnvelope<ShoppingCartCanceled> eventEnvelope, ShoppingCartDetails view)
+    {
+        if (view.LastProcessedPosition >= eventEnvelope.Metadata.LogPosition)
+            return;
+
+        view.Status = ShoppingCartStatus.Canceled;
+        view.CanceledAt = eventEnvelope.Data.CanceledAt;
+        view.Version = eventEnvelope.Metadata.StreamPosition;
+        view.LastProcessedPosition = eventEnvelope.Metadata.LogPosition;
+    }
+
+    private static ShoppingCartProduct? FindProductMatchingWith(IEnumerable<ShoppingCartProduct> products, ShoppingCartProduct product)
+        => products.SingleOrDefault(e => e.MatchesProductAndPrice(product));
 }
