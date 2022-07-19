@@ -57,18 +57,18 @@ internal class HandleProductChanged : IEventHandler<EventEnvelope<ProductChanged
 
     private async Task Dispatch(ProductRegistered @event)
     {
-        var (id, sku, name, status) = @event;
-        await commandBus.Send(CreateProduct.Create(id, sku, name, status));
+        var (id, sku, name, description, status) = @event;
+        await commandBus.SendAsync(CreateProduct.Create(id, sku, name, description, status));
     }
 
     private async Task Dispatch(ProductModified @event)
     {
-        var (id, sku, name) = @event;
-        await commandBus.Send(UpdateProduct.Create(id, sku, name));
+        var (id, sku, name, description) = @event;
+        await commandBus.SendAsync(UpdateProduct.Create(id, sku, name, description));
     }
 
     private async Task Dispatch(ProductRemoved @event)
     {
-        await commandBus.Send(DeleteProduct.Create(@event.Id));
+        await commandBus.SendAsync(DeleteProduct.Create(@event.Id));
     }
 }

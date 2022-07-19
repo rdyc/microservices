@@ -9,13 +9,13 @@ using MongoDB.Driver;
 
 namespace Cart.ShoppingCarts.AddingProduct;
 
-public record AddProduct(
+public record AddProductCart(
     Guid CartId,
     Guid ProductId,
     int Quantity
 ) : IProduct, ICommand
 {
-    public static AddProduct Create(Guid? cartId, Guid? productId, int quantity)
+    public static AddProductCart Create(Guid? cartId, Guid? productId, int quantity)
     {
         if (cartId == null || cartId == Guid.Empty)
             throw new ArgumentOutOfRangeException(nameof(cartId));
@@ -26,36 +26,18 @@ public record AddProduct(
         if (quantity <= 0)
             throw new IndexOutOfRangeException(nameof(quantity));
 
-        return new AddProduct(cartId.Value, productId.Value, quantity);
+        return new AddProductCart(cartId.Value, productId.Value, quantity);
     }
 }
 
-internal class ValidateAddProduct : AbstractValidator<AddProduct>
+internal class ValidateAddProductCart : AbstractValidator<AddProductCart>
 {
-    public ValidateAddProduct(IMongoDatabase database)
+    public ValidateAddProductCart(IMongoDatabase database)
     {
         var collectionName = MongoHelper.GetCollectionName<Product>();
         var collection = database.GetCollection<Product>(collectionName);
 
         ClassLevelCascadeMode = CascadeMode.Stop;
-
-        RuleFor(p => p.CartId).NotEmpty();
-
-        RuleFor(p => p.ProductId).NotEmpty()
-            .MustExistProduct(collection);
-
-        RuleFor(p => p.Quantity).GreaterThan(0);
-    }
-}
-
-internal class AddProductValidator : AbstractValidator<AddProduct>
-{
-    public AddProductValidator(IMongoDatabase database)
-    {
-        ClassLevelCascadeMode = CascadeMode.Stop;
-
-        var collectionName = MongoHelper.GetCollectionName<Product>();
-        var collection = database.GetCollection<Product>(collectionName);
 
         RuleFor(p => p.CartId).NotEmpty();
 
@@ -67,24 +49,25 @@ internal class AddProductValidator : AbstractValidator<AddProduct>
     }
 }
 
-internal class HandleAddProduct : ICommandHandler<AddProduct>
+internal class HandleAddProductCart : ICommandHandler<AddProductCart>
 {
     private readonly IMongoCollection<Product> collection;
     private readonly IEventStoreDBRepository<ShoppingCart> cartRepository;
     private readonly IEventStoreDBAppendScope scope;
 
-    public HandleAddProduct(
-        IMongoCollection<Product> collection,
+    public HandleAddProductCart(
+        IMongoDatabase database,
         IEventStoreDBRepository<ShoppingCart> cartRepository,
         IEventStoreDBAppendScope scope
     )
     {
-        this.collection = collection;
+        var collectionName = MongoHelper.GetCollectionName<Product>();
+        this.collection = database.GetCollection<Product>(collectionName);
         this.cartRepository = cartRepository;
         this.scope = scope;
     }
 
-    public async Task<Unit> Handle(AddProduct request, CancellationToken cancellationToken)
+    public async Task<Unit> Handle(AddProductCart request, CancellationToken cancellationToken)
     {
         var (cartId, productId, quantity) = request;
         var product = await collection.Find(e => e.Id.Equals(productId))

@@ -1,9 +1,9 @@
 using Store.Lookup.Attributes;
 
-namespace Store.Products.RemovingAttribute;
+namespace Store.Products.AddingAttribute;
 
-public record AttributeRemoved(
-    Guid ProductId,
+public record ProductAttributeAdded(
+    Guid Id,
     Guid AttributeId,
     string Name,
     AttributeType Type,
@@ -11,7 +11,7 @@ public record AttributeRemoved(
     string Value
 )
 {
-    public static AttributeRemoved Create(Guid productId, ProductAttribute productAttribute)
+    public static ProductAttributeAdded Create(Guid productId, ProductAttribute productAttribute)
     {
         var (id, name, type, unit, value) = productAttribute;
 

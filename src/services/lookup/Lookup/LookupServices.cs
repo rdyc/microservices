@@ -25,7 +25,7 @@ public static class LookupServices
             .AddEventStoreDBSubscriptionToAll(new EventStoreDBSubscriptionToAllOptions
             {
                 SubscriptionId = "lookup",
-                FilterOptions = new(EventTypeFilter.Prefix("Lookup_"))
+                FilterOptions = new(EventTypeFilter.RegularExpression(@"Attribute|Currency"))
             })
             .AddCurrency()
             .AddAttribute()

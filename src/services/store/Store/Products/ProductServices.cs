@@ -38,26 +38,31 @@ public static class ProductServices
         services
             .AddCommandValidator<RegisterProduct, ValidateRegisterProduct>()
             .AddCommandValidator<ModifyProduct, ValidateModifyProduct>()
-            .AddCommandValidator<AddAttribute, ValidateAddAttribute>()
-            .AddCommandValidator<RemoveAttribute, ValidateRemoveAttribute>()
-            .AddCommandValidator<UpdatePrice, ValidateUpdatePrice>()
-            .AddCommandValidator<UpdateStock, ValidateUpdateStock>()
+            .AddCommandValidator<AddProductAttribute, ValidateAddAttribute>()
+            .AddCommandValidator<RemoveProductAttribute, ValidateRemoveProductAttribute>()
+            .AddCommandValidator<UpdateProductPrice, ValidateUpdateProductPrice>()
+            .AddCommandValidator<UpdateProductStock, ValidateUpdateProductStock>()
             .AddCommandValidator<RemoveProduct, ValidateRemoveProduct>();
 
     private static IServiceCollection AddCommandHandlers(this IServiceCollection services) =>
         services
             .AddCommandHandler<RegisterProduct, HandleRegisterProduct>()
             .AddCommandHandler<ModifyProduct, HandleModifyProduct>()
-            .AddCommandHandler<AddAttribute, HandleAddAttribute>()
-            .AddCommandHandler<RemoveAttribute, HandleRemoveAttribute>()
-            .AddCommandHandler<UpdatePrice, HandleUpdatePrice>()
-            .AddCommandHandler<UpdateStock, HandleUpdateStock>()
+            .AddCommandHandler<AddProductAttribute, HandleAddProductAttribute>()
+            .AddCommandHandler<RemoveProductAttribute, HandleRemoveAttribute>()
+            .AddCommandHandler<UpdateProductPrice, HandleUpdateProductPrice>()
+            .AddCommandHandler<UpdateProductStock, HandleUpdateProductStock>()
             .AddCommandHandler<RemoveProduct, HandleRemoveProduct>();
 
+    // TODO: An event envelopes with same event will executed many times in event handlers, projections and projects!
     private static IServiceCollection AddEventHandlers(this IServiceCollection services) =>
         services
             .AddEventHandler<EventEnvelope<ProductRegistered>, HandleProductChanged>()
             .AddEventHandler<EventEnvelope<ProductModified>, HandleProductChanged>()
+            .AddEventHandler<EventEnvelope<ProductAttributeAdded>, HandleProductChanged>()
+            .AddEventHandler<EventEnvelope<ProductAttributeRemoved>, HandleProductChanged>()
+            .AddEventHandler<EventEnvelope<ProductPriceChanged>, HandleProductChanged>()
+            .AddEventHandler<EventEnvelope<ProductStockChanged>, HandleProductChanged>()
             .AddEventHandler<EventEnvelope<ProductRemoved>, HandleProductChanged>();
 
     private static IServiceCollection AddQueryHandlers(this IServiceCollection services) =>
@@ -72,7 +77,7 @@ public static class ProductServices
             .Projection<ProductShortInfo>(builder => builder
                 .AddOn<ProductRegistered>(ProductShortInfoProjection.Handle)
                 .UpdateOn<ProductModified>(
-                    onGet: e => e.ProductId,
+                    onGet: e => e.Id,
                     onHandle: ProductShortInfoProjection.Handle,
                     onUpdate: (view, update) => update
                         .Set(e => e.Sku, view.Sku)
@@ -81,8 +86,8 @@ public static class ProductServices
                         .Set(e => e.Version, view.Version)
                         .Set(e => e.LastProcessedPosition, view.LastProcessedPosition)
                 )
-                .UpdateOn<PriceChanged>(
-                    onGet: e => e.ProductId,
+                .UpdateOn<ProductPriceChanged>(
+                    onGet: e => e.Id,
                     onHandle: ProductShortInfoProjection.Handle,
                     onUpdate: (view, update) => update
                         .Set(e => e.Currency, view.Currency)
@@ -90,8 +95,8 @@ public static class ProductServices
                         .Set(e => e.Version, view.Version)
                         .Set(e => e.LastProcessedPosition, view.LastProcessedPosition)
                 )
-                .UpdateOn<StockChanged>(
-                    onGet: e => e.ProductId,
+                .UpdateOn<ProductStockChanged>(
+                    onGet: e => e.Id,
                     onHandle: ProductShortInfoProjection.Handle,
                     onUpdate: (view, update) => update
                         .Set(e => e.Stock, view.Stock)
@@ -99,7 +104,7 @@ public static class ProductServices
                         .Set(e => e.LastProcessedPosition, view.LastProcessedPosition)
                 )
                 .UpdateOn<ProductSold>(
-                    onGet: e => e.ProductId,
+                    onGet: e => e.Id,
                     onHandle: ProductShortInfoProjection.Handle,
                     onUpdate: (view, update) => update
                         .Set(e => e.Sold, view.Sold)
@@ -107,7 +112,7 @@ public static class ProductServices
                         .Set(e => e.LastProcessedPosition, view.LastProcessedPosition)
                 )
                 .UpdateOn<ProductRemoved>(
-                    onGet: e => e.ProductId,
+                    onGet: e => e.Id,
                     onHandle: ProductShortInfoProjection.Handle,
                     onUpdate: (view, update) => update
                         .Set(e => e.Status, view.Status)
@@ -118,7 +123,7 @@ public static class ProductServices
             .Projection<ProductDetail>(builder => builder
                 .AddOn<ProductRegistered>(ProductDetailProjection.Handle)
                 .UpdateOn<ProductModified>(
-                    onGet: e => e.ProductId,
+                    onGet: e => e.Id,
                     onHandle: ProductDetailProjection.Handle,
                     onUpdate: (view, update) => update
                         .Set(e => e.Sku, view.Sku)
@@ -127,24 +132,24 @@ public static class ProductServices
                         .Set(e => e.Version, view.Version)
                         .Set(e => e.LastProcessedPosition, view.LastProcessedPosition)
                 )
-                .UpdateOn<AttributeAdded>(
-                    onGet: e => e.ProductId,
+                .UpdateOn<ProductAttributeAdded>(
+                    onGet: e => e.Id,
                     onHandle: ProductDetailProjection.Handle,
                     onUpdate: (view, update) => update
                         .Set(e => e.Attributes, view.Attributes)
                         .Set(e => e.Version, view.Version)
                         .Set(e => e.LastProcessedPosition, view.LastProcessedPosition)
                 )
-                .UpdateOn<AttributeRemoved>(
-                    onGet: e => e.ProductId,
+                .UpdateOn<ProductAttributeRemoved>(
+                    onGet: e => e.Id,
                     onHandle: ProductDetailProjection.Handle,
                     onUpdate: (view, update) => update
                         .Set(e => e.Attributes, view.Attributes)
                         .Set(e => e.Version, view.Version)
                         .Set(e => e.LastProcessedPosition, view.LastProcessedPosition)
                 )
-                .UpdateOn<PriceChanged>(
-                    onGet: e => e.ProductId,
+                .UpdateOn<ProductPriceChanged>(
+                    onGet: e => e.Id,
                     onHandle: ProductDetailProjection.Handle,
                     onUpdate: (view, update) => update
                         .Set(e => e.Currency, view.Currency)
@@ -152,8 +157,8 @@ public static class ProductServices
                         .Set(e => e.Version, view.Version)
                         .Set(e => e.LastProcessedPosition, view.LastProcessedPosition)
                 )
-                .UpdateOn<StockChanged>(
-                    onGet: e => e.ProductId,
+                .UpdateOn<ProductStockChanged>(
+                    onGet: e => e.Id,
                     onHandle: ProductDetailProjection.Handle,
                     onUpdate: (view, update) => update
                         .Set(e => e.Stock, view.Stock)
@@ -161,7 +166,7 @@ public static class ProductServices
                         .Set(e => e.LastProcessedPosition, view.LastProcessedPosition)
                 )
                 .UpdateOn<ProductSold>(
-                    onGet: e => e.ProductId,
+                    onGet: e => e.Id,
                     onHandle: ProductDetailProjection.Handle,
                     onUpdate: (view, update) => update
                         .Set(e => e.Sold, view.Sold)
@@ -169,7 +174,7 @@ public static class ProductServices
                         .Set(e => e.LastProcessedPosition, view.LastProcessedPosition)
                 )
                 .UpdateOn<ProductRemoved>(
-                    onGet: e => e.ProductId,
+                    onGet: e => e.Id,
                     onHandle: ProductDetailProjection.Handle,
                     onUpdate: (view, update) => update
                         .Set(e => e.Status, view.Status)
@@ -182,31 +187,31 @@ public static class ProductServices
         services
             .Project<ProductRegistered, ProductHistory>()
             .Project<ProductModified, ProductHistory>(
-                getId: @event => @event.ProductId,
+                getId: @event => @event.Id,
                 filterBy: (productId, filter) => filter.Eq(e => e.AggregateId, productId)
             )
-            .Project<AttributeAdded, ProductHistory>(
-                getId: @event => @event.ProductId,
+            .Project<ProductAttributeAdded, ProductHistory>(
+                getId: @event => @event.Id,
                 filterBy: (productId, filter) => filter.Eq(e => e.AggregateId, productId)
             )
-            .Project<AttributeRemoved, ProductHistory>(
-                getId: @event => @event.ProductId,
+            .Project<ProductAttributeRemoved, ProductHistory>(
+                getId: @event => @event.Id,
                 filterBy: (productId, filter) => filter.Eq(e => e.AggregateId, productId)
             )
-            .Project<PriceChanged, ProductHistory>(
-                getId: @event => @event.ProductId,
+            .Project<ProductPriceChanged, ProductHistory>(
+                getId: @event => @event.Id,
                 filterBy: (productId, filter) => filter.Eq(e => e.AggregateId, productId)
             )
-            .Project<StockChanged, ProductHistory>(
-                getId: @event => @event.ProductId,
+            .Project<ProductStockChanged, ProductHistory>(
+                getId: @event => @event.Id,
                 filterBy: (productId, filter) => filter.Eq(e => e.AggregateId, productId)
             )
             .Project<ProductSold, ProductHistory>(
-                getId: @event => @event.ProductId,
+                getId: @event => @event.Id,
                 filterBy: (productId, filter) => filter.Eq(e => e.AggregateId, productId)
             )
             .Project<ProductRemoved, ProductHistory>(
-                getId: @event => @event.ProductId,
+                getId: @event => @event.Id,
                 filterBy: (productId, filter) => filter.Eq(e => e.AggregateId, productId)
             );
 }

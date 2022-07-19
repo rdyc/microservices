@@ -1,13 +1,13 @@
 namespace Store.Products.ModifyingProduct;
 
 public record ProductModified(
-    Guid ProductId,
+    Guid Id,
     string Sku,
     string Name,
     string Description)
 {
-    public static ProductModified Create(Guid productId, string sku, string name, string description)
+    public static ProductModified Create(Guid id, string sku, string name, string description)
     {
-        return new ProductModified(productId, sku, name, description);
+        return new ProductModified(id, sku, name, description);
     }
 }

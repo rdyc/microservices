@@ -18,7 +18,7 @@ public class Product : Aggregate
     public string Name { get; private set; } = default!;
     public string Description { get; private set; } = default!;
     public IList<ProductAttribute> Attributes { get; private set; } = default!;
-    public Currency Currency { get; private set; } = default!;
+    public CurrencyPrice Currency { get; private set; } = default!;
     public decimal Price { get; private set; } = default!;
     public int Stock { get; private set; } = default!;
     public ProductStatus Status { get; private set; } = default!;
@@ -51,16 +51,16 @@ public class Product : Aggregate
             case ProductModified modified:
                 Apply(modified);
                 return;
-            case AttributeAdded attributeAdded:
+            case ProductAttributeAdded attributeAdded:
                 Apply(attributeAdded);
                 return;
-            case AttributeRemoved attributeRemoved:
+            case ProductAttributeRemoved attributeRemoved:
                 Apply(attributeRemoved);
                 return;
-            case PriceChanged priceChanged:
+            case ProductPriceChanged priceChanged:
                 Apply(priceChanged);
                 return;
-            case StockChanged stockChanged:
+            case ProductStockChanged stockChanged:
                 Apply(stockChanged);
                 return;
             case ProductSold productSold:
@@ -74,7 +74,7 @@ public class Product : Aggregate
 
     public void Apply(ProductRegistered evt)
     {
-        Id = evt.ProductId;
+        Id = evt.Id;
         Sku = evt.Sku;
         Name = evt.Name;
         Description = evt.Description;
@@ -106,13 +106,13 @@ public class Product : Aggregate
         if (Status == ProductStatus.Discontinue)
             throw new InvalidOperationException($"Adding attribute for the product in '{Status}' status is not allowed.");
 
-        var @event = AttributeAdded.Create(Id, productAttribute);
+        var @event = ProductAttributeAdded.Create(Id, productAttribute);
 
         Enqueue(@event);
         Apply(@event);
     }
 
-    public void Apply(AttributeAdded @event)
+    public void Apply(ProductAttributeAdded @event)
     {
         var (_, id, name, type, unit, value) = @event;
         var newAttribute = ProductAttribute.From(id, name, type, unit, value);
@@ -140,13 +140,13 @@ public class Product : Aggregate
         if (existingAttribute is null)
             throw new InvalidOperationException($"An attribute with id `{attributeId}` was not found in product.");
 
-        var @event = AttributeRemoved.Create(Id, existingAttribute);
+        var @event = ProductAttributeRemoved.Create(Id, existingAttribute);
 
         Enqueue(@event);
         Apply(@event);
     }
 
-    public void Apply(AttributeRemoved @event)
+    public void Apply(ProductAttributeRemoved @event)
     {
         var existingAttribute = FindAttributeMatchingWith(@event.AttributeId);
 
@@ -159,18 +159,18 @@ public class Product : Aggregate
         }
     }
 
-    public void UpdatePrice(Currency currency, decimal price)
+    public void UpdatePrice(CurrencyPrice currency, decimal price)
     {
         if (Status == ProductStatus.Discontinue)
             throw new InvalidOperationException($"The product has discontinued");
 
-        var evt = PriceChanged.Create(Id, currency, price);
+        var evt = ProductPriceChanged.Create(Id, currency, price);
 
         Enqueue(evt);
         Apply(evt);
     }
 
-    public void Apply(PriceChanged evt)
+    public void Apply(ProductPriceChanged evt)
     {
         Version++;
 
@@ -183,13 +183,13 @@ public class Product : Aggregate
         if (Status == ProductStatus.Discontinue)
             throw new InvalidOperationException($"The product has discontinued");
 
-        var evt = StockChanged.Create(Id, stock);
+        var evt = ProductStockChanged.Create(Id, stock);
 
         Enqueue(evt);
         Apply(evt);
     }
 
-    public void Apply(StockChanged evt)
+    public void Apply(ProductStockChanged evt)
     {
         Version++;
 

@@ -10,12 +10,12 @@ using Attribute = Store.Lookup.Attributes.Attribute;
 
 namespace Store.Products.RemovingAttribute;
 
-public record RemoveAttribute(
+public record RemoveProductAttribute(
     Guid ProductId, 
     Guid AttributeId
 ) : ICommand
 {
-    public static RemoveAttribute Create(Guid productId, Guid attributeId)
+    public static RemoveProductAttribute Create(Guid productId, Guid attributeId)
     {
         if (productId == Guid.Empty)
             throw new ArgumentOutOfRangeException(nameof(productId));
@@ -27,9 +27,9 @@ public record RemoveAttribute(
     }
 }
 
-internal class ValidateRemoveAttribute : AbstractValidator<RemoveAttribute>
+internal class ValidateRemoveProductAttribute : AbstractValidator<RemoveProductAttribute>
 {
-    public ValidateRemoveAttribute(IMongoDatabase database)
+    public ValidateRemoveProductAttribute(IMongoDatabase database)
     {
         var collectionName = MongoHelper.GetCollectionName<Attribute>();
         var collection = database.GetCollection<Attribute>(collectionName);
@@ -40,7 +40,7 @@ internal class ValidateRemoveAttribute : AbstractValidator<RemoveAttribute>
     }
 }
 
-internal class HandleRemoveAttribute : ICommandHandler<RemoveAttribute>
+internal class HandleRemoveAttribute : ICommandHandler<RemoveProductAttribute>
 {
     private readonly IEventStoreDBRepository<Product> repository;
     private readonly IEventStoreDBAppendScope scope;
@@ -51,7 +51,7 @@ internal class HandleRemoveAttribute : ICommandHandler<RemoveAttribute>
         this.scope = scope;
     }
 
-    public async Task<Unit> Handle(RemoveAttribute request, CancellationToken cancellationToken)
+    public async Task<Unit> Handle(RemoveProductAttribute request, CancellationToken cancellationToken)
     {
         var (productId, attributeId) = request;
 

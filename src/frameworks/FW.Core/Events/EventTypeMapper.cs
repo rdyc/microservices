@@ -22,7 +22,8 @@ public class EventTypeMapper
 
     public static string ToName(Type eventType) => Instance.typeNameMap.GetOrAdd(eventType, _ =>
     {
-        var eventTypeName = eventType.FullName!.Replace(".", "_");
+        // var eventTypeName = eventType.FullName!.Replace(".", "_");
+        var eventTypeName = eventType.Name;
 
         Instance.typeMap.AddOrUpdate(eventTypeName, eventType, (_, _) => eventType);
 
@@ -31,7 +32,8 @@ public class EventTypeMapper
 
     public static Type? ToType(string eventTypeName) => Instance.typeMap.GetOrAdd(eventTypeName, _ =>
     {
-        var type = TypeProvider.GetFirstMatchingTypeFromCurrentDomainAssembly(eventTypeName.Replace("_", "."));
+        // var type = TypeProvider.GetFirstMatchingTypeFromCurrentDomainAssembly(eventTypeName.Replace("_", "."));
+        var type = TypeProvider.GetFirstMatchingTypeFromCurrentDomainAssembly(eventTypeName);
 
         if (type == null)
             return null;

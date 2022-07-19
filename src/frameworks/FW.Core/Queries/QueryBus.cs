@@ -11,8 +11,9 @@ public class QueryBus : IQueryBus
         this.mediator = mediator;
     }
 
-    public Task<TResponse> Send<TQuery, TResponse>(TQuery query) where TQuery : IQuery<TResponse>
+    public Task<TResponse> SendAsync<TQuery, TResponse>(TQuery query, CancellationToken cancellationToken)
+        where TQuery : IQuery<TResponse>
     {
-        return mediator.Send(query);
+        return mediator.Send(query, cancellationToken);
     }
 }

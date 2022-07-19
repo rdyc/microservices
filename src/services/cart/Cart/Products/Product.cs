@@ -13,6 +13,9 @@ public record Product : Document
     [BsonElement("name")]
     public string Name { get; set; } = default!;
 
+    [BsonElement("description")]
+    public string Description { get; set; } = default!;
+
     [BsonElement("status")]
     public ProductStatus Status { get; set; } = default!;
 

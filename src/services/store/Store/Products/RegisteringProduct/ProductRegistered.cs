@@ -1,17 +1,17 @@
 namespace Store.Products.RegisteringProduct;
 
 public record ProductRegistered(
-    Guid ProductId,
+    Guid Id,
     string Sku,
     string Name,
     string Description,
     ProductStatus Status)
 {
     public static ProductRegistered Create(
-        Guid productId,
+        Guid id,
         string sku,
         string name,
         string description,
         ProductStatus status)
-        => new(productId, sku, name, description, status);
+        => new(id, sku, name, description, status);
 }

@@ -35,10 +35,10 @@ public class ShoppingCart : Aggregate
             case ShoppingCartOpened cartOpened:
                 Apply(cartOpened);
                 return;
-            case ProductAdded productAdded:
+            case ProductCartAdded productAdded:
                 Apply(productAdded);
                 return;
-            case ProductRemoved productRemoved:
+            case ProductCartRemoved productRemoved:
                 Apply(productRemoved);
                 return;
             case ShoppingCartConfirmed cartConfirmed:
@@ -68,13 +68,13 @@ public class ShoppingCart : Aggregate
         if (Status != ShoppingCartStatus.Pending)
             throw new InvalidOperationException($"Adding product for the cart in '{Status}' status is not allowed.");
 
-        var @event = ProductAdded.Create(Id, product);
+        var @event = ProductCartAdded.Create(Id, product);
 
         Enqueue(@event);
         Apply(@event);
     }
 
-    public void Apply(ProductAdded @event)
+    public void Apply(ProductCartAdded @event)
     {
         var newProductItem = @event.Product;
 
@@ -105,13 +105,13 @@ public class ShoppingCart : Aggregate
         if (!existingProduct.HasEnough(productToBeRemoved.Quantity))
             throw new InvalidOperationException($"Cannot remove {productToBeRemoved.Quantity} items of Product with id `{productToBeRemoved.ProductId}` as there are only ${existingProduct.Quantity} items in card");
 
-        var @event = ProductRemoved.Create(Id, productToBeRemoved);
+        var @event = ProductCartRemoved.Create(Id, productToBeRemoved);
 
         Enqueue(@event);
         Apply(@event);
     }
 
-    public void Apply(ProductRemoved @event)
+    public void Apply(ProductCartRemoved @event)
     {
         var productToBeRemoved = @event.Product;
 

@@ -32,7 +32,7 @@ public record ProductDetail : Document
     public IList<ProductDetailAttribute> Attributes { get; private set; } = default!;
 
     [BsonElement("currency")]
-    public Currency Currency { get; set; } = default!;
+    public CurrencyPrice Currency { get; set; } = default!;
 
     [BsonElement("price")]
     public decimal Price { get; set; } = default!;
@@ -100,7 +100,7 @@ public class ProductDetailProjection
         view.LastProcessedPosition = eventEnvelope.Metadata.LogPosition;
     }
 
-    public static void Handle(EventEnvelope<PriceChanged> eventEnvelope, ProductDetail view)
+    public static void Handle(EventEnvelope<ProductPriceChanged> eventEnvelope, ProductDetail view)
     {
         if (view.LastProcessedPosition >= eventEnvelope.Metadata.LogPosition)
             return;
@@ -113,7 +113,7 @@ public class ProductDetailProjection
         view.LastProcessedPosition = eventEnvelope.Metadata.LogPosition;
     }
 
-    public static void Handle(EventEnvelope<StockChanged> eventEnvelope, ProductDetail view)
+    public static void Handle(EventEnvelope<ProductStockChanged> eventEnvelope, ProductDetail view)
     {
         if (view.LastProcessedPosition >= eventEnvelope.Metadata.LogPosition)
             return;
@@ -137,7 +137,7 @@ public class ProductDetailProjection
         view.LastProcessedPosition = eventEnvelope.Metadata.LogPosition;
     }
 
-    public static void Handle(EventEnvelope<AttributeAdded> eventEnvelope, ProductDetail view)
+    public static void Handle(EventEnvelope<ProductAttributeAdded> eventEnvelope, ProductDetail view)
     {
         if (view.LastProcessedPosition >= eventEnvelope.Metadata.LogPosition)
             return;
@@ -156,7 +156,7 @@ public class ProductDetailProjection
         view.LastProcessedPosition = eventEnvelope.Metadata.LogPosition;
     }
 
-    public static void Handle(EventEnvelope<RemovingAttribute.AttributeRemoved> eventEnvelope, ProductDetail view)
+    public static void Handle(EventEnvelope<RemovingAttribute.ProductAttributeRemoved> eventEnvelope, ProductDetail view)
     {
         if (view.LastProcessedPosition >= eventEnvelope.Metadata.LogPosition)
             return;

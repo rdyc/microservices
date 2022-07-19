@@ -28,10 +28,10 @@ public record ShoppingCartHistory : Document, IVersionedProjection
             case ShoppingCartOpened cartOpened:
                 Apply(cartOpened);
                 return;
-            case ProductAdded cartOpened:
+            case ProductCartAdded cartOpened:
                 Apply(cartOpened);
                 return;
-            case ProductRemoved cartOpened:
+            case ProductCartRemoved cartOpened:
                 Apply(cartOpened);
                 return;
             case ShoppingCartConfirmed cartOpened:
@@ -49,13 +49,13 @@ public record ShoppingCartHistory : Document, IVersionedProjection
         Description = $"Opened Cart with id {@event.CartId}";
     }
 
-    public void Apply(ProductAdded @event)
+    public void Apply(ProductCartAdded @event)
     {
         AggregateId = @event.CartId;
         Description = $"Added Product with id {@event.Product.ProductId} to Cart with id {@event.CartId}";
     }
 
-    public void Apply(ProductRemoved @event)
+    public void Apply(ProductCartRemoved @event)
     {
         AggregateId = @event.CartId;
         Description = $"Removed Product with id {@event.Product.ProductId} from Cart with id {@event.CartId}";

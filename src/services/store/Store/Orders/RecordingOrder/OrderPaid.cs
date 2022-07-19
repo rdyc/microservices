@@ -43,7 +43,7 @@ internal class HandleOrderPaid : IEventHandler<EventEnvelope<OrderPaid>>
     {
         foreach (var product in @event.Data.Products)
         {
-            await commandBus.Send(SellProduct.Create(product.ProductId, product.Quantity));
+            await commandBus.SendAsync(SellProduct.Create(product.ProductId, product.Quantity));
         }
     }
 }

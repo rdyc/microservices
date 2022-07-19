@@ -27,7 +27,7 @@ public record ProductShortInfo : Document
     public ProductStatus Status { get; set; } = default!;
 
     [BsonElement("currency")]
-    public Currency Currency { get; set; } = default!;
+    public CurrencyPrice Currency { get; set; } = default!;
 
     [BsonElement("price")]
     public decimal Price { get; set; } = default!;
@@ -77,7 +77,7 @@ public class ProductShortInfoProjection
         view.LastProcessedPosition = eventEnvelope.Metadata.LogPosition;
     }
 
-    public static void Handle(EventEnvelope<PriceChanged> eventEnvelope, ProductShortInfo view)
+    public static void Handle(EventEnvelope<ProductPriceChanged> eventEnvelope, ProductShortInfo view)
     {
         if (view.LastProcessedPosition >= eventEnvelope.Metadata.LogPosition)
             return;
@@ -90,7 +90,7 @@ public class ProductShortInfoProjection
         view.LastProcessedPosition = eventEnvelope.Metadata.LogPosition;
     }
 
-    public static void Handle(EventEnvelope<StockChanged> eventEnvelope, ProductShortInfo view)
+    public static void Handle(EventEnvelope<ProductStockChanged> eventEnvelope, ProductShortInfo view)
     {
         if (view.LastProcessedPosition >= eventEnvelope.Metadata.LogPosition)
             return;

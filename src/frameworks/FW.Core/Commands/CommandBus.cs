@@ -11,8 +11,8 @@ public class CommandBus : ICommandBus
         this.mediator = mediator;
     }
 
-    public Task Send<TCommand>(TCommand command) where TCommand : ICommand
+    public Task SendAsync<TCommand>(TCommand command, CancellationToken cancellationToken) where TCommand : ICommand
     {
-        return mediator.Send(command);
+        return mediator.Send(command, cancellationToken);
     }
 }

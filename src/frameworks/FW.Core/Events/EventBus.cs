@@ -12,7 +12,7 @@ public interface IEventBus
     Task Publish(IEventEnvelope @event, CancellationToken ct);
 }
 
-public class EventBus: IEventBus
+public class EventBus : IEventBus
 {
     private readonly IServiceProvider serviceProvider;
     private readonly Func<IServiceProvider, IEventEnvelope?, TracingScope> createTracingScope;
@@ -77,6 +77,7 @@ public static class EventBusExtensions
             sp.GetRequiredService<ITracingScopeFactory>().CreateTraceScope,
             asyncPolicy ?? Policy.NoOpAsync()
         ));
+
         services
             .TryAddSingleton<IEventBus>(sp => sp.GetRequiredService<EventBus>());
 

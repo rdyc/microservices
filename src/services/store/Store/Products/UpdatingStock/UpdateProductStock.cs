@@ -6,12 +6,12 @@ using MediatR;
 
 namespace Store.Products.UpdatingStock;
 
-public record UpdateStock(
+public record UpdateProductStock(
     Guid ProductId,
     int Stock
 ) : ICommand
 {
-    public static UpdateStock Create(Guid productId, int stock)
+    public static UpdateProductStock Create(Guid productId, int stock)
     {
         if (productId == Guid.Empty)
             throw new ArgumentOutOfRangeException(nameof(productId));
@@ -19,13 +19,13 @@ public record UpdateStock(
         if (stock < 0)
             throw new InvalidOperationException(nameof(stock));
 
-        return new UpdateStock(productId, stock);
+        return new UpdateProductStock(productId, stock);
     }
 }
 
-internal class ValidateUpdateStock : AbstractValidator<UpdateStock>
+internal class ValidateUpdateProductStock : AbstractValidator<UpdateProductStock>
 {
-    public ValidateUpdateStock()
+    public ValidateUpdateProductStock()
     {
         ClassLevelCascadeMode = CascadeMode.Stop;
 
@@ -33,18 +33,18 @@ internal class ValidateUpdateStock : AbstractValidator<UpdateStock>
     }
 }
 
-internal class HandleUpdateStock : ICommandHandler<UpdateStock>
+internal class HandleUpdateProductStock : ICommandHandler<UpdateProductStock>
 {
     private readonly IEventStoreDBRepository<Product> repository;
     private readonly IEventStoreDBAppendScope scope;
 
-    public HandleUpdateStock(IEventStoreDBRepository<Product> repository, IEventStoreDBAppendScope scope)
+    public HandleUpdateProductStock(IEventStoreDBRepository<Product> repository, IEventStoreDBAppendScope scope)
     {
         this.repository = repository;
         this.scope = scope;
     }
 
-    public async Task<Unit> Handle(UpdateStock request, CancellationToken cancellationToken)
+    public async Task<Unit> Handle(UpdateProductStock request, CancellationToken cancellationToken)
     {
         var (id, stock) = request;
 

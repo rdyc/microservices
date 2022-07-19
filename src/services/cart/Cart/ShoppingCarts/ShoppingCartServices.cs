@@ -33,16 +33,16 @@ internal static class ShoppingCartsServices
     private static IServiceCollection AddCommandValidators(this IServiceCollection services) =>
         services
             .AddCommandValidator<OpenShoppingCart, ValidateOpenShoppingCart>()
-            .AddCommandValidator<AddProduct, ValidateAddProduct>()
-            .AddCommandValidator<RemoveProduct, ValidateRemoveProduct>()
+            .AddCommandValidator<AddProductCart, ValidateAddProductCart>()
+            .AddCommandValidator<RemoveProductCart, ValidateRemoveProductCart>()
             .AddCommandValidator<ConfirmShoppingCart, ValidateConfirmShoppingCart>()
             .AddCommandValidator<CancelShoppingCart, ValidateCancelShoppingCart>();
 
     private static IServiceCollection AddCommandHandlers(this IServiceCollection services) =>
         services
             .AddCommandHandler<OpenShoppingCart, HandleOpenCart>()
-            .AddCommandHandler<AddProduct, HandleAddProduct>()
-            .AddCommandHandler<RemoveProduct, HandleRemoveProduct>()
+            .AddCommandHandler<AddProductCart, HandleAddProductCart>()
+            .AddCommandHandler<RemoveProductCart, HandleRemoveProductCart>()
             .AddCommandHandler<ConfirmShoppingCart, HandleConfirmCart>()
             .AddCommandHandler<CancelShoppingCart, HandleCancelCart>();
 
@@ -50,7 +50,7 @@ internal static class ShoppingCartsServices
         services
             .Projection<ShoppingCartShortInfo>(builder => builder
                 .AddOn<ShoppingCartOpened>(ShoppingCartShortInfoProjection.Handle)
-                .UpdateOn<ProductAdded>(
+                .UpdateOn<ProductCartAdded>(
                     onGet: e => e.CartId,
                     onHandle: ShoppingCartShortInfoProjection.Handle,
                     onUpdate: (view, update) => update
@@ -58,7 +58,7 @@ internal static class ShoppingCartsServices
                         .Set(e => e.Version, view.Version)
                         .Set(e => e.LastProcessedPosition, view.LastProcessedPosition)
                 )
-                .UpdateOn<ProductRemoved>(
+                .UpdateOn<ProductCartRemoved>(
                     onGet: e => e.CartId,
                     onHandle: ShoppingCartShortInfoProjection.Handle,
                     onUpdate: (view, update) => update
@@ -87,7 +87,7 @@ internal static class ShoppingCartsServices
             )
             .Projection<ShoppingCartDetails>(builder => builder
                 .AddOn<ShoppingCartOpened>(ShoppingCartDetailsProjection.Handle)
-                .UpdateOn<ProductAdded>(
+                .UpdateOn<ProductCartAdded>(
                     onGet: e => e.CartId,
                     onHandle: ShoppingCartDetailsProjection.Handle,
                     onUpdate: (view, update) => update
@@ -95,7 +95,7 @@ internal static class ShoppingCartsServices
                         .Set(e => e.Version, view.Version)
                         .Set(e => e.LastProcessedPosition, view.LastProcessedPosition)
                 )
-                .UpdateOn<ProductRemoved>(
+                .UpdateOn<ProductCartRemoved>(
                     onGet: e => e.CartId,
                     onHandle: ShoppingCartDetailsProjection.Handle,
                     onUpdate: (view, update) => update
@@ -126,11 +126,11 @@ internal static class ShoppingCartsServices
     private static IServiceCollection AddProjects(this IServiceCollection services) =>
         services
             .Project<ShoppingCartOpened, ShoppingCartHistory>()
-            .Project<ProductAdded, ShoppingCartHistory>(
+            .Project<ProductCartAdded, ShoppingCartHistory>(
                 getId: @event => @event.CartId,
                 filterBy: (cartId, filter) => filter.Eq(e => e.AggregateId, cartId)
             )
-            .Project<ProductRemoved, ShoppingCartHistory>(
+            .Project<ProductCartRemoved, ShoppingCartHistory>(
                 getId: @event => @event.CartId,
                 filterBy: (cartId, filter) => filter.Eq(e => e.AggregateId, cartId)
             )

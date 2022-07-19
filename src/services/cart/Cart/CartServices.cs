@@ -24,7 +24,7 @@ public static class CartServices
             .AddEventStoreDBSubscriptionToAll(new EventStoreDBSubscriptionToAllOptions
             {
                 SubscriptionId = "cart",
-                FilterOptions = new(EventTypeFilter.Prefix("Cart_"))
+                FilterOptions = new(EventTypeFilter.Prefix("Cart"))
             })
             .AddProduct()
             .AddCart();

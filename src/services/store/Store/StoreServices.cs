@@ -24,7 +24,7 @@ public static class StoreServices
             .AddEventStoreDBSubscriptionToAll(new EventStoreDBSubscriptionToAllOptions
             {
                 SubscriptionId = "store",
-                FilterOptions = new(EventTypeFilter.Prefix("Store_"))
+                FilterOptions = new(EventTypeFilter.Prefix("Product"))
             })
             .AddLookup()
             .AddProduct();

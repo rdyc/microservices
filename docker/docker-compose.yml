@@ -44,9 +44,9 @@ services:
     ports:
       - 1113:1113
       - 2113:2113
-    volumes:
-      - ${DOCKER_VOLUMES}/eventstore/data:/var/lib/eventstore
-      - ${DOCKER_VOLUMES}/eventstore/logs:/var/log/eventstore
+    # volumes:
+    #   - ${DOCKER_VOLUMES}/eventstore/data:/var/lib/eventstore
+    #   - ${DOCKER_VOLUMES}/eventstore/logs:/var/log/eventstore
     networks:
       - esdb_network
     restart: always

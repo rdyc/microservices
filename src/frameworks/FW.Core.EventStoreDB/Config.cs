@@ -1,7 +1,7 @@
 using EventStore.Client;
 using FW.Core.EventStoreDB.OptimisticConcurrency;
 using FW.Core.EventStoreDB.Subscriptions;
-using FW.Core.HostedServices;
+using FW.Core.BackgroundServices;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -54,10 +54,10 @@ public static class EventStoreDBConfigExtensions
 
         return services.AddHostedService(sp =>
             {
-                var logger = sp.GetRequiredService<ILogger<BackgroundHostedService>>();
+                var logger = sp.GetRequiredService<ILogger<EventStoreService>>();
                 var esdbSubscription = sp.GetRequiredService<EventStoreDBSubscriptionToAll>();
 
-                return new BackgroundHostedService(logger, cancellationToken =>
+                return new EventStoreService(logger, cancellationToken =>
                     esdbSubscription.SubscribeToAll(
                         subscriptionOptions ?? new EventStoreDBSubscriptionToAllOptions(),
                         cancellationToken

@@ -1,4 +1,3 @@
-using Cart.Products;
 using FW.Core.Commands;
 using FW.Core.MongoDB;
 using MediatR;
@@ -6,16 +5,16 @@ using MongoDB.Driver;
 
 namespace Cart.Products;
 
-public record CreateProduct(Guid Id, string Sku, string Name, ProductStatus Status) : ICommand
+public record CreateProduct(Guid Id, string Sku, string Name, string Description, ProductStatus Status) : ICommand
 {
-    public static CreateProduct Create(Guid id, string sku, string name, ProductStatus status) =>
-        new(id, sku, name, status);
+    public static CreateProduct Create(Guid id, string sku, string name, string description, ProductStatus status) =>
+        new(id, sku, name, description, status);
 }
 
-public record UpdateProduct(Guid Id, string Sku, string Name) : ICommand
+public record UpdateProduct(Guid Id, string Sku, string Name, string Description) : ICommand
 {
-    public static UpdateProduct Create(Guid id, string sku, string name) =>
-        new(id, sku, name);
+    public static UpdateProduct Create(Guid id, string sku, string name, string description) =>
+        new(id, sku, name, description);
 }
 
 public record DeleteProduct(Guid Id) : ICommand
@@ -38,13 +37,14 @@ internal class HandleProductChanges :
 
     public async Task<Unit> Handle(CreateProduct request, CancellationToken cancellationToken)
     {
-        var (id, sku, name, status) = request;
+        var (id, sku, name, description, status) = request;
 
         var data = new Product
         {
             Id = id,
             Sku = sku,
             Name = name,
+            Description = description,
             Status = status
         };
 
@@ -55,11 +55,12 @@ internal class HandleProductChanges :
 
     public async Task<Unit> Handle(UpdateProduct request, CancellationToken cancellationToken)
     {
-        var (id, sku, name) = request;
+        var (id, sku, name, description) = request;
 
         var update = Builders<Product>.Update
             .Set(e => e.Sku, sku)
-            .Set(e => e.Name, name);
+            .Set(e => e.Name, name)
+            .Set(e => e.Description, description);
 
         await collection.UpdateOneAsync(e => e.Id == id, update, new UpdateOptions { IsUpsert = true }, cancellationToken);
 

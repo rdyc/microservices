@@ -1,7 +1,11 @@
 using FW.Core.Events;
+using Store.Products.AddingAttribute;
 using Store.Products.ModifyingProduct;
 using Store.Products.RegisteringProduct;
+using Store.Products.RemovingAttribute;
 using Store.Products.RemovingProduct;
+using Store.Products.UpdatingPrice;
+using Store.Products.UpdatingStock;
 
 namespace Store.Products;
 
@@ -28,6 +32,10 @@ public enum State
 internal class HandleProductChanged :
     IEventHandler<EventEnvelope<ProductRegistered>>,
     IEventHandler<EventEnvelope<ProductModified>>,
+    IEventHandler<EventEnvelope<ProductAttributeAdded>>,
+    IEventHandler<EventEnvelope<ProductAttributeRemoved>>,
+    IEventHandler<EventEnvelope<ProductPriceChanged>>,
+    IEventHandler<EventEnvelope<ProductStockChanged>>,
     IEventHandler<EventEnvelope<ProductRemoved>>
 {
     private readonly IEventBus eventBus;
@@ -48,6 +56,46 @@ internal class HandleProductChanged :
     }
 
     public async Task Handle(EventEnvelope<ProductModified> @event, CancellationToken cancellationToken)
+    {
+        var externalEvent = new EventEnvelope<ProductChanged>(
+           ProductChanged.Create(State.Updated, @event.Data),
+           @event.Metadata
+        );
+
+        await eventBus.Publish(externalEvent, cancellationToken);
+    }
+
+    public async Task Handle(EventEnvelope<ProductAttributeAdded> @event, CancellationToken cancellationToken)
+    {
+        var externalEvent = new EventEnvelope<ProductChanged>(
+           ProductChanged.Create(State.Updated, @event.Data),
+           @event.Metadata
+        );
+
+        await eventBus.Publish(externalEvent, cancellationToken);
+    }
+
+    public async Task Handle(EventEnvelope<ProductAttributeRemoved> @event, CancellationToken cancellationToken)
+    {
+        var externalEvent = new EventEnvelope<ProductChanged>(
+           ProductChanged.Create(State.Updated, @event.Data),
+           @event.Metadata
+        );
+
+        await eventBus.Publish(externalEvent, cancellationToken);
+    }
+
+    public async Task Handle(EventEnvelope<ProductPriceChanged> @event, CancellationToken cancellationToken)
+    {
+        var externalEvent = new EventEnvelope<ProductChanged>(
+           ProductChanged.Create(State.Updated, @event.Data),
+           @event.Metadata
+        );
+
+        await eventBus.Publish(externalEvent, cancellationToken);
+    }
+
+    public async Task Handle(EventEnvelope<ProductStockChanged> @event, CancellationToken cancellationToken)
     {
         var externalEvent = new EventEnvelope<ProductChanged>(
            ProductChanged.Create(State.Updated, @event.Data),

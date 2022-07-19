@@ -3,17 +3,18 @@ using FluentValidation;
 using FW.Core.Commands;
 using FW.Core.EventStoreDB.OptimisticConcurrency;
 using FW.Core.EventStoreDB.Repository;
+using FW.Core.MongoDB;
 using MediatR;
 using MongoDB.Driver;
 
 namespace Cart.ShoppingCarts.RemovingProduct;
 
-public record RemoveProduct(
+public record RemoveProductCart(
     Guid CartId,
     Guid ProductId
 ) : ICommand
 {
-    public static RemoveProduct Create(Guid? cartId, Guid? productId)
+    public static RemoveProductCart Create(Guid? cartId, Guid? productId)
     {
         if (cartId == null || cartId == Guid.Empty)
             throw new ArgumentOutOfRangeException(nameof(cartId));
@@ -21,13 +22,13 @@ public record RemoveProduct(
         if (productId == null || cartId == Guid.Empty)
             throw new ArgumentOutOfRangeException(nameof(productId));
 
-        return new RemoveProduct(cartId.Value, productId.Value);
+        return new RemoveProductCart(cartId.Value, productId.Value);
     }
 }
 
-internal class ValidateRemoveProduct : AbstractValidator<RemoveProduct>
+internal class ValidateRemoveProductCart : AbstractValidator<RemoveProductCart>
 {
-    public ValidateRemoveProduct()
+    public ValidateRemoveProductCart()
     {
         ClassLevelCascadeMode = CascadeMode.Stop;
 
@@ -36,24 +37,25 @@ internal class ValidateRemoveProduct : AbstractValidator<RemoveProduct>
     }
 }
 
-internal class HandleRemoveProduct : ICommandHandler<RemoveProduct>
+internal class HandleRemoveProductCart : ICommandHandler<RemoveProductCart>
 {
     private readonly IMongoCollection<ShoppingCartDetails> collection;
     private readonly IEventStoreDBRepository<ShoppingCart> cartRepository;
     private readonly IEventStoreDBAppendScope scope;
 
-    public HandleRemoveProduct(
-        IMongoCollection<ShoppingCartDetails> collection,
+    public HandleRemoveProductCart(
+        IMongoDatabase database,
         IEventStoreDBRepository<ShoppingCart> cartRepository,
         IEventStoreDBAppendScope scope
     )
     {
-        this.collection = collection;
+        var collectionName = MongoHelper.GetCollectionName<ShoppingCartDetails>();
+        this.collection = database.GetCollection<ShoppingCartDetails>(collectionName);
         this.cartRepository = cartRepository;
         this.scope = scope;
     }
 
-    public async Task<Unit> Handle(RemoveProduct request, CancellationToken cancellationToken)
+    public async Task<Unit> Handle(RemoveProductCart request, CancellationToken cancellationToken)
     {
         var (cartId, productId) = request;
 

@@ -21,7 +21,7 @@ public class StreamNameMapper
     public static string ToStreamPrefix(Type streamType) => Instance.TypeNameMap.GetOrAdd(streamType, _ =>
     {
         var modulePrefix = streamType.Namespace!.Split(".").First();
-        return $"{modulePrefix}_{streamType.Name}";
+        return $"{modulePrefix.ToLower()}_{streamType.Name.ToLower()}";
     });
 
     public static string ToStreamId<TStream>(object aggregateId, object? tenantId = null) =>

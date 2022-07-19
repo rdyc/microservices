@@ -1,4 +1,4 @@
-using FW.Core.HostedServices;
+using FW.Core.BackgroundServices;
 using FW.Core.Events;
 using FW.Core.Events.External;
 using FW.Core.Kafka.Consumers;
@@ -28,10 +28,10 @@ public static class Config
 
         return services.AddHostedService(serviceProvider =>
             {
-                var logger = serviceProvider.GetRequiredService<ILogger<BackgroundHostedService>>();
+                var logger = serviceProvider.GetRequiredService<ILogger<KafkaService>>();
                 var consumer = serviceProvider.GetRequiredService<IExternalEventConsumer>();
 
-                return new BackgroundHostedService(logger, consumer.StartAsync);
+                return new KafkaService(logger, consumer.StartAsync);
             }
         );
     }

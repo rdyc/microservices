@@ -10,13 +10,13 @@ using Attribute = Store.Lookup.Attributes.Attribute;
 
 namespace Store.Products.AddingAttribute;
 
-public record AddAttribute(
+public record AddProductAttribute(
     Guid ProductId,
     Guid AttributeId,
     string Value
 ) : ICommand
 {
-    public static AddAttribute Create(Guid productId, Guid attributeId, string value)
+    public static AddProductAttribute Create(Guid productId, Guid attributeId, string value)
     {
         if (productId == Guid.Empty)
             throw new ArgumentNullException(nameof(productId));
@@ -31,7 +31,7 @@ public record AddAttribute(
     }
 }
 
-internal class ValidateAddAttribute : AbstractValidator<AddAttribute>
+internal class ValidateAddAttribute : AbstractValidator<AddProductAttribute>
 {
     public ValidateAddAttribute(IMongoDatabase database)
     {
@@ -44,13 +44,13 @@ internal class ValidateAddAttribute : AbstractValidator<AddAttribute>
     }
 }
 
-internal class HandleAddAttribute : ICommandHandler<AddAttribute>
+internal class HandleAddProductAttribute : ICommandHandler<AddProductAttribute>
 {
     private readonly IMongoCollection<Attribute> collection;
     private readonly IEventStoreDBRepository<Product> repository;
     private readonly IEventStoreDBAppendScope scope;
 
-    public HandleAddAttribute(
+    public HandleAddProductAttribute(
         IMongoDatabase database,
         IEventStoreDBRepository<Product> repository,
         IEventStoreDBAppendScope scope)
@@ -61,7 +61,7 @@ internal class HandleAddAttribute : ICommandHandler<AddAttribute>
         this.scope = scope;
     }
 
-    public async Task<Unit> Handle(AddAttribute request, CancellationToken cancellationToken)
+    public async Task<Unit> Handle(AddProductAttribute request, CancellationToken cancellationToken)
     {
         var (productId, attributeId, value) = request;
 

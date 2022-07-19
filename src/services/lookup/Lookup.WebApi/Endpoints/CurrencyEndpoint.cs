@@ -1,3 +1,6 @@
+using FW.Core.Commands;
+using FW.Core.Pagination;
+using FW.Core.Queries;
 using Lookup.Currencies.GettingCurrencies;
 using Lookup.Currencies.GettingCurrencyById;
 using Lookup.Currencies.GettingCurrencyList;
@@ -5,7 +8,6 @@ using Lookup.Currencies.ModifyingCurrency;
 using Lookup.Currencies.RegisteringCurrency;
 using Lookup.Currencies.RemovingCurrency;
 using Lookup.WebApi.Requests;
-using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Annotations;
 
@@ -14,13 +16,19 @@ namespace Lookup.WebApi.Endpoints;
 public static class CurrencyEndpoint
 {
     [SwaggerOperation(Summary = "Retrieve all currencies", OperationId = "get_all", Tags = new[] { "Currency" })]
-    internal static async Task<IResult> Currencies(int index, int size, IMediator mediator, ILoggerFactory logger, CancellationToken cancellationToken)
+    internal static async Task<IResult> Currencies(
+        int index,
+        int size,
+        [FromServices] IQueryBus query,
+        [FromServices] ILoggerFactory logger,
+        CancellationToken cancellationToken)
     {
         var log = logger.CreateLogger<Program>();
 
         try
         {
-            var result = await mediator.Send(new GetCurrencies(index, size), cancellationToken);
+            var result = await query.SendAsync<GetCurrencies, IListPaged<CurrencyShortInfo>>(
+                new GetCurrencies(index, size), cancellationToken);
 
             return Results.Ok(result);
         }
@@ -33,13 +41,18 @@ public static class CurrencyEndpoint
     }
 
     [SwaggerOperation(Summary = "Retrieve currency", OperationId = "get_detail", Tags = new[] { "Currency" })]
-    internal static async Task<IResult> Currency(Guid id, IMediator mediator, ILoggerFactory logger, CancellationToken cancellationToken)
+    internal static async Task<IResult> Currency(
+        [FromQuery] Guid currencyId,
+        [FromServices] IQueryBus query,
+        [FromServices] ILoggerFactory logger,
+        CancellationToken cancellationToken)
     {
         var log = logger.CreateLogger<Program>();
 
         try
         {
-            var result = await mediator.Send(new GetCurrencyById(id), cancellationToken);
+            var result = await query.SendAsync<GetCurrencyById, CurrencyShortInfo>(
+                new GetCurrencyById(currencyId), cancellationToken);
 
             return Results.Ok(result);
         }
@@ -52,13 +65,18 @@ public static class CurrencyEndpoint
     }
 
     [SwaggerOperation(Summary = "Retrieve currency list", OperationId = "get_list", Tags = new[] { "Currency" })]
-    internal static async Task<IResult> CurrencyList(LookupStatus? status, IMediator mediator, ILoggerFactory logger, CancellationToken cancellationToken)
+    internal static async Task<IResult> CurrencyList(
+        [FromQuery] LookupStatus? status,
+        [FromServices] IQueryBus query,
+        [FromServices] ILoggerFactory logger,
+        CancellationToken cancellationToken)
     {
         var log = logger.CreateLogger<Program>();
 
         try
         {
-            var result = await mediator.Send(new GetCurrencyList(status), cancellationToken);
+            var result = await query.SendAsync<GetCurrencyList, IListUnpaged<CurrencyShortInfo>>(
+                new GetCurrencyList(status), cancellationToken);
 
             return Results.Ok(result);
         }
@@ -71,7 +89,11 @@ public static class CurrencyEndpoint
     }
 
     [SwaggerOperation(Summary = "Register a new currency", OperationId = "post", Tags = new[] { "Currency" })]
-    internal static async Task<IResult> Create([FromBody] CurrencyCreateRequest request, IMediator mediator, ILoggerFactory logger, CancellationToken cancellationToken)
+    internal static async Task<IResult> Create(
+        [FromBody] CurrencyCreateRequest request,
+        [FromServices] ICommandBus command,
+        [FromServices] ILoggerFactory logger,
+        CancellationToken cancellationToken)
     {
         var log = logger.CreateLogger<Program>();
 
@@ -80,7 +102,7 @@ public static class CurrencyEndpoint
             var id = Guid.NewGuid();
             var (name, code, symbol, status) = request;
 
-            await mediator.Send(new RegisterCurrency(id, name, code, symbol, status), cancellationToken);
+            await command.SendAsync(new RegisterCurrency(id, name, code, symbol, status), cancellationToken);
 
             return Results.Created(string.Empty, id);
         }
@@ -93,7 +115,12 @@ public static class CurrencyEndpoint
     }
 
     [SwaggerOperation(Summary = "Modify existing currency", OperationId = "put", Tags = new[] { "Currency" })]
-    internal static async Task<IResult> Update(Guid id, [FromBody] CurrencyModifyRequest request, IMediator mediator, ILoggerFactory logger, CancellationToken cancellationToken)
+    internal static async Task<IResult> Update(
+        [FromRoute] Guid currencyId,
+        [FromBody] CurrencyModifyRequest request,
+        [FromServices] ICommandBus command,
+        [FromServices] ILoggerFactory logger,
+        CancellationToken cancellationToken)
     {
         var log = logger.CreateLogger<Program>();
 
@@ -101,9 +128,9 @@ public static class CurrencyEndpoint
         {
             var (name, code, symbol) = request;
 
-            await mediator.Send(new ModifyCurrency(id, name, code, symbol), cancellationToken);
+            await command.SendAsync(new ModifyCurrency(currencyId, name, code, symbol), cancellationToken);
 
-            return Results.Accepted(string.Empty, id);
+            return Results.Accepted(string.Empty, currencyId);
         }
         catch (OperationCanceledException ex) when (cancellationToken.IsCancellationRequested)
         {
@@ -114,13 +141,17 @@ public static class CurrencyEndpoint
     }
 
     [SwaggerOperation(Summary = "Remove existing currency", OperationId = "delete", Tags = new[] { "Currency" })]
-    internal static async Task<IResult> Delete(Guid id, IMediator mediator, ILoggerFactory logger, CancellationToken cancellationToken)
+    internal static async Task<IResult> Delete(
+        [FromRoute] Guid currencyId,
+        [FromServices] ICommandBus mediator,
+        [FromServices] ILoggerFactory logger,
+        CancellationToken cancellationToken)
     {
         var log = logger.CreateLogger<Program>();
 
         try
         {
-            await mediator.Send(new RemoveCurrency(id), cancellationToken);
+            await mediator.SendAsync(new RemoveCurrency(currencyId), cancellationToken);
 
             return Results.NoContent();
         }

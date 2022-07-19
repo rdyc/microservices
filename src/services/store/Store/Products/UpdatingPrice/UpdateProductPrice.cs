@@ -9,15 +9,15 @@ using Store.Lookup.Currencies;
 
 namespace Store.Products.UpdatingPrice;
 
-public record UpdatePrice(
+public record UpdateProductPrice(
     Guid ProductId,
     Guid CurrencyId,
     decimal Price
 ) : ICommand;
 
-internal class ValidateUpdatePrice : AbstractValidator<UpdatePrice>
+internal class ValidateUpdateProductPrice : AbstractValidator<UpdateProductPrice>
 {
-    public ValidateUpdatePrice(IMongoDatabase database)
+    public ValidateUpdateProductPrice(IMongoDatabase database)
     {
         var collectionName = MongoHelper.GetCollectionName<Currency>();
         var collection = database.GetCollection<Currency>(collectionName);
@@ -29,13 +29,13 @@ internal class ValidateUpdatePrice : AbstractValidator<UpdatePrice>
     }
 }
 
-internal class HandleUpdatePrice : ICommandHandler<UpdatePrice>
+internal class HandleUpdateProductPrice : ICommandHandler<UpdateProductPrice>
 {
     private readonly IMongoCollection<Currency> collection;
     private readonly IEventStoreDBRepository<Product> repository;
     private readonly IEventStoreDBAppendScope scope;
 
-    public HandleUpdatePrice(
+    public HandleUpdateProductPrice(
         IMongoDatabase database,
         IEventStoreDBRepository<Product> repository,
         IEventStoreDBAppendScope scope)
@@ -46,7 +46,7 @@ internal class HandleUpdatePrice : ICommandHandler<UpdatePrice>
         this.scope = scope;
     }
 
-    public async Task<Unit> Handle(UpdatePrice request, CancellationToken cancellationToken)
+    public async Task<Unit> Handle(UpdateProductPrice request, CancellationToken cancellationToken)
     {
         var (productId, currencyId, price) = request;
 
@@ -57,7 +57,12 @@ internal class HandleUpdatePrice : ICommandHandler<UpdatePrice>
         await scope.Do((expectedVersion, eventMetadata) =>
             repository.GetAndUpdate(
                 productId,
-                (product) => product.UpdatePrice(currency, price),
+                (product) => product.UpdatePrice(new CurrencyPrice(
+                    currency.Id,
+                    currency.Name,
+                    currency.Code,
+                    currency.Symbol,
+                    currency.Status), price),
                 expectedVersion,
                 eventMetadata,
                 cancellationToken

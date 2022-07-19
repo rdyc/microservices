@@ -1,3 +1,4 @@
+using Cart.ShoppingCarts;
 using Cart.ShoppingCarts.AddingProduct;
 using Cart.ShoppingCarts.CancelingCart;
 using Cart.ShoppingCarts.ConfirmingCart;
@@ -8,19 +9,21 @@ using Cart.ShoppingCarts.GettingCarts;
 using Cart.ShoppingCarts.OpeningCart;
 using Cart.ShoppingCarts.RemovingProduct;
 using Cart.WebApi.Requests;
-using MediatR;
+using FW.Core.Commands;
+using FW.Core.Pagination;
+using FW.Core.Queries;
 using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Annotations;
 
 namespace Cart.WebApi.Endpoints;
 
-public static class CartEndpoint
+internal static class CartEndpoint
 {
     [SwaggerOperation(Summary = "Retrieve all carts", OperationId = "get_carts", Tags = new[] { "Cart" })]
     internal static async Task<IResult> Carts(
         int index,
         int size,
-        [FromServices] IMediator mediator,
+        [FromServices] IQueryBus query,
         [FromServices] ILoggerFactory logger,
         CancellationToken cancellationToken)
     {
@@ -28,7 +31,8 @@ public static class CartEndpoint
 
         try
         {
-            var result = await mediator.Send(new GetCarts(index, size), cancellationToken);
+            var result = await query.SendAsync<GetCarts, IListPaged<ShoppingCartShortInfo>>(
+                new GetCarts(index, size), cancellationToken);
 
             return Results.Ok(result);
         }
@@ -43,7 +47,7 @@ public static class CartEndpoint
     [SwaggerOperation(Summary = "Retrieve cart", OperationId = "get_cart", Tags = new[] { "Cart" })]
     internal static async Task<IResult> CartDetails(
         [FromRoute] Guid cartId,
-        [FromServices] IMediator mediator,
+        [FromServices] IQueryBus query,
         [FromServices] ILoggerFactory logger,
         CancellationToken cancellationToken)
     {
@@ -51,7 +55,8 @@ public static class CartEndpoint
 
         try
         {
-            var result = await mediator.Send(GetCartById.Create(cartId), cancellationToken);
+            var result = await query.SendAsync<GetCartById, ShoppingCartDetails>(
+                GetCartById.Create(cartId), cancellationToken);
 
             return Results.Ok(result);
         }
@@ -67,7 +72,7 @@ public static class CartEndpoint
     internal static async Task<IResult> CartAtVersion(
         [FromRoute] Guid cartId,
         [FromRoute] ulong version,
-        [FromServices] IMediator mediator,
+        [FromServices] IQueryBus query,
         [FromServices] ILoggerFactory logger,
         CancellationToken cancellationToken)
     {
@@ -75,7 +80,8 @@ public static class CartEndpoint
 
         try
         {
-            var result = await mediator.Send(GetCartAtVersion.Create(cartId, version), cancellationToken);
+            var result = await query.SendAsync<GetCartAtVersion, ShoppingCart>(
+                GetCartAtVersion.Create(cartId, version), cancellationToken);
 
             return Results.Ok(result);
         }
@@ -92,7 +98,7 @@ public static class CartEndpoint
         [FromRoute] Guid cartId,
         int index,
         int size,
-        [FromServices] IMediator mediator,
+        [FromServices] IQueryBus query,
         [FromServices] ILoggerFactory logger,
         CancellationToken cancellationToken)
     {
@@ -100,7 +106,8 @@ public static class CartEndpoint
 
         try
         {
-            var result = await mediator.Send(GetCartHistory.Create(cartId, index, size), cancellationToken);
+            var result = await query.SendAsync<GetCartHistory, IListPaged<ShoppingCartHistory>>(
+                GetCartHistory.Create(cartId, index, size), cancellationToken);
 
             return Results.Ok(result);
         }
@@ -115,7 +122,7 @@ public static class CartEndpoint
     [SwaggerOperation(Summary = "Open a new cart", OperationId = "open", Tags = new[] { "Cart" })]
     internal static async Task<IResult> Open(
         [FromBody] OpenShoppingCartRequest request,
-        [FromServices] IMediator mediator,
+        [FromServices] ICommandBus command,
         [FromServices] ILoggerFactory logger,
         CancellationToken cancellationToken)
     {
@@ -125,7 +132,7 @@ public static class CartEndpoint
         {
             var id = Guid.NewGuid();
 
-            await mediator.Send(OpenShoppingCart.Create(id, request.ClientId), cancellationToken);
+            await command.SendAsync(OpenShoppingCart.Create(id, request.ClientId), cancellationToken);
 
             return Results.Created(string.Empty, id);
         }
@@ -141,7 +148,7 @@ public static class CartEndpoint
     internal static async Task<IResult> Add(
         [FromRoute] Guid cartId,
         [FromBody] AddProductRequest request,
-        [FromServices] IMediator mediator,
+        [FromServices] ICommandBus command,
         [FromServices] ILoggerFactory logger,
         CancellationToken cancellationToken)
     {
@@ -151,7 +158,7 @@ public static class CartEndpoint
         {
             var (productId, quantity) = request.Product;
 
-            await mediator.Send(AddProduct.Create(cartId, productId, quantity), cancellationToken);
+            await command.SendAsync(AddProductCart.Create(cartId, productId, quantity), cancellationToken);
 
             return Results.Accepted(string.Empty, cartId);
         }
@@ -167,7 +174,7 @@ public static class CartEndpoint
     internal static async Task<IResult> Remove(
         [FromRoute] Guid cartId,
         [FromBody] RemoveProductRequest request,
-        [FromServices] IMediator mediator,
+        [FromServices] ICommandBus command,
         [FromServices] ILoggerFactory logger,
         CancellationToken cancellationToken)
     {
@@ -175,7 +182,7 @@ public static class CartEndpoint
 
         try
         {
-            await mediator.Send(RemoveProduct.Create(cartId, request.Product.ProductId), cancellationToken);
+            await command.SendAsync(RemoveProductCart.Create(cartId, request.Product.ProductId), cancellationToken);
 
             return Results.Accepted(string.Empty, cartId);
         }
@@ -190,7 +197,7 @@ public static class CartEndpoint
     [SwaggerOperation(Summary = "Canceling cart", OperationId = "cancel", Tags = new[] { "Cart" })]
     internal static async Task<IResult> Cancel(
         [FromRoute] Guid cartId,
-        [FromServices] IMediator mediator,
+        [FromServices] ICommandBus command,
         [FromServices] ILoggerFactory logger,
         CancellationToken cancellationToken)
     {
@@ -198,7 +205,7 @@ public static class CartEndpoint
 
         try
         {
-            await mediator.Send(new CancelShoppingCart(cartId), cancellationToken);
+            await command.SendAsync(new CancelShoppingCart(cartId), cancellationToken);
 
             return Results.NoContent();
         }
@@ -213,7 +220,7 @@ public static class CartEndpoint
     [SwaggerOperation(Summary = "confirm cart", OperationId = "confirm", Tags = new[] { "Cart" })]
     internal static async Task<IResult> Confirm(
         [FromRoute] Guid cartId,
-        [FromServices] IMediator mediator,
+        [FromServices] ICommandBus command,
         [FromServices] ILoggerFactory logger,
         CancellationToken cancellationToken)
     {
@@ -221,7 +228,7 @@ public static class CartEndpoint
 
         try
         {
-            await mediator.Send(new ConfirmShoppingCart(cartId), cancellationToken);
+            await command.SendAsync(new ConfirmShoppingCart(cartId), cancellationToken);
 
             return Results.NoContent();
         }

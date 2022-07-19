@@ -34,16 +34,16 @@ public record ProductHistory : Document, IVersionedProjection
             case ProductModified productModified:
                 Apply(productModified);
                 return;
-            case AttributeAdded attributeAdded:
+            case ProductAttributeAdded attributeAdded:
                 Apply(attributeAdded);
                 return;
-            case AttributeRemoved attributeRemoved:
+            case ProductAttributeRemoved attributeRemoved:
                 Apply(attributeRemoved);
                 return;
-            case PriceChanged priceChanged:
+            case ProductPriceChanged priceChanged:
                 Apply(priceChanged);
                 return;
-            case StockChanged stockChanged:
+            case ProductStockChanged stockChanged:
                 Apply(stockChanged);
                 return;
             case ProductSold productSold:
@@ -57,49 +57,49 @@ public record ProductHistory : Document, IVersionedProjection
 
     public void Apply(ProductRegistered @event)
     {
-        AggregateId = @event.ProductId;
-        Description = $"Product registered with id {@event.ProductId}";
+        AggregateId = @event.Id;
+        Description = $"Product registered with id {@event.Id}";
     }
 
     public void Apply(ProductModified @event)
     {
-        AggregateId = @event.ProductId;
-        Description = $"Product modified with id {@event.ProductId}";
+        AggregateId = @event.Id;
+        Description = $"Product modified with id {@event.Id}";
     }
 
-    public void Apply(AttributeAdded @event)
+    public void Apply(ProductAttributeAdded @event)
     {
-        AggregateId = @event.ProductId;
-        Description = $"Product attribute added with id {@event.ProductId}";
+        AggregateId = @event.Id;
+        Description = $"Product attribute added with id {@event.Id}";
     }
 
-    public void Apply(AttributeRemoved @event)
+    public void Apply(ProductAttributeRemoved @event)
     {
-        AggregateId = @event.ProductId;
-        Description = $"Product attribute removed with id {@event.ProductId}";
+        AggregateId = @event.Id;
+        Description = $"Product attribute removed with id {@event.Id}";
     }
 
-    public void Apply(PriceChanged @event)
+    public void Apply(ProductPriceChanged @event)
     {
-        AggregateId = @event.ProductId;
-        Description = $"Product price changed with id {@event.ProductId}";
+        AggregateId = @event.Id;
+        Description = $"Product price changed with id {@event.Id}";
     }
 
-    public void Apply(StockChanged @event)
+    public void Apply(ProductStockChanged @event)
     {
-        AggregateId = @event.ProductId;
-        Description = $"Product stock changed with id {@event.ProductId}";
+        AggregateId = @event.Id;
+        Description = $"Product stock changed with id {@event.Id}";
     }
 
     public void Apply(ProductSold @event)
     {
-        AggregateId = @event.ProductId;
-        Description = $"Product id {@event.ProductId} has been sold for {@event.Quantity} items";
+        AggregateId = @event.Id;
+        Description = $"Product id {@event.Id} has been sold for {@event.Quantity} items";
     }
 
     public void Apply(ProductRemoved @event)
     {
-        AggregateId = @event.ProductId;
-        Description = $"Product removed with id {@event.ProductId}";
+        AggregateId = @event.Id;
+        Description = $"Product removed with id {@event.Id}";
     }
 }

@@ -53,7 +53,7 @@ public class ShoppingCartDetailsProjection
         };
     }
 
-    public static void Handle(EventEnvelope<ProductAdded> eventEnvelope, ShoppingCartDetails view)
+    public static void Handle(EventEnvelope<ProductCartAdded> eventEnvelope, ShoppingCartDetails view)
     {
         if (view.LastProcessedPosition >= eventEnvelope.Metadata.LogPosition)
             return;
@@ -76,7 +76,7 @@ public class ShoppingCartDetailsProjection
         view.LastProcessedPosition = eventEnvelope.Metadata.LogPosition;
     }
 
-    public static void Handle(EventEnvelope<ProductRemoved> eventEnvelope, ShoppingCartDetails view)
+    public static void Handle(EventEnvelope<ProductCartRemoved> eventEnvelope, ShoppingCartDetails view)
     {
         if (view.LastProcessedPosition >= eventEnvelope.Metadata.LogPosition)
             return;

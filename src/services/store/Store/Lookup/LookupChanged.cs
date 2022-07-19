@@ -70,30 +70,30 @@ internal class HandleLookupChanged : IEventHandler<EventEnvelope<LookupChanged>>
     private async Task Dispatch(AttributeRegistered @event)
     {
         var (id, name, type, unit, status) = @event;
-        await commandBus.Send(CreateAttribute.Create(id, name, type, unit, status));
+        await commandBus.SendAsync(CreateAttribute.Create(id, name, type, unit, status));
     }
 
     private async Task Dispatch(AttributeModified @event)
     {
         var (id, name, type, unit) = @event;
-        await commandBus.Send(UpdateAttribute.Create(id, name, type, unit));
+        await commandBus.SendAsync(UpdateAttribute.Create(id, name, type, unit));
     }
 
     private async Task Dispatch(AttributeRemoved @event) =>
-        await commandBus.Send(DeleteAttribute.Create(@event.Id));
+        await commandBus.SendAsync(DeleteAttribute.Create(@event.Id));
 
     private async Task Dispatch(CurrencyRegistered @event)
     {
         var (id, name, code, symbol, status) = @event;
-        await commandBus.Send(CreateCurrency.Create(id, name, code, symbol, status));
+        await commandBus.SendAsync(CreateCurrency.Create(id, name, code, symbol, status));
     }
 
     private async Task Dispatch(CurrencyModified @event)
     {
         var (id, name, code, symbol) = @event;
-        await commandBus.Send(UpdateCurrency.Create(id, name, code, symbol));
+        await commandBus.SendAsync(UpdateCurrency.Create(id, name, code, symbol));
     }
 
     private async Task Dispatch(CurrencyRemoved @event) =>
-        await commandBus.Send(DeleteCurrency.Create(@event.Id));
+        await commandBus.SendAsync(DeleteCurrency.Create(@event.Id));
 }
