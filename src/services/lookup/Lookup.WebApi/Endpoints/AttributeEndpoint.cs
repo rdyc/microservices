@@ -42,9 +42,9 @@ public static class AttributeEndpoint
 
     [SwaggerOperation(Summary = "Retrieve attribute", OperationId = "get_detail", Tags = new[] { "Attribute" })]
     internal static async Task<IResult> Attribute(
-        Guid id,
-        IQueryBus query,
-        ILoggerFactory logger,
+        [FromRoute] Guid attributeId,
+        [FromServices] IQueryBus query,
+        [FromServices] ILoggerFactory logger,
         CancellationToken cancellationToken)
     {
         var log = logger.CreateLogger<Program>();
@@ -52,7 +52,7 @@ public static class AttributeEndpoint
         try
         {
             var result = await query.SendAsync<GetAttributeById, AttributeShortInfo>(
-                new GetAttributeById(id), cancellationToken);
+                new GetAttributeById(attributeId), cancellationToken);
 
             return Results.Ok(result);
         }

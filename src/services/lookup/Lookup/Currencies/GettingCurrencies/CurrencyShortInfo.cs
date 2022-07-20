@@ -8,7 +8,7 @@ using MongoDB.Bson.Serialization.Attributes;
 namespace Lookup.Currencies.GettingCurrencies;
 
 [BsonCollection("currency_shortinfo")]
-public record CurrencyShortInfo : Document//, IVersionedProjection
+public record CurrencyShortInfo : Document
 {
     [BsonElement("name")]
     public string Name { get; set; } = default!;
@@ -23,10 +23,10 @@ public record CurrencyShortInfo : Document//, IVersionedProjection
     public LookupStatus Status { get; set; } = default!;
 
     [BsonElement("version")]
-    public int Version { get; set; }
+    public ulong Version { get; set; }
 
     [BsonElement("position")]
-    public ulong LastProcessedPosition { get; set; }
+    public ulong Position { get; set; }
 }
 
 public class CurrencyShortInfoProjection
@@ -42,14 +42,14 @@ public class CurrencyShortInfoProjection
             Code = code,
             Symbol = symbol,
             Status = status,
-            Version = 0,
-            LastProcessedPosition = eventEnvelope.Metadata.LogPosition
+            Version = eventEnvelope.Metadata.StreamPosition,
+            Position = eventEnvelope.Metadata.LogPosition
         };
     }
 
     public static void Handle(EventEnvelope<CurrencyModified> eventEnvelope, CurrencyShortInfo view)
     {
-        if (view.LastProcessedPosition >= eventEnvelope.Metadata.LogPosition)
+        if (view.Position >= eventEnvelope.Metadata.LogPosition)
             return;
 
         var (_, name, code, symbol) = eventEnvelope.Data;
@@ -57,17 +57,17 @@ public class CurrencyShortInfoProjection
         view.Name = name;
         view.Code = code;
         view.Symbol = symbol;
-        view.Version++;
-        view.LastProcessedPosition = eventEnvelope.Metadata.LogPosition;
+        view.Version = eventEnvelope.Metadata.StreamPosition;
+        view.Position = eventEnvelope.Metadata.LogPosition;
     }
 
     public static void Handle(EventEnvelope<CurrencyRemoved> eventEnvelope, CurrencyShortInfo view)
     {
-        if (view.LastProcessedPosition >= eventEnvelope.Metadata.LogPosition)
+        if (view.Position >= eventEnvelope.Metadata.LogPosition)
             return;
 
         view.Status = LookupStatus.Removed;
-        view.Version++;
-        view.LastProcessedPosition = eventEnvelope.Metadata.LogPosition;
+        view.Version = eventEnvelope.Metadata.StreamPosition;
+        view.Position = eventEnvelope.Metadata.LogPosition;
     }
 }

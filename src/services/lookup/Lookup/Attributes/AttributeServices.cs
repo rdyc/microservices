@@ -1,5 +1,4 @@
 using FW.Core.Commands;
-using FW.Core.Events;
 using FW.Core.EventStoreDB.Repository;
 using FW.Core.MongoDB.Projections;
 using FW.Core.Pagination;
@@ -23,9 +22,8 @@ internal static class AttributeServices
             .AddScoped<IEventStoreDBRepository<Attribute>, EventStoreDBRepository<Attribute>>()
             .AddCommandValidators()
             .AddCommandHandlers()
-            .AddEventHandlers()
-            .AddProjections()
-            .AddQueryHandlers();
+            .AddQueryHandlers()
+            .AddProjections();
 
     private static IServiceCollection AddCommandValidators(this IServiceCollection services) =>
         services
@@ -45,15 +43,9 @@ internal static class AttributeServices
             .AddQueryHandler<GetAttributeList, IListUnpaged<AttributeShortInfo>, HandleGetAttributeList>()
             .AddQueryHandler<GetAttributeById, AttributeShortInfo, HandleGetAttributeById>();
 
-    private static IServiceCollection AddEventHandlers(this IServiceCollection services) =>
-        services
-            .AddEventHandler<EventEnvelope<AttributeRegistered>, HandleAttributeChanged>()
-            .AddEventHandler<EventEnvelope<AttributeModified>, HandleAttributeChanged>()
-            .AddEventHandler<EventEnvelope<AttributeRemoved>, HandleAttributeChanged>();
-
     private static IServiceCollection AddProjections(this IServiceCollection services) =>
-        services.Projection<AttributeShortInfo>(builder =>
-            builder
+        services
+            .Projection<AttributeShortInfo>(builder => builder
                 .AddOn<AttributeRegistered>(AttributeShortInfoProjection.Handle)
                 .UpdateOn<AttributeModified>(
                     onGet: e => e.Id,
@@ -63,7 +55,7 @@ internal static class AttributeServices
                         .Set(e => e.Type, view.Type)
                         .Set(e => e.Unit, view.Unit)
                         .Set(e => e.Version, view.Version)
-                        .Set(e => e.LastProcessedPosition, view.LastProcessedPosition)
+                        .Set(e => e.Position, view.Position)
                 )
                 .UpdateOn<AttributeRemoved>(
                     onGet: e => e.Id,
@@ -71,7 +63,7 @@ internal static class AttributeServices
                     onUpdate: (view, update) => update
                         .Set(e => e.Status, view.Status)
                         .Set(e => e.Version, view.Version)
-                        .Set(e => e.LastProcessedPosition, view.LastProcessedPosition)
+                        .Set(e => e.Position, view.Position)
                 )
         );
 }

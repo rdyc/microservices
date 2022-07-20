@@ -42,7 +42,7 @@ public static class CurrencyEndpoint
 
     [SwaggerOperation(Summary = "Retrieve currency", OperationId = "get_detail", Tags = new[] { "Currency" })]
     internal static async Task<IResult> Currency(
-        [FromQuery] Guid currencyId,
+        [FromRoute] Guid currencyId,
         [FromServices] IQueryBus query,
         [FromServices] ILoggerFactory logger,
         CancellationToken cancellationToken)

@@ -1,9 +1,9 @@
+using FW.Core.Events;
+
 namespace Lookup.Attributes.RemovingAttribute;
 
-public record AttributeRemoved(Guid Id)
+public record AttributeRemoved(Guid Id) : IExternalEvent
 {
-    public static AttributeRemoved Create(Guid id)
-    {
-        return new AttributeRemoved(id);
-    }
+    public static AttributeRemoved Create(Guid id) =>
+        new(id);
 }

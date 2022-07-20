@@ -1,9 +1,11 @@
+using FW.Core.Events;
+
 namespace Lookup.Currencies.RemovingCurrency;
 
-public record CurrencyRemoved(Guid Id)
+public record CurrencyRemoved(
+    Guid Id
+) : IExternalEvent
 {
-    public static CurrencyRemoved Create(Guid id)
-    {
-        return new CurrencyRemoved(id);
-    }
+    public static CurrencyRemoved Create(Guid id) =>
+        new(id);
 }

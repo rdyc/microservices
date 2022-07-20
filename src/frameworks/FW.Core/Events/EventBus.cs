@@ -41,10 +41,9 @@ public class EventBus : IEventBus
 
         foreach (var eventHandler in eventHandlers)
         {
-            await retryPolicy.ExecuteAsync(async token =>
-            {
-                await eventHandler.Handle(@event, token);
-            }, ct);
+            await retryPolicy.ExecuteAsync(async token => 
+                await eventHandler.Handle(@event, token), ct
+            );
         }
     }
 

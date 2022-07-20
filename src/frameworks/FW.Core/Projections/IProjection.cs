@@ -7,5 +7,5 @@ public interface IProjection
 
 public interface IVersionedProjection : IProjection
 {
-    public ulong LastProcessedPosition { get; set; }
+    public ulong Position { get; set; }
 }

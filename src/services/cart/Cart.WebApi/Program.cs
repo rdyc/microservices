@@ -1,6 +1,8 @@
 using System.Net;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using Cart;
+using Cart.WebApi.Endpoints;
 using EventStore.Client;
 using FluentValidation;
 using FW.Core;
@@ -13,8 +15,6 @@ using FW.Core.WebApi.Middlewares;
 using FW.Core.WebApi.OptimisticConcurrency;
 using FW.Core.WebApi.Tracing;
 using Microsoft.AspNetCore.Http.Json;
-using Cart;
-using Cart.WebApi.Endpoints;
 using Swashbuckle.AspNetCore.SwaggerUI;
 
 var builder = WebApplication.CreateBuilder(args);

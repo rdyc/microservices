@@ -1,16 +1,13 @@
-using Store.Lookup;
+using FW.Core.Events;
 
 namespace Store.Products.UpdatingPrice;
 
 public record ProductPriceChanged(
     Guid Id,
-    CurrencyPrice Currency,
+    ProductCurrency Currency,
     decimal Price
-)
+) : IExternalEvent
 {
-    public static ProductPriceChanged Create(Guid id, CurrencyPrice currency, decimal price) =>
+    public static ProductPriceChanged Create(Guid id, ProductCurrency currency, decimal price) =>
         new(id, currency, price);
 }
-
-
-public record CurrencyPrice(Guid Id, string Name, string Code, string Symbol, LookupStatus Status);

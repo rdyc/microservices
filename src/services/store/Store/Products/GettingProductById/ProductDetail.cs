@@ -32,7 +32,7 @@ public record ProductDetail : Document
     public IList<ProductDetailAttribute> Attributes { get; private set; } = default!;
 
     [BsonElement("currency")]
-    public CurrencyPrice Currency { get; set; } = default!;
+    public ProductCurrency Currency { get; set; } = default!;
 
     [BsonElement("price")]
     public decimal Price { get; set; } = default!;
@@ -44,10 +44,10 @@ public record ProductDetail : Document
     public int Sold { get; set; } = default!;
 
     [BsonElement("version")]
-    public int Version { get; set; }
+    public ulong Version { get; set; }
 
     [BsonElement("position")]
-    public ulong LastProcessedPosition { get; set; }
+    public ulong Position { get; set; }
 }
 
 public record ProductDetailAttribute
@@ -81,14 +81,14 @@ public class ProductDetailProjection
             Name = name,
             Description = desc,
             Status = status,
-            Version = 0,
-            LastProcessedPosition = eventEnvelope.Metadata.LogPosition
+            Version = eventEnvelope.Metadata.StreamPosition,
+            Position = eventEnvelope.Metadata.LogPosition
         };
     }
 
     public static void Handle(EventEnvelope<ProductModified> eventEnvelope, ProductDetail view)
     {
-        if (view.LastProcessedPosition >= eventEnvelope.Metadata.LogPosition)
+        if (view.Position >= eventEnvelope.Metadata.LogPosition)
             return;
 
         var (_, sku, name, desc) = eventEnvelope.Data;
@@ -96,50 +96,50 @@ public class ProductDetailProjection
         view.Sku = sku;
         view.Name = name;
         view.Description = desc;
-        view.Version++;
-        view.LastProcessedPosition = eventEnvelope.Metadata.LogPosition;
+        view.Version = eventEnvelope.Metadata.StreamPosition;
+        view.Position = eventEnvelope.Metadata.LogPosition;
     }
 
     public static void Handle(EventEnvelope<ProductPriceChanged> eventEnvelope, ProductDetail view)
     {
-        if (view.LastProcessedPosition >= eventEnvelope.Metadata.LogPosition)
+        if (view.Position >= eventEnvelope.Metadata.LogPosition)
             return;
 
         var (_, currency, price) = eventEnvelope.Data;
 
         view.Currency = currency;
         view.Price = price;
-        view.Version++;
-        view.LastProcessedPosition = eventEnvelope.Metadata.LogPosition;
+        view.Version = eventEnvelope.Metadata.StreamPosition;
+        view.Position = eventEnvelope.Metadata.LogPosition;
     }
 
     public static void Handle(EventEnvelope<ProductStockChanged> eventEnvelope, ProductDetail view)
     {
-        if (view.LastProcessedPosition >= eventEnvelope.Metadata.LogPosition)
+        if (view.Position >= eventEnvelope.Metadata.LogPosition)
             return;
 
         var (_, stock) = eventEnvelope.Data;
 
         view.Stock = stock;
-        view.Version++;
-        view.LastProcessedPosition = eventEnvelope.Metadata.LogPosition;
+        view.Version = eventEnvelope.Metadata.StreamPosition;
+        view.Position = eventEnvelope.Metadata.LogPosition;
     }
 
     public static void Handle(EventEnvelope<ProductSold> eventEnvelope, ProductDetail view)
     {
-        if (view.LastProcessedPosition >= eventEnvelope.Metadata.LogPosition)
+        if (view.Position >= eventEnvelope.Metadata.LogPosition)
             return;
 
         var (_, quantity) = eventEnvelope.Data;
 
         view.Sold += quantity;
-        view.Version++;
-        view.LastProcessedPosition = eventEnvelope.Metadata.LogPosition;
+        view.Version = eventEnvelope.Metadata.StreamPosition;
+        view.Position = eventEnvelope.Metadata.LogPosition;
     }
 
     public static void Handle(EventEnvelope<ProductAttributeAdded> eventEnvelope, ProductDetail view)
     {
-        if (view.LastProcessedPosition >= eventEnvelope.Metadata.LogPosition)
+        if (view.Position >= eventEnvelope.Metadata.LogPosition)
             return;
 
         var (_, id, name, type, unit, value) = eventEnvelope.Data;
@@ -152,13 +152,13 @@ public class ProductDetailProjection
             Unit = unit,
             Value = value
         });
-        view.Version++;
-        view.LastProcessedPosition = eventEnvelope.Metadata.LogPosition;
+        view.Version = eventEnvelope.Metadata.StreamPosition;
+        view.Position = eventEnvelope.Metadata.LogPosition;
     }
 
     public static void Handle(EventEnvelope<RemovingAttribute.ProductAttributeRemoved> eventEnvelope, ProductDetail view)
     {
-        if (view.LastProcessedPosition >= eventEnvelope.Metadata.LogPosition)
+        if (view.Position >= eventEnvelope.Metadata.LogPosition)
             return;
 
         var (_, id, name, type, unit, value) = eventEnvelope.Data;
@@ -175,17 +175,17 @@ public class ProductDetailProjection
             });
         }
 
-        view.Version++;
-        view.LastProcessedPosition = eventEnvelope.Metadata.LogPosition;
+        view.Version = eventEnvelope.Metadata.StreamPosition;
+        view.Position = eventEnvelope.Metadata.LogPosition;
     }
 
     public static void Handle(EventEnvelope<ProductRemoved> eventEnvelope, ProductDetail view)
     {
-        if (view.LastProcessedPosition >= eventEnvelope.Metadata.LogPosition)
+        if (view.Position >= eventEnvelope.Metadata.LogPosition)
             return;
 
         view.Status = ProductStatus.Discontinue;
-        view.Version++;
-        view.LastProcessedPosition = eventEnvelope.Metadata.LogPosition;
+        view.Version = eventEnvelope.Metadata.StreamPosition;
+        view.Position = eventEnvelope.Metadata.LogPosition;
     }
 }

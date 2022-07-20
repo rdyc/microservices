@@ -70,8 +70,9 @@ internal class HandleAddProductCart : ICommandHandler<AddProductCart>
     public async Task<Unit> Handle(AddProductCart request, CancellationToken cancellationToken)
     {
         var (cartId, productId, quantity) = request;
+
         var product = await collection.Find(e => e.Id.Equals(productId))
-            .SingleOrDefaultAsync(cancellationToken);
+            .SingleAsync(cancellationToken);
 
         await scope.Do((expectedRevision, eventMetadata) =>
             cartRepository.GetAndUpdate(
@@ -80,8 +81,13 @@ internal class HandleAddProductCart : ICommandHandler<AddProductCart>
                     product.Id,
                     product.Sku,
                     product.Name,
-                    product.Price,
-                    quantity)),
+                    quantity,
+                    ShoppingCartCurrency.Create(
+                        product.Currency.Id,
+                        product.Currency.Name,
+                        product.Currency.Code,
+                        product.Currency.Symbol),
+                    product.Price)),
                 expectedRevision,
                 eventMetadata,
                 cancellationToken

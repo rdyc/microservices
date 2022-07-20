@@ -1,3 +1,4 @@
+using FW.Core.Events;
 using Store.Lookup.Attributes;
 
 namespace Store.Products.AddingAttribute;
@@ -9,7 +10,7 @@ public record ProductAttributeAdded(
     AttributeType Type,
     string Unit,
     string Value
-)
+) : IExternalEvent
 {
     public static ProductAttributeAdded Create(Guid productId, ProductAttribute productAttribute)
     {

@@ -1,5 +1,4 @@
 using FW.Core.Commands;
-using FW.Core.Events;
 using FW.Core.EventStoreDB.Repository;
 using FW.Core.MongoDB.Projections;
 using FW.Core.Pagination;
@@ -23,9 +22,8 @@ internal static class CurrencyServices
             .AddScoped<IEventStoreDBRepository<Currency>, EventStoreDBRepository<Currency>>()
             .AddCommandValidators()
             .AddCommandHandlers()
-            .AddEventHandlers()
-            .AddProjections()
-            .AddQueryHandlers();
+            .AddQueryHandlers()
+            .AddProjections();
 
     private static IServiceCollection AddCommandValidators(this IServiceCollection services) =>
         services
@@ -45,15 +43,9 @@ internal static class CurrencyServices
             .AddQueryHandler<GetCurrencyList, IListUnpaged<CurrencyShortInfo>, HandleGetCurrencyList>()
             .AddQueryHandler<GetCurrencyById, CurrencyShortInfo, HandleGetCurrencyById>();
 
-    private static IServiceCollection AddEventHandlers(this IServiceCollection services) =>
-        services
-            .AddEventHandler<EventEnvelope<CurrencyRegistered>, HandleCurrencyChanged>()
-            .AddEventHandler<EventEnvelope<CurrencyModified>, HandleCurrencyChanged>()
-            .AddEventHandler<EventEnvelope<CurrencyRemoved>, HandleCurrencyChanged>();
-
     private static IServiceCollection AddProjections(this IServiceCollection services) =>
-        services.Projection<CurrencyShortInfo>(builder =>
-            builder
+        services
+            .Projection<CurrencyShortInfo>(builder => builder
                 .AddOn<CurrencyRegistered>(CurrencyShortInfoProjection.Handle)
                 .UpdateOn<CurrencyModified>(
                     onGet: e => e.Id,
@@ -63,7 +55,7 @@ internal static class CurrencyServices
                         .Set(e => e.Code, view.Code)
                         .Set(e => e.Symbol, view.Symbol)
                         .Set(e => e.Version, view.Version)
-                        .Set(e => e.LastProcessedPosition, view.LastProcessedPosition)
+                        .Set(e => e.Position, view.Position)
                 )
                 .UpdateOn<CurrencyRemoved>(
                     onGet: e => e.Id,
@@ -71,7 +63,7 @@ internal static class CurrencyServices
                     onUpdate: (view, update) => update
                         .Set(e => e.Status, view.Status)
                         .Set(e => e.Version, view.Version)
-                        .Set(e => e.LastProcessedPosition, view.LastProcessedPosition)
+                        .Set(e => e.Position, view.Position)
                 )
         );
 }

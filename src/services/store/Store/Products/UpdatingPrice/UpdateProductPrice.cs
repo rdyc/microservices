@@ -6,6 +6,7 @@ using FW.Core.MongoDB;
 using MediatR;
 using MongoDB.Driver;
 using Store.Lookup.Currencies;
+using Store.Products.GettingProducts;
 
 namespace Store.Products.UpdatingPrice;
 
@@ -19,12 +20,17 @@ internal class ValidateUpdateProductPrice : AbstractValidator<UpdateProductPrice
 {
     public ValidateUpdateProductPrice(IMongoDatabase database)
     {
-        var collectionName = MongoHelper.GetCollectionName<Currency>();
-        var collection = database.GetCollection<Currency>(collectionName);
-
         ClassLevelCascadeMode = CascadeMode.Stop;
 
-        RuleFor(p => p.CurrencyId).MustExistCurrency(collection);
+        var products = database.GetCollection<ProductShortInfo>(MongoHelper.GetCollectionName<ProductShortInfo>());
+        var currencies = database.GetCollection<Currency>(MongoHelper.GetCollectionName<Currency>());
+
+        RuleFor(p => p.ProductId).NotEmpty()
+            .MustExistProduct(products);
+
+        RuleFor(p => p.CurrencyId).NotEmpty()
+            .MustExistCurrency(currencies);
+
         RuleFor(p => p.Price).GreaterThan(0);
     }
 }
@@ -50,19 +56,21 @@ internal class HandleUpdateProductPrice : ICommandHandler<UpdateProductPrice>
     {
         var (productId, currencyId, price) = request;
 
-        var currency = await collection
+        var _currency = await collection
             .Find(e => e.Id.Equals(currencyId))
-            .SingleOrDefaultAsync(cancellationToken);
+            .SingleAsync(cancellationToken);
+
+        var currency = ProductCurrency.Create(
+            _currency.Id,
+            _currency.Name,
+            _currency.Code,
+            _currency.Symbol
+        );
 
         await scope.Do((expectedVersion, eventMetadata) =>
             repository.GetAndUpdate(
                 productId,
-                (product) => product.UpdatePrice(new CurrencyPrice(
-                    currency.Id,
-                    currency.Name,
-                    currency.Code,
-                    currency.Symbol,
-                    currency.Status), price),
+                (product) => product.UpdatePrice(currency, price),
                 expectedVersion,
                 eventMetadata,
                 cancellationToken

@@ -1,3 +1,4 @@
+using FW.Core.Events;
 using Store.Lookup.Attributes;
 
 namespace Store.Products.RemovingAttribute;
@@ -9,7 +10,7 @@ public record ProductAttributeRemoved(
     AttributeType Type,
     string Unit,
     string Value
-)
+) : IExternalEvent
 {
     public static ProductAttributeRemoved Create(Guid productId, ProductAttribute productAttribute)
     {

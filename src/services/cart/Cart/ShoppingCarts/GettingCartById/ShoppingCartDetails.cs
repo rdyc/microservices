@@ -35,7 +35,7 @@ public record ShoppingCartDetails : Document
     public ulong Version { get; set; }
 
     [BsonElement("position")]
-    public ulong LastProcessedPosition { get; set; }
+    public ulong Position { get; set; }
 }
 
 public class ShoppingCartDetailsProjection
@@ -55,7 +55,7 @@ public class ShoppingCartDetailsProjection
 
     public static void Handle(EventEnvelope<ProductCartAdded> eventEnvelope, ShoppingCartDetails view)
     {
-        if (view.LastProcessedPosition >= eventEnvelope.Metadata.LogPosition)
+        if (view.Position >= eventEnvelope.Metadata.LogPosition)
             return;
 
         var newProduct = eventEnvelope.Data.Product;
@@ -73,12 +73,12 @@ public class ShoppingCartDetailsProjection
             );
         }
         view.Version = eventEnvelope.Metadata.StreamPosition;
-        view.LastProcessedPosition = eventEnvelope.Metadata.LogPosition;
+        view.Position = eventEnvelope.Metadata.LogPosition;
     }
 
     public static void Handle(EventEnvelope<ProductCartRemoved> eventEnvelope, ShoppingCartDetails view)
     {
-        if (view.LastProcessedPosition >= eventEnvelope.Metadata.LogPosition)
+        if (view.Position >= eventEnvelope.Metadata.LogPosition)
             return;
 
         var productItemToBeRemoved = eventEnvelope.Data.Product;
@@ -99,29 +99,29 @@ public class ShoppingCartDetailsProjection
             }
         }
         view.Version = eventEnvelope.Metadata.StreamPosition;
-        view.LastProcessedPosition = eventEnvelope.Metadata.LogPosition;
+        view.Position = eventEnvelope.Metadata.LogPosition;
     }
 
     public static void Handle(EventEnvelope<ShoppingCartConfirmed> eventEnvelope, ShoppingCartDetails view)
     {
-        if (view.LastProcessedPosition >= eventEnvelope.Metadata.LogPosition)
+        if (view.Position >= eventEnvelope.Metadata.LogPosition)
             return;
 
         view.Status = ShoppingCartStatus.Confirmed;
         view.ConfirmedAt = eventEnvelope.Data.ConfirmedAt;
         view.Version = eventEnvelope.Metadata.StreamPosition;
-        view.LastProcessedPosition = eventEnvelope.Metadata.LogPosition;
+        view.Position = eventEnvelope.Metadata.LogPosition;
     }
 
     public static void Handle(EventEnvelope<ShoppingCartCanceled> eventEnvelope, ShoppingCartDetails view)
     {
-        if (view.LastProcessedPosition >= eventEnvelope.Metadata.LogPosition)
+        if (view.Position >= eventEnvelope.Metadata.LogPosition)
             return;
 
         view.Status = ShoppingCartStatus.Canceled;
         view.CanceledAt = eventEnvelope.Data.CanceledAt;
         view.Version = eventEnvelope.Metadata.StreamPosition;
-        view.LastProcessedPosition = eventEnvelope.Metadata.LogPosition;
+        view.Position = eventEnvelope.Metadata.LogPosition;
     }
 
     private static ShoppingCartProduct? FindProductMatchingWith(IEnumerable<ShoppingCartProduct> products, ShoppingCartProduct product)

@@ -7,7 +7,7 @@ using Microsoft.Extensions.Logging;
 
 namespace FW.Core.Kafka.Producers;
 
-public class KafkaProducer: IExternalEventProducer
+public class KafkaProducer : IExternalEventProducer
 {
     private readonly ILogger<KafkaProducer> logger;
     private readonly KafkaProducerConfig config;
@@ -40,7 +40,7 @@ public class KafkaProducer: IExternalEventProducer
         }
         catch (Exception e)
         {
-            logger.LogError("Error producing Kafka message: {Message} {StackTrace}",e.Message, e.StackTrace);
+            logger.LogError("Error producing Kafka message: {Message} {StackTrace}", e.Message, e.StackTrace);
             throw;
         }
     }

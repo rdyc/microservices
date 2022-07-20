@@ -6,7 +6,7 @@ public interface IExternalEventProducer
 }
 
 
-public class EventBusDecoratorWithExternalProducer: IEventBus
+public class EventBusDecoratorWithExternalProducer : IEventBus
 {
     private readonly IEventBus eventBus;
     private readonly IExternalEventProducer externalEventProducer;

@@ -71,8 +71,13 @@ internal class HandleRemoveProductCart : ICommandHandler<RemoveProductCart>
                     product.ProductId,
                     product.Sku,
                     product.Name,
-                    product.Price,
-                    product.Quantity
+                    product.Quantity,
+                    ShoppingCartCurrency.Create(
+                        product.Currency.Id,
+                        product.Currency.Name,
+                        product.Currency.Code,
+                        product.Currency.Symbol),
+                    product.Price
                 )),
                 expectedRevision,
                 eventMetadata,

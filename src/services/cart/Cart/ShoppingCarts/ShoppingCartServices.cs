@@ -26,9 +26,9 @@ internal static class ShoppingCartsServices
             .AddScoped<IEventStoreDBRepository<ShoppingCart>, EventStoreDBRepository<ShoppingCart>>()
             .AddCommandValidators()
             .AddCommandHandlers()
+            .AddQueryHandlers()
             .AddProjections()
-            .AddProjects()
-            .AddQueryHandlers();
+            .AddProjects();
 
     private static IServiceCollection AddCommandValidators(this IServiceCollection services) =>
         services
@@ -46,6 +46,13 @@ internal static class ShoppingCartsServices
             .AddCommandHandler<ConfirmShoppingCart, HandleConfirmCart>()
             .AddCommandHandler<CancelShoppingCart, HandleCancelCart>();
 
+    private static IServiceCollection AddQueryHandlers(this IServiceCollection services) =>
+        services
+            .AddQueryHandler<GetCartById, ShoppingCartDetails, HandleGetCartById>()
+            .AddQueryHandler<GetCarts, IListPaged<ShoppingCartShortInfo>, HandleGetCarts>()
+            .AddQueryHandler<GetCartHistory, IListPaged<ShoppingCartHistory>, HandleGetCartHistory>()
+            .AddQueryHandler<GetCartAtVersion, ShoppingCart, HandleGetCartAtVersion>();
+
     private static IServiceCollection AddProjections(this IServiceCollection services) =>
         services
             .Projection<ShoppingCartShortInfo>(builder => builder
@@ -56,7 +63,7 @@ internal static class ShoppingCartsServices
                     onUpdate: (view, update) => update
                         .Set(e => e.TotalItemsCount, view.TotalItemsCount)
                         .Set(e => e.Version, view.Version)
-                        .Set(e => e.LastProcessedPosition, view.LastProcessedPosition)
+                        .Set(e => e.Position, view.Position)
                 )
                 .UpdateOn<ProductCartRemoved>(
                     onGet: e => e.CartId,
@@ -64,7 +71,7 @@ internal static class ShoppingCartsServices
                     onUpdate: (view, update) => update
                         .Set(e => e.TotalItemsCount, view.TotalItemsCount)
                         .Set(e => e.Version, view.Version)
-                        .Set(e => e.LastProcessedPosition, view.LastProcessedPosition)
+                        .Set(e => e.Position, view.Position)
                 )
                 .UpdateOn<ShoppingCartConfirmed>(
                     onGet: e => e.CartId,
@@ -73,7 +80,7 @@ internal static class ShoppingCartsServices
                         .Set(e => e.Status, view.Status)
                         .Set(e => e.ConfirmedAt, view.ConfirmedAt)
                         .Set(e => e.Version, view.Version)
-                        .Set(e => e.LastProcessedPosition, view.LastProcessedPosition)
+                        .Set(e => e.Position, view.Position)
                 )
                 .UpdateOn<ShoppingCartCanceled>(
                     onGet: e => e.CartId,
@@ -82,7 +89,7 @@ internal static class ShoppingCartsServices
                         .Set(e => e.Status, view.Status)
                         .Set(e => e.CanceledAt, view.CanceledAt)
                         .Set(e => e.Version, view.Version)
-                        .Set(e => e.LastProcessedPosition, view.LastProcessedPosition)
+                        .Set(e => e.Position, view.Position)
                 )
             )
             .Projection<ShoppingCartDetails>(builder => builder
@@ -93,7 +100,7 @@ internal static class ShoppingCartsServices
                     onUpdate: (view, update) => update
                         .Set(e => e.Products, view.Products)
                         .Set(e => e.Version, view.Version)
-                        .Set(e => e.LastProcessedPosition, view.LastProcessedPosition)
+                        .Set(e => e.Position, view.Position)
                 )
                 .UpdateOn<ProductCartRemoved>(
                     onGet: e => e.CartId,
@@ -101,7 +108,7 @@ internal static class ShoppingCartsServices
                     onUpdate: (view, update) => update
                         .Set(e => e.Products, view.Products)
                         .Set(e => e.Version, view.Version)
-                        .Set(e => e.LastProcessedPosition, view.LastProcessedPosition)
+                        .Set(e => e.Position, view.Position)
                 )
                 .UpdateOn<ShoppingCartConfirmed>(
                     onGet: e => e.CartId,
@@ -110,7 +117,7 @@ internal static class ShoppingCartsServices
                         .Set(e => e.Status, view.Status)
                         .Set(e => e.ConfirmedAt, view.ConfirmedAt)
                         .Set(e => e.Version, view.Version)
-                        .Set(e => e.LastProcessedPosition, view.LastProcessedPosition)
+                        .Set(e => e.Position, view.Position)
                 )
                 .UpdateOn<ShoppingCartCanceled>(
                     onGet: e => e.CartId,
@@ -119,34 +126,15 @@ internal static class ShoppingCartsServices
                         .Set(e => e.Status, view.Status)
                         .Set(e => e.CanceledAt, view.CanceledAt)
                         .Set(e => e.Version, view.Version)
-                        .Set(e => e.LastProcessedPosition, view.LastProcessedPosition)
+                        .Set(e => e.Position, view.Position)
                 )
             );
 
     private static IServiceCollection AddProjects(this IServiceCollection services) =>
         services
             .Project<ShoppingCartOpened, ShoppingCartHistory>()
-            .Project<ProductCartAdded, ShoppingCartHistory>(
-                getId: @event => @event.CartId,
-                filterBy: (cartId, filter) => filter.Eq(e => e.AggregateId, cartId)
-            )
-            .Project<ProductCartRemoved, ShoppingCartHistory>(
-                getId: @event => @event.CartId,
-                filterBy: (cartId, filter) => filter.Eq(e => e.AggregateId, cartId)
-            )
-            .Project<ShoppingCartConfirmed, ShoppingCartHistory>(
-                getId: @event => @event.CartId,
-                filterBy: (cartId, filter) => filter.Eq(e => e.AggregateId, cartId)
-            )
-            .Project<ShoppingCartCanceled, ShoppingCartHistory>(
-                getId: @event => @event.CartId,
-                filterBy: (cartId, filter) => filter.Eq(e => e.AggregateId, cartId)
-            );
-
-    private static IServiceCollection AddQueryHandlers(this IServiceCollection services) =>
-        services
-            .AddQueryHandler<GetCartById, ShoppingCartDetails, HandleGetCartById>()
-            .AddQueryHandler<GetCarts, IListPaged<ShoppingCartShortInfo>, HandleGetCarts>()
-            .AddQueryHandler<GetCartHistory, IListPaged<ShoppingCartHistory>, HandleGetCartHistory>()
-            .AddQueryHandler<GetCartAtVersion, ShoppingCart, HandleGetCartAtVersion>();
+            .Project<ProductCartAdded, ShoppingCartHistory>()
+            .Project<ProductCartRemoved, ShoppingCartHistory>()
+            .Project<ShoppingCartConfirmed, ShoppingCartHistory>()
+            .Project<ShoppingCartCanceled, ShoppingCartHistory>();
 }

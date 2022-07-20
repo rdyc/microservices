@@ -23,10 +23,10 @@ public record AttributeShortInfo : Document
     public LookupStatus Status { get; set; } = default!;
 
     [BsonElement("version")]
-    public int Version { get; set; }
+    public ulong Version { get; set; }
 
     [BsonElement("position")]
-    public ulong LastProcessedPosition { get; set; }
+    public ulong Position { get; set; }
 }
 
 public class AttributeShortInfoProjection
@@ -42,14 +42,14 @@ public class AttributeShortInfoProjection
             Type = code,
             Unit = symbol,
             Status = status,
-            Version = 0,
-            LastProcessedPosition = eventEnvelope.Metadata.LogPosition
+            Version = eventEnvelope.Metadata.StreamPosition,
+            Position = eventEnvelope.Metadata.LogPosition
         };
     }
 
     public static void Handle(EventEnvelope<AttributeModified> eventEnvelope, AttributeShortInfo view)
     {
-        if (view.LastProcessedPosition >= eventEnvelope.Metadata.LogPosition)
+        if (view.Position >= eventEnvelope.Metadata.LogPosition)
             return;
 
         var (_, name, type, unit) = eventEnvelope.Data;
@@ -57,17 +57,17 @@ public class AttributeShortInfoProjection
         view.Name = name;
         view.Type = type;
         view.Unit = unit;
-        view.Version++;
-        view.LastProcessedPosition = eventEnvelope.Metadata.LogPosition;
+        view.Version = eventEnvelope.Metadata.StreamPosition;
+        view.Position = eventEnvelope.Metadata.LogPosition;
     }
 
     public static void Handle(EventEnvelope<AttributeRemoved> eventEnvelope, AttributeShortInfo view)
     {
-        if (view.LastProcessedPosition >= eventEnvelope.Metadata.LogPosition)
+        if (view.Position >= eventEnvelope.Metadata.LogPosition)
             return;
 
         view.Status = LookupStatus.Removed;
-        view.Version++;
-        view.LastProcessedPosition = eventEnvelope.Metadata.LogPosition;
+        view.Version = eventEnvelope.Metadata.StreamPosition;
+        view.Position = eventEnvelope.Metadata.LogPosition;
     }
 }

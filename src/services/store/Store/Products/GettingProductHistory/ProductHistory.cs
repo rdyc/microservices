@@ -1,5 +1,5 @@
+using FW.Core.Events;
 using FW.Core.MongoDB;
-using FW.Core.Projections;
 using MongoDB.Bson.Serialization.Attributes;
 using Store.Products.AddingAttribute;
 using Store.Products.ModifyingProduct;
@@ -13,7 +13,7 @@ using Store.Products.UpdatingStock;
 namespace Store.Products.GettingProductHistory;
 
 [BsonCollection("product_history")]
-public record ProductHistory : Document, IVersionedProjection
+public record ProductHistory : Document
 {
     [BsonElement("aggregate_id")]
     public Guid AggregateId { get; set; } = default!;
@@ -21,85 +21,98 @@ public record ProductHistory : Document, IVersionedProjection
     [BsonElement("description")]
     public string Description { get; set; } = default!;
 
-    [BsonElement("last_position")]
-    public ulong LastProcessedPosition { get; set; } = default!;
+    [BsonElement("version")]
+    public ulong Version { get; set; } = default!;
 
-    public void When(object @event)
+    [BsonElement("position")]
+    public ulong Position { get; set; } = default!;
+}
+
+public class ProductHistoryProjection
+{
+    public static ProductHistory Handle(EventEnvelope<ProductRegistered> eventEnvelope)
     {
-        switch (@event)
+        var (id, sku, name, description, status) = eventEnvelope.Data;
+
+        return Create(
+            id,
+            $"Registered as sku: {sku}, name: {name}, description: {description} and status: {status}",
+            eventEnvelope.Metadata
+        );
+    }
+
+    public static ProductHistory Handle(EventEnvelope<ProductModified> eventEnvelope)
+    {
+        var (id, sku, name, description) = eventEnvelope.Data;
+
+        return Create(
+            id,
+            $"Modified as sku: {sku}, name: {name}, and description: {description}",
+            eventEnvelope.Metadata
+        );
+    }
+
+    public static ProductHistory Handle(EventEnvelope<ProductAttributeAdded> eventEnvelope)
+    {
+        var (id, _, name, type, unit, value) = eventEnvelope.Data;
+
+        return Create(
+            id,
+            $"Added attribute with name: {name}, type: {type}, unit: {unit} and value: {value}",
+            eventEnvelope.Metadata
+        );
+    }
+
+    public static ProductHistory Handle(EventEnvelope<ProductAttributeRemoved> eventEnvelope)
+    {
+        var (id, _, name, type, unit, value) = eventEnvelope.Data;
+
+        return Create(
+            id,
+            $"Removed attribute for name: {name}, type: {type}, unit: {unit} and value: {value}",
+            eventEnvelope.Metadata
+        );
+    }
+
+    public static ProductHistory Handle(EventEnvelope<ProductPriceChanged> eventEnvelope)
+    {
+        var (id, currency, price) = eventEnvelope.Data;
+
+        return Create(
+            id,
+            $"Price changed to currency: {currency.Code} and price: {currency.Symbol} {price}",
+            eventEnvelope.Metadata
+        );
+    }
+
+    public static ProductHistory Handle(EventEnvelope<ProductStockChanged> eventEnvelope)
+    {
+        var (id, stock) = eventEnvelope.Data;
+
+        return Create(id, $"Stock changed to {stock}", eventEnvelope.Metadata);
+    }
+
+    public static ProductHistory Handle(EventEnvelope<ProductSold> eventEnvelope)
+    {
+        var (id, qty) = eventEnvelope.Data;
+
+        return Create(id, $"Sold for {qty} item(s)", eventEnvelope.Metadata);
+    }
+
+    public static ProductHistory Handle(EventEnvelope<ProductRemoved> eventEnvelope) =>
+        Create(eventEnvelope.Data.Id, $"Removed", eventEnvelope.Metadata);
+
+    private static ProductHistory Create(Guid aggregateId, string description, EventMetadata metadata)
+    {
+        var (eventId, streamPosition, logPosition, _) = metadata;
+
+        return new ProductHistory
         {
-            case ProductRegistered productRegistered:
-                Apply(productRegistered);
-                return;
-            case ProductModified productModified:
-                Apply(productModified);
-                return;
-            case ProductAttributeAdded attributeAdded:
-                Apply(attributeAdded);
-                return;
-            case ProductAttributeRemoved attributeRemoved:
-                Apply(attributeRemoved);
-                return;
-            case ProductPriceChanged priceChanged:
-                Apply(priceChanged);
-                return;
-            case ProductStockChanged stockChanged:
-                Apply(stockChanged);
-                return;
-            case ProductSold productSold:
-                Apply(productSold);
-                return;
-            case ProductRemoved productRemoved:
-                Apply(productRemoved);
-                return;
-        }
-    }
-
-    public void Apply(ProductRegistered @event)
-    {
-        AggregateId = @event.Id;
-        Description = $"Product registered with id {@event.Id}";
-    }
-
-    public void Apply(ProductModified @event)
-    {
-        AggregateId = @event.Id;
-        Description = $"Product modified with id {@event.Id}";
-    }
-
-    public void Apply(ProductAttributeAdded @event)
-    {
-        AggregateId = @event.Id;
-        Description = $"Product attribute added with id {@event.Id}";
-    }
-
-    public void Apply(ProductAttributeRemoved @event)
-    {
-        AggregateId = @event.Id;
-        Description = $"Product attribute removed with id {@event.Id}";
-    }
-
-    public void Apply(ProductPriceChanged @event)
-    {
-        AggregateId = @event.Id;
-        Description = $"Product price changed with id {@event.Id}";
-    }
-
-    public void Apply(ProductStockChanged @event)
-    {
-        AggregateId = @event.Id;
-        Description = $"Product stock changed with id {@event.Id}";
-    }
-
-    public void Apply(ProductSold @event)
-    {
-        AggregateId = @event.Id;
-        Description = $"Product id {@event.Id} has been sold for {@event.Quantity} items";
-    }
-
-    public void Apply(ProductRemoved @event)
-    {
-        AggregateId = @event.Id;
-        Description = $"Product removed with id {@event.Id}";
+            Id = Guid.Parse(eventId),
+            AggregateId = aggregateId,
+            Description = description,
+            Version = streamPosition,
+            Position = logPosition
+        };
     }
 }

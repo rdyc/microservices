@@ -4,23 +4,15 @@ public record OpenShoppingCartRequest(
     Guid? ClientId
 );
 
-public record ProductRequest(
+public record AddProductRequest(
     Guid? ProductId,
     int Quantity
 );
 
-public record AddProductRequest(
-    ProductRequest Product
-);
-
-public record PricedProductRequest(
+public record RemoveProductRequest(
     Guid? ProductId,
     int? Quantity,
     decimal? UnitPrice
-);
-
-public record RemoveProductRequest(
-    PricedProductRequest Product
 );
 
 public record ConfirmShoppingCartRequest;

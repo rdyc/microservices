@@ -189,13 +189,13 @@ public class DocumentProjection<TEvent, TDocument> :
 
         var eventLogPosition = eventMetadata.LogPosition;
 
-        if (entity.LastProcessedPosition >= eventLogPosition)
+        if (entity.Position >= eventLogPosition)
             return;
 
         entity.When(@event);
 
         entity.Id = Guid.Parse(eventMetadata.EventId);
-        entity.LastProcessedPosition = eventLogPosition;
+        entity.Position = eventLogPosition;
 
         await collection.InsertOneAsync(entity, default, cancellationToken);
     }

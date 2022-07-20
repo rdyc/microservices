@@ -14,12 +14,12 @@ public record ShoppingCartHistory : Document, IVersionedProjection
 {
     [BsonElement("aggregate_id")]
     public Guid AggregateId { get; set; } = default!;
-    
+
     [BsonElement("description")]
     public string Description { get; set; } = default!;
-    
+
     [BsonElement("last_position")]
-    public ulong LastProcessedPosition { get; set; } = default!;
+    public ulong Position { get; set; } = default!;
 
     public void When(object @event)
     {
@@ -46,30 +46,34 @@ public record ShoppingCartHistory : Document, IVersionedProjection
     public void Apply(ShoppingCartOpened @event)
     {
         AggregateId = @event.CartId;
-        Description = $"Opened Cart with id {@event.CartId}";
+        Description = $"Opened";
     }
 
     public void Apply(ProductCartAdded @event)
     {
+        var (id, sku, name, quantity, currency, price) = @event.Product;
+
         AggregateId = @event.CartId;
-        Description = $"Added Product with id {@event.Product.ProductId} to Cart with id {@event.CartId}";
+        Description = $"Added product for id: {id}, sku: {sku}, name: {name}, quantity: {quantity} and price: {currency.Symbol} {price}";
     }
 
     public void Apply(ProductCartRemoved @event)
     {
+        var (id, sku, name, quantity, currency, price) = @event.Product;
+
         AggregateId = @event.CartId;
-        Description = $"Removed Product with id {@event.Product.ProductId} from Cart with id {@event.CartId}";
+        Description = $"Removed product for id: {id}, sku: {sku}, name: {name}, quantity: {quantity} and price: {currency.Symbol} {price}";
     }
 
     public void Apply(ShoppingCartConfirmed @event)
     {
         AggregateId = @event.CartId;
-        Description = $"Confirmed Cart with id {@event.CartId}";
+        Description = $"Confirmed at {@event.ConfirmedAt}";
     }
 
     public void Apply(ShoppingCartCanceled @event)
     {
         AggregateId = @event.CartId;
-        Description = $"Canceled Cart with id {@event.CartId}";
+        Description = $"Canceled at {@event.CanceledAt}";
     }
 }

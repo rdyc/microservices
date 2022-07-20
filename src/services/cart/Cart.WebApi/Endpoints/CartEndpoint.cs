@@ -156,7 +156,7 @@ internal static class CartEndpoint
 
         try
         {
-            var (productId, quantity) = request.Product;
+            var (productId, quantity) = request;
 
             await command.SendAsync(AddProductCart.Create(cartId, productId, quantity), cancellationToken);
 
@@ -182,7 +182,7 @@ internal static class CartEndpoint
 
         try
         {
-            await command.SendAsync(RemoveProductCart.Create(cartId, request.Product.ProductId), cancellationToken);
+            await command.SendAsync(RemoveProductCart.Create(cartId, request.ProductId), cancellationToken);
 
             return Results.Accepted(string.Empty, cartId);
         }

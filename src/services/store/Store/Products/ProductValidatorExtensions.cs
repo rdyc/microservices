@@ -1,5 +1,4 @@
 using FluentValidation;
-using FW.Core.Exceptions;
 using MongoDB.Driver;
 using Store.Products.GettingProducts;
 
@@ -14,19 +13,10 @@ public static class ProductValidatorExtensions
 {
     public static IRuleBuilderOptions<T, Guid> MustExistProduct<T>(
         this IRuleBuilder<T, Guid> ruleBuilder,
-        IMongoCollection<ProductShortInfo> collection)
-    {
-        return ruleBuilder
-            .MustAsync(async (value, cancellationToken) =>
-            {
-                var count = await collection.CountDocumentsAsync(e => e.Id == value, null, cancellationToken);
-
-                if (count == 0)
-                    throw AggregateNotFoundException.For<T>(value);
-
-                return true;
-            });
-    }
+        IMongoCollection<ProductShortInfo> collection
+    ) => ruleBuilder.MustAsync(async (value, ct) => await collection
+            .CountDocumentsAsync(e => e.Id == value, default, ct) > 0)
+            .WithMessage("The product was not found");
 
     public static IRuleBuilderOptions<T, string> MustUniqueProductSKU<T>(
         this IRuleBuilder<T, string> ruleBuilder,
@@ -35,7 +25,7 @@ public static class ProductValidatorExtensions
     ) where T : IProduct
     {
         return ruleBuilder
-            .MustAsync(async (instance, value, cancellationToken) =>
+            .MustAsync(async (instance, value, ct) =>
             {
                 var builder = Builders<ProductShortInfo>.Filter;
                 var filter = builder.Eq(e => e.Sku, value);
@@ -45,7 +35,7 @@ public static class ProductValidatorExtensions
                     filter = builder.And(filter, builder.Ne(e => e.Id, instance.ProductId));
                 }
 
-                return await collection.CountDocumentsAsync(filter, null, cancellationToken) == 0;
+                return await collection.CountDocumentsAsync(filter, default, ct) == 0;
             })
             .WithMessage("The product sku already used");
     }
