@@ -1,6 +1,7 @@
 using FW.Core.Commands;
 using FW.Core.Pagination;
 using FW.Core.Queries;
+using FW.Core.WebApi;
 using Lookup.Currencies.GettingCurrencies;
 using Lookup.Currencies.GettingCurrencyById;
 using Lookup.Currencies.GettingCurrencyList;
@@ -24,20 +25,15 @@ public static class CurrencyEndpoint
         CancellationToken cancellationToken)
     {
         var log = logger.CreateLogger<Program>();
+        var task = query.SendAsync<GetCurrencies, IListPaged<CurrencyShortInfo>>(
+            new GetCurrencies(index, size), cancellationToken);
 
-        try
-        {
-            var result = await query.SendAsync<GetCurrencies, IListPaged<CurrencyShortInfo>>(
-                new GetCurrencies(index, size), cancellationToken);
-
-            return Results.Ok(result);
-        }
-        catch (OperationCanceledException ex) when (cancellationToken.IsCancellationRequested)
-        {
-            log.LogWarning(ex.Message);
-        }
-
-        return Results.NoContent();
+        return await WithCancellation.TryExecute(
+            task: task,
+            onCompleted: (result) => Results.Ok(result),
+            onCancelled: (ex) => log.LogWarning(ex.Message),
+            cancellationToken: cancellationToken
+        );
     }
 
     [SwaggerOperation(Summary = "Retrieve currency", OperationId = "get_detail", Tags = new[] { "Currency" })]
@@ -143,23 +139,17 @@ public static class CurrencyEndpoint
     [SwaggerOperation(Summary = "Remove existing currency", OperationId = "delete", Tags = new[] { "Currency" })]
     internal static async Task<IResult> Delete(
         [FromRoute] Guid currencyId,
-        [FromServices] ICommandBus mediator,
+        [FromServices] ICommandBus command,
         [FromServices] ILoggerFactory logger,
         CancellationToken cancellationToken)
     {
         var log = logger.CreateLogger<Program>();
 
-        try
-        {
-            await mediator.SendAsync(new RemoveCurrency(currencyId), cancellationToken);
-
-            return Results.NoContent();
-        }
-        catch (OperationCanceledException ex) when (cancellationToken.IsCancellationRequested)
-        {
-            log.LogWarning(ex.Message);
-        }
-
-        return Results.NoContent();
+        return await WithCancellation.TryExecute(
+            task: command.SendAsync(new RemoveCurrency(currencyId), cancellationToken),
+            onCompleted: () => Results.NoContent(),
+            onCancelled: (ex) => log.LogWarning(ex.Message),
+            cancellationToken: cancellationToken
+        );
     }
 }
