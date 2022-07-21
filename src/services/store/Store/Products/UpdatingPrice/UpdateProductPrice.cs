@@ -14,7 +14,14 @@ public record UpdateProductPrice(
     Guid ProductId,
     Guid CurrencyId,
     decimal Price
-) : ICommand;
+) : ICommand
+{
+    public static UpdateProductPrice Create(
+        Guid productId,
+        Guid currencyId,
+        decimal price
+    ) => new(productId, currencyId, price);
+}
 
 internal class ValidateUpdateProductPrice : AbstractValidator<UpdateProductPrice>
 {

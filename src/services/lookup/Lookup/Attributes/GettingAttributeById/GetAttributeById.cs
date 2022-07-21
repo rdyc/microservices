@@ -6,7 +6,13 @@ using MongoDB.Driver;
 
 namespace Lookup.Attributes.GettingAttributeById;
 
-public record GetAttributeById(Guid Id) : IQuery<AttributeShortInfo>;
+public record GetAttributeById(
+    Guid Id
+) : IQuery<AttributeShortInfo>
+{
+    public static GetAttributeById Create(Guid id) =>
+        new(id);
+}
 
 internal class HandleGetAttributeById : IQueryHandler<GetAttributeById, AttributeShortInfo>
 {

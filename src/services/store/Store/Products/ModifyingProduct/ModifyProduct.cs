@@ -10,11 +10,19 @@ using Store.Products.GettingProducts;
 namespace Store.Products.ModifyingProduct;
 
 public record ModifyProduct(
-    Guid ProductId,
-    string SKU,
+    Guid Id,
+    string Sku,
     string Name,
     string Description
-) : IProduct, ICommand;
+) : IProduct, ICommand
+{
+    public static ModifyProduct Create(
+        Guid id,
+        string sku,
+        string name,
+        string description
+    ) => new(id, sku, name, description);
+}
 
 internal class ValidateModifyProduct : AbstractValidator<ModifyProduct>
 {
@@ -25,8 +33,8 @@ internal class ValidateModifyProduct : AbstractValidator<ModifyProduct>
 
         ClassLevelCascadeMode = CascadeMode.Stop;
 
-        RuleFor(p => p.ProductId).NotEmpty().MustExistProduct(collection);
-        RuleFor(p => p.SKU).NotEmpty().MustUniqueProductSKU(collection, true);
+        RuleFor(p => p.Id).NotEmpty().MustExistProduct(collection);
+        RuleFor(p => p.Sku).NotEmpty().MustUniqueProductSku(collection, true);
         RuleFor(p => p.Name).NotEmpty().MaximumLength(50);
         RuleFor(p => p.Description).NotEmpty().MaximumLength(250);
     }

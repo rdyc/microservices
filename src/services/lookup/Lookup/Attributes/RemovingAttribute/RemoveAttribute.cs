@@ -9,7 +9,13 @@ using MongoDB.Driver;
 
 namespace Lookup.Attributes.RemovingAttribute;
 
-public record RemoveAttribute(Guid AttributeId) : IAttribute, ICommand;
+public record RemoveAttribute(
+    Guid AttributeId
+) : IAttribute, ICommand
+{
+    public static RemoveAttribute Create(Guid attributeId)
+        => new(attributeId);
+}
 
 internal class ValidateRemoveAttribute : AbstractValidator<RemoveAttribute>
 {

@@ -6,7 +6,13 @@ using MongoDB.Driver;
 
 namespace Lookup.Attributes.GettingAttributeList;
 
-public record GetAttributeList(LookupStatus? Status) : IQuery<IListUnpaged<AttributeShortInfo>>;
+public record GetAttributeList(
+    LookupStatus? Status
+) : IQuery<IListUnpaged<AttributeShortInfo>>
+{
+    public static GetAttributeList Create(LookupStatus? status) =>
+        new(status);
+}
 
 internal class HandleGetAttributeList : IQueryHandler<GetAttributeList, IListUnpaged<AttributeShortInfo>>
 {

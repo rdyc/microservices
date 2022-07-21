@@ -6,7 +6,14 @@ using MongoDB.Driver;
 
 namespace Lookup.Attributes.GettingAttributes;
 
-public record GetAttributes(int Index, int Size) : IQuery<IListPaged<AttributeShortInfo>>;
+public record GetAttributes(
+    int Index,
+    int Size
+) : IQuery<IListPaged<AttributeShortInfo>>
+{
+    public static GetAttributes Create(int index, int size) =>
+        new(index, size);
+}
 
 internal class HandleGetAttributes : IQueryHandler<GetAttributes, IListPaged<AttributeShortInfo>>
 {

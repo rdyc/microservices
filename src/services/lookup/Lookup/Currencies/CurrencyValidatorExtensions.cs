@@ -7,7 +7,7 @@ namespace Lookup.Currencies;
 
 public interface ICurrency
 {
-    Guid CurrencyId { get; }
+    Guid Id { get; }
 }
 
 public static class CurrencyValidatorExtensions
@@ -45,7 +45,7 @@ public static class CurrencyValidatorExtensions
 
                 if (isUpdating)
                 {
-                    filter = builder.And(filter, builder.Ne(e => e.Id, instance.CurrencyId));
+                    filter = builder.And(filter, builder.Ne(e => e.Id, instance.Id));
                 }
 
                 return await collection.CountDocumentsAsync(

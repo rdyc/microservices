@@ -6,7 +6,7 @@ namespace Store.Products;
 
 public interface IProduct
 {
-    Guid ProductId { get; }
+    Guid Id { get; }
 }
 
 public static class ProductValidatorExtensions
@@ -18,7 +18,7 @@ public static class ProductValidatorExtensions
             .CountDocumentsAsync(e => e.Id == value, default, ct) > 0)
             .WithMessage("The product was not found");
 
-    public static IRuleBuilderOptions<T, string> MustUniqueProductSKU<T>(
+    public static IRuleBuilderOptions<T, string> MustUniqueProductSku<T>(
         this IRuleBuilder<T, string> ruleBuilder,
         IMongoCollection<ProductShortInfo> collection,
         bool isUpdating = false
@@ -32,7 +32,7 @@ public static class ProductValidatorExtensions
 
                 if (isUpdating)
                 {
-                    filter = builder.And(filter, builder.Ne(e => e.Id, instance.ProductId));
+                    filter = builder.And(filter, builder.Ne(e => e.Id, instance.Id));
                 }
 
                 return await collection.CountDocumentsAsync(filter, default, ct) == 0;

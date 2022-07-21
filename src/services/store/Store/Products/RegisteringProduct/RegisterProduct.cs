@@ -10,11 +10,19 @@ using Store.Products.GettingProducts;
 namespace Store.Products.RegisteringProduct;
 
 public record RegisterProduct(
-    Guid ProductId,
-    string SKU,
+    Guid Id,
+    string Sku,
     string Name,
     string Description
-) : IProduct, ICommand;
+) : IProduct, ICommand
+{
+    public static RegisterProduct Create(
+        Guid id,
+        string sku,
+        string name,
+        string description
+    ) => new(id, sku, name, description);
+}
 
 internal class ValidateRegisterProduct : AbstractValidator<RegisterProduct>
 {
@@ -27,7 +35,7 @@ internal class ValidateRegisterProduct : AbstractValidator<RegisterProduct>
 
         ClassLevelCascadeMode = CascadeMode.Stop;
 
-        RuleFor(p => p.SKU).NotEmpty().MustUniqueProductSKU(collection);
+        RuleFor(p => p.Sku).NotEmpty().MustUniqueProductSku(collection);
         RuleFor(p => p.Name).NotEmpty();
         RuleFor(p => p.Description).NotEmpty();
     }

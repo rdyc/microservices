@@ -6,7 +6,18 @@ using MongoDB.Driver;
 
 namespace Lookup.Histories.GettingHistories;
 
-public record GetHistory(Guid AggregateId, int Index, int Size) : IQuery<IListPaged<History>>;
+public record GetHistory(
+    Guid AggregateId,
+    int Index,
+    int Size
+) : IQuery<IListPaged<History>>
+{
+    public static GetHistory Create(
+        Guid aggregateId,
+        int index,
+        int size
+    ) => new(aggregateId, index, size);
+}
 
 internal class HandleGetHistory : IQueryHandler<GetHistory, IListPaged<History>>
 {

@@ -11,7 +11,7 @@ using Attribute = Store.Lookup.Attributes.Attribute;
 namespace Store.Products.RemovingAttribute;
 
 public record RemoveProductAttribute(
-    Guid ProductId, 
+    Guid ProductId,
     Guid AttributeId
 ) : ICommand
 {
@@ -23,7 +23,7 @@ public record RemoveProductAttribute(
         if (attributeId == Guid.Empty)
             throw new ArgumentNullException(nameof(attributeId));
 
-        return new (productId, attributeId);
+        return new(productId, attributeId);
     }
 }
 

@@ -9,7 +9,12 @@ using MongoDB.Driver;
 
 namespace Lookup.Currencies.RemovingCurrency;
 
-public record RemoveCurrency(Guid CurrencyId) : ICurrency, ICommand;
+public record RemoveCurrency(
+    Guid Id
+) : ICurrency, ICommand
+{
+    public static RemoveCurrency Create(Guid id) => new(id);
+}
 
 internal class ValidateRemoveCurrency : AbstractValidator<RemoveCurrency>
 {
@@ -17,12 +22,12 @@ internal class ValidateRemoveCurrency : AbstractValidator<RemoveCurrency>
 
     public ValidateRemoveCurrency(IMongoDatabase database)
     {
+        ClassLevelCascadeMode = CascadeMode.Stop;
+
         var collectionName = MongoHelper.GetCollectionName<CurrencyShortInfo>();
         collection = database.GetCollection<CurrencyShortInfo>(collectionName);
 
-        ClassLevelCascadeMode = CascadeMode.Stop;
-
-        RuleFor(p => p.CurrencyId).NotEmpty()
+        RuleFor(p => p.Id).NotEmpty()
             .MustExistCurrency(collection);
     }
 }
@@ -44,7 +49,7 @@ internal class HandleRemoveCurrency : ICommandHandler<RemoveCurrency>
     {
         await scope.Do((expectedVersion, eventMetadata) =>
             repository.GetAndUpdate(
-                request.CurrencyId,
+                request.Id,
                 (currency) => currency.Remove(),
                 expectedVersion,
                 eventMetadata,

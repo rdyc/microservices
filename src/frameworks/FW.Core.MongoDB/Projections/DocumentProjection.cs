@@ -1,5 +1,4 @@
 ﻿using FW.Core.Events;
-using FW.Core.Projections;
 using Microsoft.Extensions.DependencyInjection;
 using MongoDB.Driver;
 
@@ -15,25 +14,6 @@ public static class DocumentProjection
         var collectionName = MongoHelper.GetCollectionName<TDocument>();
 
         builder(new DocumentProjectionBuilder<TDocument>(services, collectionName));
-
-        return services;
-    }
-
-    public static IServiceCollection Project<TEvent, TDocument>(
-        this IServiceCollection services,
-        Func<TEvent, Guid>? getId = null,
-        Func<Guid, FilterDefinitionBuilder<TDocument>, FilterDefinition<TDocument>>? filterBy = null)
-        where TDocument : IDocument, IVersionedProjection
-        where TEvent : notnull
-    {
-        services.AddTransient<IEventHandler<EventEnvelope<TEvent>>>(sp =>
-            {
-                var collectionName = MongoHelper.GetCollectionName<TDocument>();
-                var collection = sp.GetRequiredService<IMongoDatabase>()
-                    .GetCollection<TDocument>(collectionName);
-
-                return new DocumentProjection<TEvent, TDocument>(collection, getId, filterBy);
-            });
 
         return services;
     }
@@ -148,55 +128,5 @@ public class UpdateProjection<TDocument, TEvent> :
         var update = onUpdate.Invoke(view, updateBuilder);
 
         await collection.UpdateOneAsync(e => e.Id == viewId, update, default, cancellationToken);
-    }
-}
-
-public class DocumentProjection<TEvent, TDocument> :
-    IEventHandler<EventEnvelope<TEvent>>
-    where TDocument : IDocument, IVersionedProjection
-    where TEvent : notnull
-{
-    private readonly IMongoCollection<TDocument> collection;
-    private readonly Func<TEvent, Guid>? getId;
-    private readonly Func<Guid, FilterDefinitionBuilder<TDocument>, FilterDefinition<TDocument>>? filterBy;
-
-    public DocumentProjection(
-        IMongoCollection<TDocument> collection,
-        Func<TEvent, Guid>? getId = null,
-        Func<Guid, FilterDefinitionBuilder<TDocument>, FilterDefinition<TDocument>>? filterBy = null
-    )
-    {
-        this.collection = collection;
-        this.getId = getId;
-        this.filterBy = filterBy;
-    }
-
-    public async Task Handle(EventEnvelope<TEvent> eventEnvelope, CancellationToken cancellationToken)
-    {
-        var (@event, eventMetadata) = eventEnvelope;
-
-        TDocument entity = (TDocument)Activator.CreateInstance(typeof(TDocument));
-
-        if (getId != null && filterBy != null)
-        {
-            var viewId = getId.Invoke(@event);
-            var filter = filterBy.Invoke(viewId, Builders<TDocument>.Filter);
-            entity = await collection.Find(filter).SingleOrDefaultAsync(cancellationToken);
-
-            if (entity == null)
-                throw new InvalidOperationException($"{typeof(TDocument).Name} with id {viewId} wasn't found");
-        }
-
-        var eventLogPosition = eventMetadata.LogPosition;
-
-        if (entity.Position >= eventLogPosition)
-            return;
-
-        entity.When(@event);
-
-        entity.Id = Guid.Parse(eventMetadata.EventId);
-        entity.Position = eventLogPosition;
-
-        await collection.InsertOneAsync(entity, default, cancellationToken);
     }
 }

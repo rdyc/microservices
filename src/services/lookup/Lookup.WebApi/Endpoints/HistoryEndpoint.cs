@@ -1,5 +1,6 @@
 using FW.Core.Pagination;
 using FW.Core.Queries;
+using FW.Core.WebApi;
 using Lookup.Histories.GettingHistories;
 using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Annotations;
@@ -10,7 +11,7 @@ public static class HistoryEndpoint
 {
     [SwaggerOperation(Summary = "Retrieve lookup histories", OperationId = "get", Tags = new[] { "History" })]
     internal static async Task<IResult> Histories(
-        [FromRoute] Guid aggregateid,
+        [FromRoute] Guid aggregateId,
         int index,
         int size,
         [FromServices] IQueryBus query,
@@ -18,19 +19,14 @@ public static class HistoryEndpoint
         CancellationToken cancellationToken)
     {
         var log = logger.CreateLogger<Program>();
+        var task = query.SendAsync<GetHistory, IListPaged<History>>(
+            GetHistory.Create(aggregateId, index, size), cancellationToken);
 
-        try
-        {
-            var result = await query.SendAsync<GetHistory, IListPaged<History>>(
-                new GetHistory(aggregateid, index, size), cancellationToken);
-
-            return Results.Ok(result);
-        }
-        catch (OperationCanceledException ex) when (cancellationToken.IsCancellationRequested)
-        {
-            log.LogWarning(ex.Message);
-        }
-
-        return Results.NoContent();
+        return await WithCancellation.TryExecute(
+            task: task,
+            onCompleted: (result) => Results.Ok(result),
+            onCancelled: (ex) => log.LogWarning(ex.Message),
+            cancellationToken: cancellationToken
+        );
     }
 }

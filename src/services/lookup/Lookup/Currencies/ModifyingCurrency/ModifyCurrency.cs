@@ -10,11 +10,19 @@ using MongoDB.Driver;
 namespace Lookup.Currencies.ModifyingCurrency;
 
 public record ModifyCurrency(
-    Guid CurrencyId,
+    Guid Id,
     string Name,
     string Code,
     string Symbol
-) : ICurrency, ICommand;
+) : ICurrency, ICommand
+{
+    public static ModifyCurrency Create(
+        Guid id,
+        string name,
+        string code,
+        string symbol
+    ) => new(id, name, code, symbol);
+}
 
 internal class ValidateModifyCurrency : AbstractValidator<ModifyCurrency>
 {
@@ -27,7 +35,7 @@ internal class ValidateModifyCurrency : AbstractValidator<ModifyCurrency>
 
         ClassLevelCascadeMode = CascadeMode.Stop;
 
-        RuleFor(p => p.CurrencyId).NotEmpty()
+        RuleFor(p => p.Id).NotEmpty()
             .MustExistCurrency(collection);
         RuleFor(p => p.Name).NotEmpty();
         RuleFor(p => p.Code).NotEmpty().MaximumLength(3)

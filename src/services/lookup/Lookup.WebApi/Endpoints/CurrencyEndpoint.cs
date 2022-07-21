@@ -26,7 +26,7 @@ public static class CurrencyEndpoint
     {
         var log = logger.CreateLogger<Program>();
         var task = query.SendAsync<GetCurrencies, IListPaged<CurrencyShortInfo>>(
-            new GetCurrencies(index, size), cancellationToken);
+            GetCurrencies.Create(index, size), cancellationToken);
 
         return await WithCancellation.TryExecute(
             task: task,
@@ -44,20 +44,15 @@ public static class CurrencyEndpoint
         CancellationToken cancellationToken)
     {
         var log = logger.CreateLogger<Program>();
+        var task = query.SendAsync<GetCurrencyById, CurrencyShortInfo>(
+            GetCurrencyById.Create(currencyId), cancellationToken);
 
-        try
-        {
-            var result = await query.SendAsync<GetCurrencyById, CurrencyShortInfo>(
-                new GetCurrencyById(currencyId), cancellationToken);
-
-            return Results.Ok(result);
-        }
-        catch (OperationCanceledException ex) when (cancellationToken.IsCancellationRequested)
-        {
-            log.LogWarning(ex.Message);
-        }
-
-        return Results.NoContent();
+        return await WithCancellation.TryExecute(
+            task: task,
+            onCompleted: (result) => Results.Ok(result),
+            onCancelled: (ex) => log.LogWarning(ex.Message),
+            cancellationToken: cancellationToken
+        );
     }
 
     [SwaggerOperation(Summary = "Retrieve currency list", OperationId = "get_list", Tags = new[] { "Currency" })]
@@ -68,20 +63,15 @@ public static class CurrencyEndpoint
         CancellationToken cancellationToken)
     {
         var log = logger.CreateLogger<Program>();
+        var task = query.SendAsync<GetCurrencyList, IListUnpaged<CurrencyShortInfo>>(
+            GetCurrencyList.Create(status), cancellationToken);
 
-        try
-        {
-            var result = await query.SendAsync<GetCurrencyList, IListUnpaged<CurrencyShortInfo>>(
-                new GetCurrencyList(status), cancellationToken);
-
-            return Results.Ok(result);
-        }
-        catch (OperationCanceledException ex) when (cancellationToken.IsCancellationRequested)
-        {
-            log.LogWarning(ex.Message);
-        }
-
-        return Results.NoContent();
+        return await WithCancellation.TryExecute(
+            task: task,
+            onCompleted: (result) => Results.Ok(result),
+            onCancelled: (ex) => log.LogWarning(ex.Message),
+            cancellationToken: cancellationToken
+        );
     }
 
     [SwaggerOperation(Summary = "Register a new currency", OperationId = "post", Tags = new[] { "Currency" })]
@@ -92,22 +82,17 @@ public static class CurrencyEndpoint
         CancellationToken cancellationToken)
     {
         var log = logger.CreateLogger<Program>();
+        var currencyId = Guid.NewGuid();
+        var (name, code, symbol, status) = request;
+        var task = command.SendAsync(
+            RegisterCurrency.Create(currencyId, name, code, symbol, status), cancellationToken);
 
-        try
-        {
-            var id = Guid.NewGuid();
-            var (name, code, symbol, status) = request;
-
-            await command.SendAsync(new RegisterCurrency(id, name, code, symbol, status), cancellationToken);
-
-            return Results.Created(string.Empty, id);
-        }
-        catch (OperationCanceledException ex) when (cancellationToken.IsCancellationRequested)
-        {
-            log.LogWarning(ex.Message);
-        }
-
-        return Results.NoContent();
+        return await WithCancellation.TryExecute(
+            task: task,
+            onCompleted: () => Results.Created(string.Empty, currencyId),
+            onCancelled: (ex) => log.LogWarning(ex.Message),
+            cancellationToken: cancellationToken
+        );
     }
 
     [SwaggerOperation(Summary = "Modify existing currency", OperationId = "put", Tags = new[] { "Currency" })]
@@ -119,21 +104,16 @@ public static class CurrencyEndpoint
         CancellationToken cancellationToken)
     {
         var log = logger.CreateLogger<Program>();
+        var (name, code, symbol) = request;
+        var task = command.SendAsync(
+            ModifyCurrency.Create(currencyId, name, code, symbol), cancellationToken);
 
-        try
-        {
-            var (name, code, symbol) = request;
-
-            await command.SendAsync(new ModifyCurrency(currencyId, name, code, symbol), cancellationToken);
-
-            return Results.Accepted(string.Empty, currencyId);
-        }
-        catch (OperationCanceledException ex) when (cancellationToken.IsCancellationRequested)
-        {
-            log.LogWarning(ex.Message);
-        }
-
-        return Results.NoContent();
+        return await WithCancellation.TryExecute(
+            task: task,
+            onCompleted: () => Results.Accepted(string.Empty, currencyId),
+            onCancelled: (ex) => log.LogWarning(ex.Message),
+            cancellationToken: cancellationToken
+        );
     }
 
     [SwaggerOperation(Summary = "Remove existing currency", OperationId = "delete", Tags = new[] { "Currency" })]
@@ -144,9 +124,11 @@ public static class CurrencyEndpoint
         CancellationToken cancellationToken)
     {
         var log = logger.CreateLogger<Program>();
+        var task = command.SendAsync(
+            RemoveCurrency.Create(currencyId), cancellationToken);
 
         return await WithCancellation.TryExecute(
-            task: command.SendAsync(new RemoveCurrency(currencyId), cancellationToken),
+            task: task,
             onCompleted: () => Results.NoContent(),
             onCancelled: (ex) => log.LogWarning(ex.Message),
             cancellationToken: cancellationToken

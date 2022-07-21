@@ -1,6 +1,7 @@
 using FW.Core.Commands;
 using FW.Core.Pagination;
 using FW.Core.Queries;
+using FW.Core.WebApi;
 using Microsoft.AspNetCore.Mvc;
 using Store.Products.AddingAttribute;
 using Store.Products.GettingProductById;
@@ -28,20 +29,15 @@ public static class ProductEndpoint
         CancellationToken cancellationToken)
     {
         var log = logger.CreateLogger<Program>();
+        var task = query.SendAsync<GetProducts, IListPaged<ProductShortInfo>>(
+            GetProducts.Create(index, size), cancellationToken);
 
-        try
-        {
-            var result = await query.SendAsync<GetProducts, IListPaged<ProductShortInfo>>(
-                new GetProducts(index, size), cancellationToken);
-
-            return Results.Ok(result);
-        }
-        catch (OperationCanceledException ex) when (cancellationToken.IsCancellationRequested)
-        {
-            log.LogWarning(ex.Message);
-        }
-
-        return Results.NoContent();
+        return await WithCancellation.TryExecute(
+            task: task,
+            onCompleted: (result) => Results.Ok(result),
+            onCancelled: (ex) => log.LogWarning(ex.Message),
+            cancellationToken: cancellationToken
+        );
     }
 
     [SwaggerOperation(Summary = "Retrieve product", OperationId = "get_product", Tags = new[] { "Product" })]
@@ -52,20 +48,15 @@ public static class ProductEndpoint
         CancellationToken cancellationToken)
     {
         var log = logger.CreateLogger<Program>();
+        var task = query.SendAsync<GetProductById, ProductDetail>(
+            GetProductById.Create(productId), cancellationToken);
 
-        try
-        {
-            var result = await query.SendAsync<GetProductById, ProductDetail>(
-                new GetProductById(productId), cancellationToken);
-
-            return Results.Ok(result);
-        }
-        catch (OperationCanceledException ex) when (cancellationToken.IsCancellationRequested)
-        {
-            log.LogWarning(ex.Message);
-        }
-
-        return Results.NoContent();
+        return await WithCancellation.TryExecute(
+            task: task,
+            onCompleted: (result) => Results.Ok(result),
+            onCancelled: (ex) => log.LogWarning(ex.Message),
+            cancellationToken: cancellationToken
+        );
     }
 
     [SwaggerOperation(Summary = "Retrieve product histories", OperationId = "get_history", Tags = new[] { "Product" })]
@@ -78,20 +69,15 @@ public static class ProductEndpoint
         CancellationToken cancellationToken)
     {
         var log = logger.CreateLogger<Program>();
+        var task = query.SendAsync<GetProductHistory, IListPaged<ProductHistory>>(
+            GetProductHistory.Create(productId, index, size), cancellationToken);
 
-        try
-        {
-            var result = await query.SendAsync<GetProductHistory, IListPaged<ProductHistory>>(
-                GetProductHistory.Create(productId, index, size), cancellationToken);
-
-            return Results.Ok(result);
-        }
-        catch (OperationCanceledException ex) when (cancellationToken.IsCancellationRequested)
-        {
-            log.LogWarning(ex.Message);
-        }
-
-        return Results.NoContent();
+        return await WithCancellation.TryExecute(
+            task: task,
+            onCompleted: (result) => Results.Ok(result),
+            onCancelled: (ex) => log.LogWarning(ex.Message),
+            cancellationToken: cancellationToken
+        );
     }
 
     [SwaggerOperation(Summary = "Register a new product", OperationId = "register", Tags = new[] { "Product" })]
@@ -102,22 +88,16 @@ public static class ProductEndpoint
         CancellationToken cancellationToken)
     {
         var log = logger.CreateLogger<Program>();
+        var productId = Guid.NewGuid();
+        var (sku, name, description) = request;
+        var task = command.SendAsync(RegisterProduct.Create(productId, sku, name, description), cancellationToken);
 
-        try
-        {
-            var id = Guid.NewGuid();
-            var (sku, name, description) = request;
-
-            await command.SendAsync(new RegisterProduct(id, sku, name, description), cancellationToken);
-
-            return Results.Created(string.Empty, id);
-        }
-        catch (OperationCanceledException ex) when (cancellationToken.IsCancellationRequested)
-        {
-            log.LogWarning(ex.Message);
-        }
-
-        return Results.NoContent();
+        return await WithCancellation.TryExecute(
+            task: task,
+            onCompleted: () => Results.Created(string.Empty, productId),
+            onCancelled: (ex) => log.LogWarning(ex.Message),
+            cancellationToken: cancellationToken
+        );
     }
 
     [SwaggerOperation(Summary = "Modify existing product", OperationId = "modify", Tags = new[] { "Product" })]
@@ -129,21 +109,15 @@ public static class ProductEndpoint
         CancellationToken cancellationToken)
     {
         var log = logger.CreateLogger<Program>();
+        var (name, code, symbol) = request;
+        var task = command.SendAsync(ModifyProduct.Create(productId, name, code, symbol), cancellationToken);
 
-        try
-        {
-            var (name, code, symbol) = request;
-
-            await command.SendAsync(new ModifyProduct(productId, name, code, symbol), cancellationToken);
-
-            return Results.Accepted(string.Empty, productId);
-        }
-        catch (OperationCanceledException ex) when (cancellationToken.IsCancellationRequested)
-        {
-            log.LogWarning(ex.Message);
-        }
-
-        return Results.NoContent();
+        return await WithCancellation.TryExecute(
+            task: task,
+            onCompleted: () => Results.Accepted(string.Empty, productId),
+            onCancelled: (ex) => log.LogWarning(ex.Message),
+            cancellationToken: cancellationToken
+        );
     }
 
     [SwaggerOperation(Summary = "Add product attribute", OperationId = "add_attribute", Tags = new[] { "Product" })]
@@ -155,21 +129,15 @@ public static class ProductEndpoint
         CancellationToken cancellationToken)
     {
         var log = logger.CreateLogger<Program>();
+        var (attributeId, value) = request;
+        var task = command.SendAsync(AddProductAttribute.Create(productId, attributeId, value), cancellationToken);
 
-        try
-        {
-            var (attributeId, value) = request;
-
-            await command.SendAsync(new AddProductAttribute(productId, attributeId, value), cancellationToken);
-
-            return Results.Accepted(string.Empty, productId);
-        }
-        catch (OperationCanceledException ex) when (cancellationToken.IsCancellationRequested)
-        {
-            log.LogWarning(ex.Message);
-        }
-
-        return Results.NoContent();
+        return await WithCancellation.TryExecute(
+            task: task,
+            onCompleted: () => Results.Accepted(string.Empty, productId),
+            onCancelled: (ex) => log.LogWarning(ex.Message),
+            cancellationToken: cancellationToken
+        );
     }
 
     [SwaggerOperation(Summary = "Remove product attribute", OperationId = "remove_attribute", Tags = new[] { "Product" })]
@@ -181,19 +149,14 @@ public static class ProductEndpoint
         CancellationToken cancellationToken)
     {
         var log = logger.CreateLogger<Program>();
+        var task = command.SendAsync(RemoveProductAttribute.Create(productId, attributeId), cancellationToken);
 
-        try
-        {
-            await command.SendAsync(new RemoveProductAttribute(productId, attributeId), cancellationToken);
-
-            return Results.Accepted(string.Empty, productId);
-        }
-        catch (OperationCanceledException ex) when (cancellationToken.IsCancellationRequested)
-        {
-            log.LogWarning(ex.Message);
-        }
-
-        return Results.NoContent();
+        return await WithCancellation.TryExecute(
+            task: task,
+            onCompleted: () => Results.Accepted(string.Empty, productId),
+            onCancelled: (ex) => log.LogWarning(ex.Message),
+            cancellationToken: cancellationToken
+        );
     }
 
     [SwaggerOperation(Summary = "Update product pricing", OperationId = "update_price", Tags = new[] { "Product" })]
@@ -205,21 +168,15 @@ public static class ProductEndpoint
         CancellationToken cancellationToken)
     {
         var log = logger.CreateLogger<Program>();
+        var (currencyId, price) = request;
+        var task = command.SendAsync(UpdateProductPrice.Create(productId, currencyId, price), cancellationToken);
 
-        try
-        {
-            var (currencyId, price) = request;
-
-            await command.SendAsync(new UpdateProductPrice(productId, currencyId, price), cancellationToken);
-
-            return Results.Accepted(string.Empty, productId);
-        }
-        catch (OperationCanceledException ex) when (cancellationToken.IsCancellationRequested)
-        {
-            log.LogWarning(ex.Message);
-        }
-
-        return Results.NoContent();
+        return await WithCancellation.TryExecute(
+            task: task,
+            onCompleted: () => Results.Accepted(string.Empty, productId),
+            onCancelled: (ex) => log.LogWarning(ex.Message),
+            cancellationToken: cancellationToken
+        );
     }
 
     [SwaggerOperation(Summary = "Update product stock", OperationId = "update_stock", Tags = new[] { "Product" })]
@@ -231,19 +188,14 @@ public static class ProductEndpoint
         CancellationToken cancellationToken)
     {
         var log = logger.CreateLogger<Program>();
+        var task = command.SendAsync(UpdateProductStock.Create(productId, request.Stock), cancellationToken);
 
-        try
-        {
-            await command.SendAsync(new UpdateProductStock(productId, request.Stock), cancellationToken);
-
-            return Results.Accepted(string.Empty, productId);
-        }
-        catch (OperationCanceledException ex) when (cancellationToken.IsCancellationRequested)
-        {
-            log.LogWarning(ex.Message);
-        }
-
-        return Results.NoContent();
+        return await WithCancellation.TryExecute(
+            task: task,
+            onCompleted: () => Results.Accepted(string.Empty, productId),
+            onCancelled: (ex) => log.LogWarning(ex.Message),
+            cancellationToken: cancellationToken
+        );
     }
 
     [SwaggerOperation(Summary = "Remove existing product", OperationId = "remove", Tags = new[] { "Product" })]
@@ -254,18 +206,13 @@ public static class ProductEndpoint
         CancellationToken cancellationToken)
     {
         var log = logger.CreateLogger<Program>();
+        var task = command.SendAsync(RemoveProduct.Create(productId), cancellationToken);
 
-        try
-        {
-            await command.SendAsync(new RemoveProduct(productId), cancellationToken);
-
-            return Results.NoContent();
-        }
-        catch (OperationCanceledException ex) when (cancellationToken.IsCancellationRequested)
-        {
-            log.LogWarning(ex.Message);
-        }
-
-        return Results.NoContent();
+        return await WithCancellation.TryExecute(
+            task: task,
+            onCompleted: () => Results.NoContent(),
+            onCancelled: (ex) => log.LogWarning(ex.Message),
+            cancellationToken: cancellationToken
+        );
     }
 }

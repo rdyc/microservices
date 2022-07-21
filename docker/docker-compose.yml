@@ -149,7 +149,7 @@ services:
       "
   
   schema_registry:
-    image: confluentinc/cp-schema-registry:7.0.1
+    image: confluentinc/cp-schema-registry:latest
     container_name: schema_registry
     hostname: schema_registry
     ports:
@@ -161,7 +161,8 @@ services:
       - kafka_network
     environment:
       SCHEMA_REGISTRY_HOST_NAME: schema_registry
-      SCHEMA_REGISTRY_KAFKASTORE_CONNECTION_URL: 'zookeeper:2181'
+      SCHEMA_REGISTRY_LISTENERS: "http://0.0.0.0:8081"
+      SCHEMA_REGISTRY_KAFKASTORE_BOOTSTRAP_SERVERS: 'kafka:29092'
       SCHEMA_REGISTRY_ACCESS_CONTROL_ALLOW_METHODS: 'GET,POST,PUT,OPTIONS'
       SCHEMA_REGISTRY_ACCESS_CONTROL_ALLOW_ORIGIN: '*'
       SCHEMA_LOG4J_ROOT_LOGLEVEL: 'ERROR'
@@ -169,7 +170,7 @@ services:
     restart: always
 
   kafka_rest:
-    image: confluentinc/cp-kafka-rest:7.0.1
+    image: confluentinc/cp-kafka-rest:latest
     container_name: kafka_rest
     hostname: kafka_rest
     ports:

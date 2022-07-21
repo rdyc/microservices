@@ -10,12 +10,21 @@ using MongoDB.Driver;
 namespace Lookup.Currencies.RegisteringCurrency;
 
 public record RegisterCurrency(
-    Guid CurrencyId,
+    Guid Id,
     string Name,
     string Code,
     string Symbol,
     LookupStatus Status
-) : ICurrency, ICommand;
+) : ICurrency, ICommand
+{
+    public static RegisterCurrency Create(
+        Guid id,
+        string name,
+        string code,
+        string symbol,
+        LookupStatus status
+    ) => new(id, name, code, symbol, status);
+}
 
 internal class ValidateRegisterCurrency : AbstractValidator<RegisterCurrency>
 {
@@ -28,7 +37,7 @@ internal class ValidateRegisterCurrency : AbstractValidator<RegisterCurrency>
 
         ClassLevelCascadeMode = CascadeMode.Stop;
 
-        RuleFor(p => p.CurrencyId).NotEmpty();
+        RuleFor(p => p.Id).NotEmpty();
         RuleFor(p => p.Name).NotEmpty();
         RuleFor(p => p.Code).NotEmpty().MaximumLength(3)
             .MustUniqueCurrencyCode(collection);

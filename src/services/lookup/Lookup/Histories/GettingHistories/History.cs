@@ -17,11 +17,28 @@ public record History : Document
     [BsonElement("aggregate_id")]
     public Guid AggregateId { get; set; } = default!;
 
-    [BsonElement("type")]
-    public string Type { get; set; } = default!;
+    [BsonElement("description")]
+    public string Description { get; set; } = default!;
 
-    [BsonElement("data")]
-    public IDictionary<string, object>? Data { get; set; }
+    [BsonElement("version")]
+    public ulong Version { get; set; } = default!;
+
+    [BsonElement("position")]
+    public ulong Position { get; set; } = default!;
+
+    public static History Create(Guid aggregateId, string description, EventMetadata metadata)
+    {
+        var (eventId, streamPosition, logPosition, _) = metadata;
+
+        return new History
+        {
+            Id = Guid.Parse(eventId),
+            AggregateId = aggregateId,
+            Description = description,
+            Version = streamPosition,
+            Position = logPosition
+        };
+    }
 }
 
 public class AttributeHistoryProjection
@@ -30,52 +47,26 @@ public class AttributeHistoryProjection
     {
         var (id, name, type, unit, status) = eventEnvelope.Data;
 
-        var data = new Dictionary<string, object>
-        {
-            { "name", name },
-            { "type", type },
-            { "unit", unit },
-            { "status", status }
-        };
-
-        return new History
-        {
-            Id = Guid.Parse(eventEnvelope.Metadata.EventId),
-            AggregateId = id,
-            Type = nameof(AttributeRegistered),
-            Data = data
-        };
+        return History.Create(
+            id,
+            $"Registered as name: {name}, type: {type}, unit: {unit} and status: {status}",
+            eventEnvelope.Metadata
+        );
     }
 
     public static History Handle(EventEnvelope<AttributeModified> eventEnvelope)
     {
         var (id, name, type, unit) = eventEnvelope.Data;
 
-        var data = new Dictionary<string, object>
-        {
-            { "name", name },
-            { "type", type },
-            { "unit", unit }
-        };
-
-        return new History
-        {
-            Id = Guid.Parse(eventEnvelope.Metadata.EventId),
-            AggregateId = id,
-            Type = nameof(AttributeModified),
-            Data = data
-        };
+        return History.Create(
+            id,
+            $"Modified with name: {name}, type: {type} and unit: {unit}",
+            eventEnvelope.Metadata
+        );
     }
 
-    public static History Handle(EventEnvelope<AttributeRemoved> eventEnvelope)
-    {
-        return new History
-        {
-            Id = Guid.Parse(eventEnvelope.Metadata.EventId),
-            AggregateId = eventEnvelope.Data.Id,
-            Type = nameof(AttributeRemoved)
-        };
-    }
+    public static History Handle(EventEnvelope<AttributeRemoved> eventEnvelope) =>
+        History.Create(eventEnvelope.Data.Id, "Removed", eventEnvelope.Metadata);
 }
 
 public class CurrencyHistoryProjection
@@ -84,50 +75,24 @@ public class CurrencyHistoryProjection
     {
         var (id, name, code, symbol, status) = eventEnvelope.Data;
 
-        var data = new Dictionary<string, object>
-        {
-            { "name", name },
-            { "code", code },
-            { "symbol", symbol },
-            { "status", status }
-        };
-
-        return new History
-        {
-            Id = Guid.Parse(eventEnvelope.Metadata.EventId),
-            AggregateId = id,
-            Type = nameof(CurrencyRegistered),
-            Data = data
-        };
+        return History.Create(
+            id,
+            $"Registered as name: {name}, code: {code}, symbol: {symbol} and status: {status}",
+            eventEnvelope.Metadata
+        );
     }
 
     public static History Handle(EventEnvelope<CurrencyModified> eventEnvelope)
     {
         var (id, name, code, symbol) = eventEnvelope.Data;
 
-        var data = new Dictionary<string, object>
-        {
-            { "name", name },
-            { "code", code },
-            { "symbol", symbol }
-        };
-
-        return new History
-        {
-            Id = Guid.Parse(eventEnvelope.Metadata.EventId),
-            AggregateId = id,
-            Type = nameof(CurrencyModified),
-            Data = data
-        };
+        return History.Create(
+            id,
+            $"Modified with name: {name}, code: {code} and symbol: {symbol}",
+            eventEnvelope.Metadata
+        );
     }
 
-    public static History Handle(EventEnvelope<CurrencyRemoved> eventEnvelope)
-    {
-        return new History
-        {
-            Id = Guid.Parse(eventEnvelope.Metadata.EventId),
-            AggregateId = eventEnvelope.Data.Id,
-            Type = nameof(CurrencyRemoved)
-        };
-    }
+    public static History Handle(EventEnvelope<CurrencyRemoved> eventEnvelope) =>
+        History.Create(eventEnvelope.Data.Id, "Removed", eventEnvelope.Metadata);
 }

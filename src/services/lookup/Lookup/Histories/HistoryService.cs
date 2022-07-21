@@ -15,7 +15,8 @@ namespace Lookup.Histories;
 internal static class HistoryService
 {
     internal static IServiceCollection AddHistory(this IServiceCollection services) =>
-        services.AddQueryHandlers()
+        services
+            .AddQueryHandlers()
             .AddProjections();
 
     private static IServiceCollection AddQueryHandlers(this IServiceCollection services) =>

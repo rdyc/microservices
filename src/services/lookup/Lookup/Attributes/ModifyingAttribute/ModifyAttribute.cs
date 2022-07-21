@@ -14,7 +14,15 @@ public record ModifyAttribute(
     string Name,
     AttributeType Type,
     string Unit
-) : IAttribute, ICommand;
+) : IAttribute, ICommand
+{
+    public static ModifyAttribute Create(
+        Guid attributeId,
+        string name,
+        AttributeType type,
+        string unit
+    ) => new(attributeId, name, type, unit);
+}
 
 internal class ValidateModifyAttribute : AbstractValidator<ModifyAttribute>
 {

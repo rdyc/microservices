@@ -19,7 +19,7 @@ public record GetProducts(
         if (pageSize is null or <= 0 or > 100)
             throw new ArgumentOutOfRangeException(nameof(pageSize));
 
-        return new GetProducts(pageNumber.Value, pageSize.Value);
+        return new(pageNumber.Value, pageSize.Value);
     }
 }
 

@@ -1,6 +1,7 @@
 using FW.Core.Commands;
 using FW.Core.Pagination;
 using FW.Core.Queries;
+using FW.Core.WebApi;
 using Lookup.Attributes.GettingAttributeById;
 using Lookup.Attributes.GettingAttributeList;
 using Lookup.Attributes.GettingAttributes;
@@ -24,20 +25,15 @@ public static class AttributeEndpoint
         CancellationToken cancellationToken)
     {
         var log = logger.CreateLogger<Program>();
+        var task = query.SendAsync<GetAttributes, IListPaged<AttributeShortInfo>>(
+            GetAttributes.Create(index, size), cancellationToken);
 
-        try
-        {
-            var result = await query.SendAsync<GetAttributes, IListPaged<AttributeShortInfo>>(
-                new GetAttributes(index, size), cancellationToken);
-
-            return Results.Ok(result);
-        }
-        catch (OperationCanceledException ex) when (cancellationToken.IsCancellationRequested)
-        {
-            log.LogWarning(ex.Message);
-        }
-
-        return Results.NoContent();
+        return await WithCancellation.TryExecute(
+            task: task,
+            onCompleted: (result) => Results.Ok(result),
+            onCancelled: (ex) => log.LogWarning(ex.Message),
+            cancellationToken: cancellationToken
+        );
     }
 
     [SwaggerOperation(Summary = "Retrieve attribute", OperationId = "get_detail", Tags = new[] { "Attribute" })]
@@ -48,20 +44,15 @@ public static class AttributeEndpoint
         CancellationToken cancellationToken)
     {
         var log = logger.CreateLogger<Program>();
+        var task = query.SendAsync<GetAttributeById, AttributeShortInfo>(
+            GetAttributeById.Create(attributeId), cancellationToken);
 
-        try
-        {
-            var result = await query.SendAsync<GetAttributeById, AttributeShortInfo>(
-                new GetAttributeById(attributeId), cancellationToken);
-
-            return Results.Ok(result);
-        }
-        catch (OperationCanceledException ex) when (cancellationToken.IsCancellationRequested)
-        {
-            log.LogWarning(ex.Message);
-        }
-
-        return Results.NoContent();
+        return await WithCancellation.TryExecute(
+            task: task,
+            onCompleted: (result) => Results.Ok(result),
+            onCancelled: (ex) => log.LogWarning(ex.Message),
+            cancellationToken: cancellationToken
+        );
     }
 
     [SwaggerOperation(Summary = "Retrieve attribute list", OperationId = "get_list", Tags = new[] { "Attribute" })]
@@ -72,20 +63,15 @@ public static class AttributeEndpoint
         CancellationToken cancellationToken)
     {
         var log = logger.CreateLogger<Program>();
+        var task = query.SendAsync<GetAttributeList, IListUnpaged<AttributeShortInfo>>(
+            GetAttributeList.Create(status), cancellationToken);
 
-        try
-        {
-            var result = await query.SendAsync<GetAttributeList, IListUnpaged<AttributeShortInfo>>(
-                new GetAttributeList(status), cancellationToken);
-
-            return Results.Ok(result);
-        }
-        catch (OperationCanceledException ex) when (cancellationToken.IsCancellationRequested)
-        {
-            log.LogWarning(ex.Message);
-        }
-
-        return Results.NoContent();
+        return await WithCancellation.TryExecute(
+            task: task,
+            onCompleted: (result) => Results.Ok(result),
+            onCancelled: (ex) => log.LogWarning(ex.Message),
+            cancellationToken: cancellationToken
+        );
     }
 
     [SwaggerOperation(Summary = "Register a new attribute", OperationId = "post", Tags = new[] { "Attribute" })]
@@ -96,22 +82,16 @@ public static class AttributeEndpoint
         CancellationToken cancellationToken)
     {
         var log = logger.CreateLogger<Program>();
+        var attributeId = Guid.NewGuid();
+        var (name, code, symbol, status) = request;
+        var task = command.SendAsync(RegisterAttribute.Create(attributeId, name, code, symbol, status), cancellationToken);
 
-        try
-        {
-            var id = Guid.NewGuid();
-            var (name, code, symbol, status) = request;
-
-            await command.SendAsync(new RegisterAttribute(id, name, code, symbol, status), cancellationToken);
-
-            return Results.Created(string.Empty, id);
-        }
-        catch (OperationCanceledException ex) when (cancellationToken.IsCancellationRequested)
-        {
-            log.LogWarning(ex.Message);
-        }
-
-        return Results.NoContent();
+        return await WithCancellation.TryExecute(
+            task: task,
+            onCompleted: () => Results.Created(string.Empty, attributeId),
+            onCancelled: (ex) => log.LogWarning(ex.Message),
+            cancellationToken: cancellationToken
+        );
     }
 
     [SwaggerOperation(Summary = "Modify existing attribute", OperationId = "put", Tags = new[] { "Attribute" })]
@@ -123,21 +103,15 @@ public static class AttributeEndpoint
         CancellationToken cancellationToken)
     {
         var log = logger.CreateLogger<Program>();
+        var (name, code, symbol) = request;
+        var task = command.SendAsync(ModifyAttribute.Create(attributeId, name, code, symbol), cancellationToken);
 
-        try
-        {
-            var (name, code, symbol) = request;
-
-            await command.SendAsync(new ModifyAttribute(attributeId, name, code, symbol), cancellationToken);
-
-            return Results.Accepted(string.Empty, attributeId);
-        }
-        catch (OperationCanceledException ex) when (cancellationToken.IsCancellationRequested)
-        {
-            log.LogWarning(ex.Message);
-        }
-
-        return Results.NoContent();
+        return await WithCancellation.TryExecute(
+            task: task,
+            onCompleted: () => Results.Accepted(string.Empty, attributeId),
+            onCancelled: (ex) => log.LogWarning(ex.Message),
+            cancellationToken: cancellationToken
+        );
     }
 
     [SwaggerOperation(Summary = "Remove existing attribute", OperationId = "delete", Tags = new[] { "Attribute" })]
@@ -148,18 +122,13 @@ public static class AttributeEndpoint
         CancellationToken cancellationToken)
     {
         var log = logger.CreateLogger<Program>();
+        var task = command.SendAsync(RemoveAttribute.Create(attributeId), cancellationToken);
 
-        try
-        {
-            await command.SendAsync(new RemoveAttribute(attributeId), cancellationToken);
-
-            return Results.NoContent();
-        }
-        catch (OperationCanceledException ex) when (cancellationToken.IsCancellationRequested)
-        {
-            log.LogWarning(ex.Message);
-        }
-
-        return Results.NoContent();
+        return await WithCancellation.TryExecute(
+            task: task,
+            onCompleted: () => Results.NoContent(),
+            onCancelled: (ex) => log.LogWarning(ex.Message),
+            cancellationToken: cancellationToken
+        );
     }
 }

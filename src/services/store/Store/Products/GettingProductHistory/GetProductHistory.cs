@@ -23,7 +23,7 @@ public record GetProductHistory(
         if (pageSize is null or < 0 or > 100)
             throw new ArgumentOutOfRangeException(nameof(pageSize));
 
-        return new GetProductHistory(productId.Value, pageNumber.Value, pageSize.Value);
+        return new(productId.Value, pageNumber.Value, pageSize.Value);
     }
 };
 

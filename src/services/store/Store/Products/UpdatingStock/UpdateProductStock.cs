@@ -19,7 +19,7 @@ public record UpdateProductStock(
         if (stock < 0)
             throw new InvalidOperationException(nameof(stock));
 
-        return new UpdateProductStock(productId, stock);
+        return new(productId, stock);
     }
 }
 

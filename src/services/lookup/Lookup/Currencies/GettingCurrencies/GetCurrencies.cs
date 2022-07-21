@@ -6,7 +6,14 @@ using MongoDB.Driver;
 
 namespace Lookup.Currencies.GettingCurrencies;
 
-public record GetCurrencies(int Index, int Size) : IQuery<IListPaged<CurrencyShortInfo>>;
+public record GetCurrencies(
+    int Index,
+    int Size
+) : IQuery<IListPaged<CurrencyShortInfo>>
+{
+    public static GetCurrencies Create(int index, int size) =>
+        new(index, size);
+}
 
 internal class HandleGetCurrencies : IQueryHandler<GetCurrencies, IListPaged<CurrencyShortInfo>>
 {

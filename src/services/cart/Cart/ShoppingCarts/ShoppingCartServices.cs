@@ -27,8 +27,7 @@ internal static class ShoppingCartsServices
             .AddCommandValidators()
             .AddCommandHandlers()
             .AddQueryHandlers()
-            .AddProjections()
-            .AddProjects();
+            .AddProjections();
 
     private static IServiceCollection AddCommandValidators(this IServiceCollection services) =>
         services
@@ -128,13 +127,12 @@ internal static class ShoppingCartsServices
                         .Set(e => e.Version, view.Version)
                         .Set(e => e.Position, view.Position)
                 )
+            )
+            .Projection<ShoppingCartHistory>(builder => builder
+                .AddOn<ShoppingCartOpened>(ShoppingCartHistoryProjection.Handle)
+                .AddOn<ProductCartAdded>(ShoppingCartHistoryProjection.Handle)
+                .AddOn<ProductCartRemoved>(ShoppingCartHistoryProjection.Handle)
+                .AddOn<ShoppingCartConfirmed>(ShoppingCartHistoryProjection.Handle)
+                .AddOn<ShoppingCartCanceled>(ShoppingCartHistoryProjection.Handle)
             );
-
-    private static IServiceCollection AddProjects(this IServiceCollection services) =>
-        services
-            .Project<ShoppingCartOpened, ShoppingCartHistory>()
-            .Project<ProductCartAdded, ShoppingCartHistory>()
-            .Project<ProductCartRemoved, ShoppingCartHistory>()
-            .Project<ShoppingCartConfirmed, ShoppingCartHistory>()
-            .Project<ShoppingCartCanceled, ShoppingCartHistory>();
 }

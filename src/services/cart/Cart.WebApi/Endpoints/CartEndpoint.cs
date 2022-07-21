@@ -12,6 +12,7 @@ using Cart.WebApi.Requests;
 using FW.Core.Commands;
 using FW.Core.Pagination;
 using FW.Core.Queries;
+using FW.Core.WebApi;
 using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Annotations;
 
@@ -28,20 +29,15 @@ internal static class CartEndpoint
         CancellationToken cancellationToken)
     {
         var log = logger.CreateLogger<Program>();
+        var task = query.SendAsync<GetCarts, IListPaged<ShoppingCartShortInfo>>(
+            GetCarts.Create(index, size), cancellationToken);
 
-        try
-        {
-            var result = await query.SendAsync<GetCarts, IListPaged<ShoppingCartShortInfo>>(
-                new GetCarts(index, size), cancellationToken);
-
-            return Results.Ok(result);
-        }
-        catch (OperationCanceledException ex) when (cancellationToken.IsCancellationRequested)
-        {
-            log.LogWarning(ex.Message);
-        }
-
-        return Results.NoContent();
+        return await WithCancellation.TryExecute(
+            task: task,
+            onCompleted: (result) => Results.Ok(result),
+            onCancelled: (ex) => log.LogWarning(ex.Message),
+            cancellationToken: cancellationToken
+        );
     }
 
     [SwaggerOperation(Summary = "Retrieve cart", OperationId = "get_cart", Tags = new[] { "Cart" })]
@@ -52,20 +48,15 @@ internal static class CartEndpoint
         CancellationToken cancellationToken)
     {
         var log = logger.CreateLogger<Program>();
+        var task = query.SendAsync<GetCartById, ShoppingCartDetails>(
+            GetCartById.Create(cartId), cancellationToken);
 
-        try
-        {
-            var result = await query.SendAsync<GetCartById, ShoppingCartDetails>(
-                GetCartById.Create(cartId), cancellationToken);
-
-            return Results.Ok(result);
-        }
-        catch (OperationCanceledException ex) when (cancellationToken.IsCancellationRequested)
-        {
-            log.LogWarning(ex.Message);
-        }
-
-        return Results.NoContent();
+        return await WithCancellation.TryExecute(
+            task: task,
+            onCompleted: (result) => Results.Ok(result),
+            onCancelled: (ex) => log.LogWarning(ex.Message),
+            cancellationToken: cancellationToken
+        );
     }
 
     [SwaggerOperation(Summary = "Retrieve cart at version", OperationId = "get_cart", Tags = new[] { "Cart" })]
@@ -77,20 +68,15 @@ internal static class CartEndpoint
         CancellationToken cancellationToken)
     {
         var log = logger.CreateLogger<Program>();
+        var task = query.SendAsync<GetCartAtVersion, ShoppingCart>(
+            GetCartAtVersion.Create(cartId, version), cancellationToken);
 
-        try
-        {
-            var result = await query.SendAsync<GetCartAtVersion, ShoppingCart>(
-                GetCartAtVersion.Create(cartId, version), cancellationToken);
-
-            return Results.Ok(result);
-        }
-        catch (OperationCanceledException ex) when (cancellationToken.IsCancellationRequested)
-        {
-            log.LogWarning(ex.Message);
-        }
-
-        return Results.NoContent();
+        return await WithCancellation.TryExecute(
+            task: task,
+            onCompleted: (result) => Results.Ok(result),
+            onCancelled: (ex) => log.LogWarning(ex.Message),
+            cancellationToken: cancellationToken
+        );
     }
 
     [SwaggerOperation(Summary = "Retrieve cart histories", OperationId = "get_history", Tags = new[] { "Cart" })]
@@ -103,20 +89,15 @@ internal static class CartEndpoint
         CancellationToken cancellationToken)
     {
         var log = logger.CreateLogger<Program>();
+        var task = query.SendAsync<GetCartHistory, IListPaged<ShoppingCartHistory>>(
+            GetCartHistory.Create(cartId, index, size), cancellationToken);
 
-        try
-        {
-            var result = await query.SendAsync<GetCartHistory, IListPaged<ShoppingCartHistory>>(
-                GetCartHistory.Create(cartId, index, size), cancellationToken);
-
-            return Results.Ok(result);
-        }
-        catch (OperationCanceledException ex) when (cancellationToken.IsCancellationRequested)
-        {
-            log.LogWarning(ex.Message);
-        }
-
-        return Results.NoContent();
+        return await WithCancellation.TryExecute(
+            task: task,
+            onCompleted: (result) => Results.Ok(result),
+            onCancelled: (ex) => log.LogWarning(ex.Message),
+            cancellationToken: cancellationToken
+        );
     }
 
     [SwaggerOperation(Summary = "Open a new cart", OperationId = "open", Tags = new[] { "Cart" })]
@@ -127,21 +108,15 @@ internal static class CartEndpoint
         CancellationToken cancellationToken)
     {
         var log = logger.CreateLogger<Program>();
+        var cartId = Guid.NewGuid();
+        var task = command.SendAsync(OpenShoppingCart.Create(cartId, request.ClientId), cancellationToken);
 
-        try
-        {
-            var id = Guid.NewGuid();
-
-            await command.SendAsync(OpenShoppingCart.Create(id, request.ClientId), cancellationToken);
-
-            return Results.Created(string.Empty, id);
-        }
-        catch (OperationCanceledException ex) when (cancellationToken.IsCancellationRequested)
-        {
-            log.LogWarning(ex.Message);
-        }
-
-        return Results.NoContent();
+        return await WithCancellation.TryExecute(
+            task: task,
+            onCompleted: () => Results.Created(string.Empty, cartId),
+            onCancelled: (ex) => log.LogWarning(ex.Message),
+            cancellationToken: cancellationToken
+        );
     }
 
     [SwaggerOperation(Summary = "Add product", OperationId = "add_product", Tags = new[] { "Cart" })]
@@ -153,21 +128,15 @@ internal static class CartEndpoint
         CancellationToken cancellationToken)
     {
         var log = logger.CreateLogger<Program>();
+        var (productId, quantity) = request;
+        var task = command.SendAsync(AddProductCart.Create(cartId, productId, quantity), cancellationToken);
 
-        try
-        {
-            var (productId, quantity) = request;
-
-            await command.SendAsync(AddProductCart.Create(cartId, productId, quantity), cancellationToken);
-
-            return Results.Accepted(string.Empty, cartId);
-        }
-        catch (OperationCanceledException ex) when (cancellationToken.IsCancellationRequested)
-        {
-            log.LogWarning(ex.Message);
-        }
-
-        return Results.NoContent();
+        return await WithCancellation.TryExecute(
+            task: task,
+            onCompleted: () => Results.Accepted(string.Empty, cartId),
+            onCancelled: (ex) => log.LogWarning(ex.Message),
+            cancellationToken: cancellationToken
+        );
     }
 
     [SwaggerOperation(Summary = "Remove product", OperationId = "remove_product", Tags = new[] { "Cart" })]
@@ -179,19 +148,14 @@ internal static class CartEndpoint
         CancellationToken cancellationToken)
     {
         var log = logger.CreateLogger<Program>();
+        var task = command.SendAsync(RemoveProductCart.Create(cartId, request.ProductId), cancellationToken);
 
-        try
-        {
-            await command.SendAsync(RemoveProductCart.Create(cartId, request.ProductId), cancellationToken);
-
-            return Results.Accepted(string.Empty, cartId);
-        }
-        catch (OperationCanceledException ex) when (cancellationToken.IsCancellationRequested)
-        {
-            log.LogWarning(ex.Message);
-        }
-
-        return Results.NoContent();
+        return await WithCancellation.TryExecute(
+            task: task,
+            onCompleted: () => Results.Accepted(string.Empty, cartId),
+            onCancelled: (ex) => log.LogWarning(ex.Message),
+            cancellationToken: cancellationToken
+        );
     }
 
     [SwaggerOperation(Summary = "Canceling cart", OperationId = "cancel", Tags = new[] { "Cart" })]
@@ -202,19 +166,14 @@ internal static class CartEndpoint
         CancellationToken cancellationToken)
     {
         var log = logger.CreateLogger<Program>();
+        var task = command.SendAsync(CancelShoppingCart.Create(cartId), cancellationToken);
 
-        try
-        {
-            await command.SendAsync(new CancelShoppingCart(cartId), cancellationToken);
-
-            return Results.NoContent();
-        }
-        catch (OperationCanceledException ex) when (cancellationToken.IsCancellationRequested)
-        {
-            log.LogWarning(ex.Message);
-        }
-
-        return Results.NoContent();
+        return await WithCancellation.TryExecute(
+            task: task,
+            onCompleted: () => Results.Accepted(string.Empty, cartId),
+            onCancelled: (ex) => log.LogWarning(ex.Message),
+            cancellationToken: cancellationToken
+        );
     }
 
     [SwaggerOperation(Summary = "confirm cart", OperationId = "confirm", Tags = new[] { "Cart" })]
@@ -225,18 +184,13 @@ internal static class CartEndpoint
         CancellationToken cancellationToken)
     {
         var log = logger.CreateLogger<Program>();
+        var task = command.SendAsync(ConfirmShoppingCart.Create(cartId), cancellationToken);
 
-        try
-        {
-            await command.SendAsync(new ConfirmShoppingCart(cartId), cancellationToken);
-
-            return Results.NoContent();
-        }
-        catch (OperationCanceledException ex) when (cancellationToken.IsCancellationRequested)
-        {
-            log.LogWarning(ex.Message);
-        }
-
-        return Results.NoContent();
+        return await WithCancellation.TryExecute(
+            task: task,
+            onCompleted: () => Results.Accepted(string.Empty, cartId),
+            onCancelled: (ex) => log.LogWarning(ex.Message),
+            cancellationToken: cancellationToken
+        );
     }
 }

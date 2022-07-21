@@ -15,7 +15,16 @@ public record RegisterAttribute(
     AttributeType Type,
     string Unit,
     LookupStatus Status
-) : IAttribute, ICommand;
+) : IAttribute, ICommand
+{
+    public static RegisterAttribute Create(
+        Guid attributeId,
+        string name,
+        AttributeType type,
+        string unit,
+        LookupStatus status
+    ) => new(attributeId, name, type, unit, status);
+}
 
 internal class ValidateRegisterAttribute : AbstractValidator<RegisterAttribute>
 {

@@ -6,7 +6,12 @@ using MongoDB.Driver;
 
 namespace Lookup.Currencies.GettingCurrencyById;
 
-public record GetCurrencyById(Guid Id) : IQuery<CurrencyShortInfo>;
+public record GetCurrencyById(
+    Guid Id
+) : IQuery<CurrencyShortInfo>
+{
+    public static GetCurrencyById Create(Guid id) => new(id);
+}
 
 internal class HandleGetCurrencyById : IQueryHandler<GetCurrencyById, CurrencyShortInfo>
 {

@@ -5,7 +5,12 @@ using MongoDB.Driver;
 
 namespace Store.Products.GettingProductById;
 
-public record GetProductById(Guid Id) : IQuery<ProductDetail>;
+public record GetProductById(
+    Guid Id
+) : IQuery<ProductDetail>
+{
+    public static GetProductById Create(Guid id) => new(id);
+}
 
 internal class HandleGetProductById : IQueryHandler<GetProductById, ProductDetail>
 {

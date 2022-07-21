@@ -3,14 +3,14 @@ using Cart.ShoppingCarts.CancelingCart;
 using Cart.ShoppingCarts.ConfirmingCart;
 using Cart.ShoppingCarts.OpeningCart;
 using Cart.ShoppingCarts.RemovingProduct;
+using FW.Core.Events;
 using FW.Core.MongoDB;
-using FW.Core.Projections;
 using MongoDB.Bson.Serialization.Attributes;
 
 namespace Cart.ShoppingCarts.GettingCartHistory;
 
 [BsonCollection("shopping_cart_history")]
-public record ShoppingCartHistory : Document, IVersionedProjection
+public record ShoppingCartHistory : Document
 {
     [BsonElement("aggregate_id")]
     public Guid AggregateId { get; set; } = default!;
@@ -18,62 +18,73 @@ public record ShoppingCartHistory : Document, IVersionedProjection
     [BsonElement("description")]
     public string Description { get; set; } = default!;
 
-    [BsonElement("last_position")]
+    [BsonElement("version")]
+    public ulong Version { get; set; } = default!;
+
+    [BsonElement("position")]
     public ulong Position { get; set; } = default!;
 
-    public void When(object @event)
+    public static ShoppingCartHistory Create(Guid aggregateId, string description, EventMetadata metadata)
     {
-        switch (@event)
+        var (eventId, streamPosition, logPosition, _) = metadata;
+
+        return new ShoppingCartHistory
         {
-            case ShoppingCartOpened cartOpened:
-                Apply(cartOpened);
-                return;
-            case ProductCartAdded cartOpened:
-                Apply(cartOpened);
-                return;
-            case ProductCartRemoved cartOpened:
-                Apply(cartOpened);
-                return;
-            case ShoppingCartConfirmed cartOpened:
-                Apply(cartOpened);
-                return;
-            case ShoppingCartCanceled cartCanceled:
-                Apply(cartCanceled);
-                return;
-        }
+            Id = Guid.Parse(eventId),
+            AggregateId = aggregateId,
+            Description = description,
+            Version = streamPosition,
+            Position = logPosition
+        };
     }
+}
 
-    public void Apply(ShoppingCartOpened @event)
+public class ShoppingCartHistoryProjection
+{
+    public static ShoppingCartHistory Handle(EventEnvelope<ShoppingCartOpened> eventEnvelope)
     {
-        AggregateId = @event.CartId;
-        Description = $"Opened";
+        var (cartId, clientId, status) = eventEnvelope.Data;
+
+        return ShoppingCartHistory.Create(
+            cartId,
+            $"Opened as clientId: {clientId} and status: {status}",
+            eventEnvelope.Metadata
+        );
     }
 
-    public void Apply(ProductCartAdded @event)
+    public static ShoppingCartHistory Handle(EventEnvelope<ProductCartAdded> eventEnvelope)
     {
-        var (id, sku, name, quantity, currency, price) = @event.Product;
+        var (id, sku, name, quantity, currency, price) = eventEnvelope.Data.Product;
 
-        AggregateId = @event.CartId;
-        Description = $"Added product for id: {id}, sku: {sku}, name: {name}, quantity: {quantity} and price: {currency.Symbol} {price}";
+        return ShoppingCartHistory.Create(
+            eventEnvelope.Data.CartId,
+            $"Added product for id: {id}, sku: {sku}, name: {name}, quantity: {quantity} and price: {currency.Symbol} {price}",
+            eventEnvelope.Metadata
+        );
     }
 
-    public void Apply(ProductCartRemoved @event)
+    public static ShoppingCartHistory Handle(EventEnvelope<ProductCartRemoved> eventEnvelope)
     {
-        var (id, sku, name, quantity, currency, price) = @event.Product;
+        var (id, sku, name, quantity, currency, price) = eventEnvelope.Data.Product;
 
-        AggregateId = @event.CartId;
-        Description = $"Removed product for id: {id}, sku: {sku}, name: {name}, quantity: {quantity} and price: {currency.Symbol} {price}";
+        return ShoppingCartHistory.Create(
+            eventEnvelope.Data.CartId,
+            $"Removed product for id: {id}, sku: {sku}, name: {name}, quantity: {quantity} and price: {currency.Symbol} {price}",
+            eventEnvelope.Metadata
+        );
     }
 
-    public void Apply(ShoppingCartConfirmed @event)
-    {
-        AggregateId = @event.CartId;
-        Description = $"Confirmed at {@event.ConfirmedAt}";
-    }
+    public static ShoppingCartHistory Handle(EventEnvelope<ShoppingCartConfirmed> eventEnvelope) =>
+        ShoppingCartHistory.Create(
+            eventEnvelope.Data.CartId,
+            $"Confirmed at {eventEnvelope.Data.ConfirmedAt}",
+            eventEnvelope.Metadata
+        );
 
-    public void Apply(ShoppingCartCanceled @event)
-    {
-        AggregateId = @event.CartId;
-        Description = $"Canceled at {@event.CanceledAt}";
-    }
+    public static ShoppingCartHistory Handle(EventEnvelope<ShoppingCartCanceled> eventEnvelope) =>
+        ShoppingCartHistory.Create(
+            eventEnvelope.Data.CartId,
+            $"Cancelled at {eventEnvelope.Data.CanceledAt}",
+            eventEnvelope.Metadata
+        );
 }
