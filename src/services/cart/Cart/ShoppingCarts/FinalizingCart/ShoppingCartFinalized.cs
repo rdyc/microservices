@@ -21,16 +21,16 @@ public record ShoppingCartFinalized(
         decimal totalPrice,
         DateTime finalizedAt)
     {
-        return new ShoppingCartFinalized(cartId, clientId, products, totalPrice, finalizedAt);
+        return new(cartId, clientId, products, totalPrice, finalizedAt);
     }
 }
 
-internal class HandleCartFinalized : IEventHandler<EventEnvelope<ShoppingCartConfirmed>>
+internal class HandleShoppingCartFinalized : IEventHandler<EventEnvelope<ShoppingCartConfirmed>>
 {
     private readonly EventStoreClient eventStore;
     private readonly IEventBus eventBus;
 
-    public HandleCartFinalized(
+    public HandleShoppingCartFinalized(
         EventStoreClient eventStore,
         IEventBus eventBus)
     {

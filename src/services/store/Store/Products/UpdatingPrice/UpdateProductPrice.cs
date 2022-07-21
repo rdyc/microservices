@@ -63,21 +63,21 @@ internal class HandleUpdateProductPrice : ICommandHandler<UpdateProductPrice>
     {
         var (productId, currencyId, price) = request;
 
-        var _currency = await collection
+        var currency = await collection
             .Find(e => e.Id.Equals(currencyId))
-            .SingleAsync(cancellationToken);
-
-        var currency = ProductCurrency.Create(
-            _currency.Id,
-            _currency.Name,
-            _currency.Code,
-            _currency.Symbol
-        );
+            .SingleAsync(cancellationToken);;
 
         await scope.Do((expectedVersion, eventMetadata) =>
             repository.GetAndUpdate(
                 productId,
-                (product) => product.UpdatePrice(currency, price),
+                (product) => product.UpdatePrice(
+                    ProductCurrency.Create(
+                        currency.Id,
+                        currency.Name,
+                        currency.Code,
+                        currency.Symbol
+                    )
+                    , price),
                 expectedVersion,
                 eventMetadata,
                 cancellationToken

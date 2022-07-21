@@ -23,7 +23,7 @@ public record ShoppingCartDetails : Document
     public IList<ShoppingCartProduct> Products { get; set; } = default!;
 
     [BsonElement("total_price")]
-    public decimal TotalPrice => Products.Sum(pi => pi.TotalPrice);
+    public decimal TotalPrice { get; set; } = default!;
 
     [BsonElement("confirmed_at")]
     public DateTime? ConfirmedAt { get; set; }
@@ -48,7 +48,6 @@ public class ShoppingCartDetailsProjection
         {
             Id = cartId,
             ClientId = clientId,
-            Products = new List<ShoppingCartProduct>(),
             Status = status
         };
     }
@@ -57,6 +56,9 @@ public class ShoppingCartDetailsProjection
     {
         if (view.Position >= eventEnvelope.Metadata.LogPosition)
             return;
+
+        if (view.Products is null)
+            view.Products = new List<ShoppingCartProduct>();
 
         var newProduct = eventEnvelope.Data.Product;
         var existingProduct = FindProductMatchingWith(view.Products, newProduct);

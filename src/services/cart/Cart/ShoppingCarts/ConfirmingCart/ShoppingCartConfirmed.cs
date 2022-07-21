@@ -12,6 +12,6 @@ public record ShoppingCartConfirmed(
         if (confirmedAt == default)
             throw new ArgumentNullException(nameof(confirmedAt));
 
-        return new ShoppingCartConfirmed(cartId, confirmedAt);
+        return new(cartId, confirmedAt);
     }
 }

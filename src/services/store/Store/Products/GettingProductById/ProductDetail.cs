@@ -2,10 +2,10 @@ using FW.Core.Events;
 using FW.Core.MongoDB;
 using MongoDB.Bson.Serialization.Attributes;
 using Store.Lookup.Attributes;
-using Store.Lookup.Currencies;
 using Store.Products.AddingAttribute;
 using Store.Products.ModifyingProduct;
 using Store.Products.RegisteringProduct;
+using Store.Products.RemovingAttribute;
 using Store.Products.RemovingProduct;
 using Store.Products.SellingProduct;
 using Store.Products.UpdatingPrice;
@@ -29,7 +29,7 @@ public record ProductDetail : Document
     public ProductStatus Status { get; set; } = default!;
 
     [BsonElement("attributes")]
-    public IList<ProductDetailAttribute> Attributes { get; private set; } = default!;
+    public IList<ProductDetailAttribute> Attributes { get; set; } = default!;
 
     [BsonElement("currency")]
     public ProductCurrency Currency { get; set; } = default!;
@@ -142,6 +142,9 @@ public class ProductDetailProjection
         if (view.Position >= eventEnvelope.Metadata.LogPosition)
             return;
 
+        if (view.Attributes is null)
+            view.Attributes = new List<ProductDetailAttribute>();
+
         var (_, id, name, type, unit, value) = eventEnvelope.Data;
 
         view.Attributes.Add(new ProductDetailAttribute
@@ -156,23 +159,26 @@ public class ProductDetailProjection
         view.Position = eventEnvelope.Metadata.LogPosition;
     }
 
-    public static void Handle(EventEnvelope<RemovingAttribute.ProductAttributeRemoved> eventEnvelope, ProductDetail view)
+    public static void Handle(EventEnvelope<ProductAttributeRemoved> eventEnvelope, ProductDetail view)
     {
         if (view.Position >= eventEnvelope.Metadata.LogPosition)
             return;
 
-        var (_, id, name, type, unit, value) = eventEnvelope.Data;
-
-        if (view.Attributes.Any(e => e.Id.Equals(id) && e.Value.Equals(value)))
+        if (view.Attributes != null)
         {
-            view.Attributes.Remove(new ProductDetailAttribute
+            var (_, id, name, type, unit, value) = eventEnvelope.Data;
+
+            if (view.Attributes.Any(e => e.Id.Equals(id) && e.Value.Equals(value)))
             {
-                Id = id,
-                Name = name,
-                Type = type,
-                Unit = unit,
-                Value = value
-            });
+                view.Attributes.Remove(new ProductDetailAttribute
+                {
+                    Id = id,
+                    Name = name,
+                    Type = type,
+                    Unit = unit,
+                    Value = value
+                });
+            }
         }
 
         view.Version = eventEnvelope.Metadata.StreamPosition;

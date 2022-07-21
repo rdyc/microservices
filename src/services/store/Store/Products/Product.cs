@@ -113,8 +113,13 @@ public class Product : Aggregate
 
     public void Apply(ProductAttributeAdded @event)
     {
+        Version++;
+
+        if (Attributes is null)
+            Attributes = new List<ProductAttribute>();
+
         var (_, id, name, type, unit, value) = @event;
-        var newAttribute = ProductAttribute.From(id, name, type, unit, value);
+        var newAttribute = ProductAttribute.Create(id, name, type, unit, value);
         var existingAttribute = FindAttributeMatchingWith(newAttribute);
 
         if (existingAttribute is null)
@@ -147,6 +152,11 @@ public class Product : Aggregate
 
     public void Apply(ProductAttributeRemoved @event)
     {
+        Version++;
+
+        if (Attributes is null)
+            return;
+
         var existingAttribute = FindAttributeMatchingWith(@event.AttributeId);
 
         if (existingAttribute == null)

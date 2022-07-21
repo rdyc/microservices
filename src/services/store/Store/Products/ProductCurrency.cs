@@ -7,6 +7,10 @@ public record ProductCurrency(
     string Symbol
 )
 {
-    public static ProductCurrency Create(Guid id, string name, string code, string symbol) =>
-        new(id, name, code, symbol);
+    public static ProductCurrency Create(
+        Guid id,
+        string name,
+        string code,
+        string symbol
+    ) => new(id, name, code, symbol);
 }

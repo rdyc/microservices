@@ -59,7 +59,7 @@ internal static class CartEndpoint
         );
     }
 
-    [SwaggerOperation(Summary = "Retrieve cart at version", OperationId = "get_cart", Tags = new[] { "Cart" })]
+    [SwaggerOperation(Summary = "Retrieve cart at version", OperationId = "get_cart_version", Tags = new[] { "Cart" })]
     internal static async Task<IResult> CartAtVersion(
         [FromRoute] Guid cartId,
         [FromRoute] ulong version,

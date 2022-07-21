@@ -40,7 +40,8 @@ internal class ValidateAddAttribute : AbstractValidator<AddProductAttribute>
 
         ClassLevelCascadeMode = CascadeMode.Stop;
 
-        RuleFor(p => p.AttributeId).NotEmpty().MustExistAttribute(collection);
+        RuleFor(p => p.AttributeId).NotEmpty()
+            .MustExistAttribute(collection);
     }
 }
 
@@ -53,7 +54,8 @@ internal class HandleAddProductAttribute : ICommandHandler<AddProductAttribute>
     public HandleAddProductAttribute(
         IMongoDatabase database,
         IEventStoreDBRepository<Product> repository,
-        IEventStoreDBAppendScope scope)
+        IEventStoreDBAppendScope scope
+    )
     {
         var collectionName = MongoHelper.GetCollectionName<Attribute>();
         this.collection = database.GetCollection<Attribute>(collectionName);
@@ -67,19 +69,20 @@ internal class HandleAddProductAttribute : ICommandHandler<AddProductAttribute>
 
         var attribute = await collection
             .Find(e => e.Id.Equals(attributeId))
-            .SingleOrDefaultAsync(cancellationToken);
-
-        var productAttribute = new ProductAttribute(
-            attribute.Id,
-            attribute.Name,
-            attribute.Type,
-            attribute.Unit,
-            value);
+            .SingleAsync(cancellationToken);
 
         await scope.Do((expectedVersion, eventMetadata) =>
             repository.GetAndUpdate(
                 productId,
-                (product) => product.AddAttribute(productAttribute),
+                (product) => product.AddAttribute(
+                    ProductAttribute.Create(
+                        attribute.Id,
+                        attribute.Name,
+                        attribute.Type,
+                        attribute.Unit,
+                        value
+                    )
+                ),
                 expectedVersion,
                 eventMetadata,
                 cancellationToken

@@ -20,8 +20,8 @@ internal static class EndpointBuilder
         app.MapGet("/products/{productId}/histories", ProductEndpoint.Histories).Produces((int)HttpStatusCode.OK, typeof(IListPaged<ProductHistory>));
         app.MapPost("/products/{productId}/attributes", ProductEndpoint.AddAttribute).Produces((int)HttpStatusCode.Accepted, typeof(Guid));
         app.MapDelete("/products/{productId}/attributes/{attributeId}", ProductEndpoint.RemoveAttribute).Produces((int)HttpStatusCode.Accepted, typeof(Guid));
-        app.MapPut("/products/{productId}/price", ProductEndpoint.UpdatePrice).Produces((int)HttpStatusCode.Accepted, typeof(Guid));
-        app.MapPut("/products/{productId}/stock", ProductEndpoint.UpdateStock).Produces((int)HttpStatusCode.Accepted, typeof(Guid));
+        app.MapPost("/products/{productId}/price", ProductEndpoint.UpdatePrice).Produces((int)HttpStatusCode.Accepted, typeof(Guid));
+        app.MapPost("/products/{productId}/stock", ProductEndpoint.UpdateStock).Produces((int)HttpStatusCode.Accepted, typeof(Guid));
         app.MapDelete("/products/{productId}", ProductEndpoint.Delete).Produces((int)HttpStatusCode.NoContent);
 
         return app;

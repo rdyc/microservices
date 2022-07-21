@@ -11,12 +11,12 @@ public record GetProducts(
     int PageSize
 ) : IQuery<IListPaged<ProductShortInfo>>
 {
-    public static GetProducts Create(int? pageNumber = 1, int? pageSize = 20)
+    public static GetProducts Create(int? pageNumber = 0, int? pageSize = 20)
     {
-        if (pageNumber is null or <= 0)
+        if (pageNumber is null or < 0)
             throw new ArgumentOutOfRangeException(nameof(pageNumber));
 
-        if (pageSize is null or <= 0 or > 100)
+        if (pageSize is null or < 0 or > 100)
             throw new ArgumentOutOfRangeException(nameof(pageSize));
 
         return new(pageNumber.Value, pageSize.Value);

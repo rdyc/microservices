@@ -40,6 +40,25 @@ public record Product : Document
 
 public record ProductCurrency
 {
+    private ProductCurrency(
+        Guid id,
+        string name,
+        string code,
+        string symbol)
+    {
+        Id = id;
+        Name = name;
+        Code = code;
+        Symbol = symbol;
+    }
+
+    public static ProductCurrency Create(
+        Guid id,
+        string name,
+        string code,
+        string symbol
+    ) => new(id, name, code, symbol);
+
     [BsonElement("id")]
     public Guid Id { get; set; } = default!;
 
@@ -83,19 +102,6 @@ public record ProductAttribute
     public string Value { get; set; } = default!;
 }
 
-public enum AttributeType
-{
-    Text,
-    Number,
-    Decimal
-}
-
-public enum ProductStatus
-{
-    Available,
-    Discontinue
-}
-
 
 public class ProductProjection
 {
@@ -134,6 +140,9 @@ public class ProductProjection
         if (view.Position >= eventEnvelope.Metadata.LogPosition)
             return;
 
+        if (view.Attributes is null)
+            view.Attributes = new List<ProductAttribute>();
+
         var (_, id, name, type, unit, value) = eventEnvelope.Data;
 
         view.Attributes.Add(ProductAttribute.Create(id, name, type, unit, value));
@@ -146,7 +155,7 @@ public class ProductProjection
         if (view.Position >= eventEnvelope.Metadata.LogPosition)
             return;
 
-        if (view.Attributes.Any())
+        if (view.Attributes != null)
         {
             var (_, id, name, type, unit, value) = eventEnvelope.Data;
 
@@ -170,7 +179,7 @@ public class ProductProjection
 
         var (_, currency, price) = eventEnvelope.Data;
 
-        view.Currency = currency;
+        view.Currency = ProductCurrency.Create(currency.Id, currency.Name, currency.Code, currency.Symbol);
         view.Price = price;
         view.Version = eventEnvelope.Metadata.StreamPosition;
         view.Position = eventEnvelope.Metadata.LogPosition;

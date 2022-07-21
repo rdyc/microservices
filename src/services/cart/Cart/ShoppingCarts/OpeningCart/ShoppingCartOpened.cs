@@ -15,6 +15,6 @@ public record ShoppingCartOpened(
         if (status == default)
             throw new ArgumentOutOfRangeException(nameof(status));
 
-        return new ShoppingCartOpened(cartId, clientId, status);
+        return new(cartId, clientId, status);
     }
 }

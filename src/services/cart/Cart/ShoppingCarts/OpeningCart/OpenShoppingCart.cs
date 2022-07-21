@@ -19,7 +19,7 @@ public record OpenShoppingCart(
         if (clientId == null || clientId == Guid.Empty)
             throw new ArgumentOutOfRangeException(nameof(clientId));
 
-        return new OpenShoppingCart(cartId.Value, clientId.Value);
+        return new(cartId.Value, clientId.Value);
     }
 }
 

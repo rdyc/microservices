@@ -26,7 +26,7 @@ public record AddProductCart(
         if (quantity <= 0)
             throw new IndexOutOfRangeException(nameof(quantity));
 
-        return new AddProductCart(cartId.Value, productId.Value, quantity);
+        return new(cartId.Value, productId.Value, quantity);
     }
 }
 

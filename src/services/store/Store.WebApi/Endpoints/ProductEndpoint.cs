@@ -90,7 +90,8 @@ public static class ProductEndpoint
         var log = logger.CreateLogger<Program>();
         var productId = Guid.NewGuid();
         var (sku, name, description) = request;
-        var task = command.SendAsync(RegisterProduct.Create(productId, sku, name, description), cancellationToken);
+        var task = command.SendAsync(
+            RegisterProduct.Create(productId, sku, name, description), cancellationToken);
 
         return await WithCancellation.TryExecute(
             task: task,
@@ -110,7 +111,8 @@ public static class ProductEndpoint
     {
         var log = logger.CreateLogger<Program>();
         var (name, code, symbol) = request;
-        var task = command.SendAsync(ModifyProduct.Create(productId, name, code, symbol), cancellationToken);
+        var task = command.SendAsync(
+            ModifyProduct.Create(productId, name, code, symbol), cancellationToken);
 
         return await WithCancellation.TryExecute(
             task: task,
@@ -130,7 +132,8 @@ public static class ProductEndpoint
     {
         var log = logger.CreateLogger<Program>();
         var (attributeId, value) = request;
-        var task = command.SendAsync(AddProductAttribute.Create(productId, attributeId, value), cancellationToken);
+        var task = command.SendAsync(
+            AddProductAttribute.Create(productId, attributeId, value), cancellationToken);
 
         return await WithCancellation.TryExecute(
             task: task,
@@ -149,7 +152,8 @@ public static class ProductEndpoint
         CancellationToken cancellationToken)
     {
         var log = logger.CreateLogger<Program>();
-        var task = command.SendAsync(RemoveProductAttribute.Create(productId, attributeId), cancellationToken);
+        var task = command.SendAsync(
+            RemoveProductAttribute.Create(productId, attributeId), cancellationToken);
 
         return await WithCancellation.TryExecute(
             task: task,
@@ -169,7 +173,8 @@ public static class ProductEndpoint
     {
         var log = logger.CreateLogger<Program>();
         var (currencyId, price) = request;
-        var task = command.SendAsync(UpdateProductPrice.Create(productId, currencyId, price), cancellationToken);
+        var task = command.SendAsync(
+            UpdateProductPrice.Create(productId, currencyId, price), cancellationToken);
 
         return await WithCancellation.TryExecute(
             task: task,
@@ -188,7 +193,8 @@ public static class ProductEndpoint
         CancellationToken cancellationToken)
     {
         var log = logger.CreateLogger<Program>();
-        var task = command.SendAsync(UpdateProductStock.Create(productId, request.Stock), cancellationToken);
+        var task = command.SendAsync(
+            UpdateProductStock.Create(productId, request.Stock), cancellationToken);
 
         return await WithCancellation.TryExecute(
             task: task,
@@ -206,7 +212,8 @@ public static class ProductEndpoint
         CancellationToken cancellationToken)
     {
         var log = logger.CreateLogger<Program>();
-        var task = command.SendAsync(RemoveProduct.Create(productId), cancellationToken);
+        var task = command.SendAsync(
+            RemoveProduct.Create(productId), cancellationToken);
 
         return await WithCancellation.TryExecute(
             task: task,

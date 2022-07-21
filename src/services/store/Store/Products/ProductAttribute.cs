@@ -11,7 +11,7 @@ public record ProductAttribute
     string Value
 )
 {
-    public static ProductAttribute From(Guid? id, string name, AttributeType type, string unit, string value)
+    public static ProductAttribute Create(Guid? id, string name, AttributeType type, string unit, string value)
     {
         if (!id.HasValue)
             throw new ArgumentNullException(nameof(id));
@@ -45,7 +45,7 @@ public record ProductAttribute
 
         var (id, name, type, unit, value) = attribute;
 
-        return From(id, name, type, unit, value);
+        return Create(id, name, type, unit, value);
     }
 
     public bool HasTheSameValue(ProductAttribute attribute)

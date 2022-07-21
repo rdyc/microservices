@@ -1,8 +1,8 @@
+using Cart.ShoppingCarts.AddingProduct;
 using Cart.ShoppingCarts.CancelingCart;
 using Cart.ShoppingCarts.ConfirmingCart;
 using Cart.ShoppingCarts.OpeningCart;
 using Cart.ShoppingCarts.RemovingProduct;
-using Cart.ShoppingCarts.AddingProduct;
 using FW.Core.Aggregates;
 using FW.Core.Extensions;
 
@@ -76,6 +76,8 @@ public class ShoppingCart : Aggregate
 
     public void Apply(ProductCartAdded @event)
     {
+        Version++;
+
         var newProductItem = @event.Product;
 
         var existingProductItem = FindProductMatchingWith(newProductItem);
@@ -113,6 +115,8 @@ public class ShoppingCart : Aggregate
 
     public void Apply(ProductCartRemoved @event)
     {
+        Version++;
+
         var productToBeRemoved = @event.Product;
 
         var existingProduct = FindProductMatchingWith(@event.Product);
@@ -145,6 +149,8 @@ public class ShoppingCart : Aggregate
 
     public void Apply(ShoppingCartConfirmed @event)
     {
+        Version++;
+
         Status = ShoppingCartStatus.Confirmed;
     }
 
@@ -161,6 +167,8 @@ public class ShoppingCart : Aggregate
 
     public void Apply(ShoppingCartCanceled @event)
     {
+        Version++;
+
         Status = ShoppingCartStatus.Canceled;
     }
 

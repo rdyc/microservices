@@ -2,6 +2,7 @@ using Cart.ShoppingCarts;
 using Cart.ShoppingCarts.AddingProduct;
 using Cart.ShoppingCarts.CancelingCart;
 using Cart.ShoppingCarts.ConfirmingCart;
+using Cart.ShoppingCarts.FinalizingCart;
 using Cart.ShoppingCarts.GettingCartAtVersion;
 using Cart.ShoppingCarts.GettingCartById;
 using Cart.ShoppingCarts.GettingCartHistory;
@@ -9,6 +10,7 @@ using Cart.ShoppingCarts.GettingCarts;
 using Cart.ShoppingCarts.OpeningCart;
 using Cart.ShoppingCarts.RemovingProduct;
 using FW.Core.Commands;
+using FW.Core.Events;
 using FW.Core.EventStoreDB.Repository;
 using FW.Core.MongoDB.Projections;
 using FW.Core.Pagination;
@@ -27,6 +29,7 @@ internal static class ShoppingCartsServices
             .AddCommandValidators()
             .AddCommandHandlers()
             .AddQueryHandlers()
+            .AddEventHandlers()
             .AddProjections();
 
     private static IServiceCollection AddCommandValidators(this IServiceCollection services) =>
@@ -44,6 +47,10 @@ internal static class ShoppingCartsServices
             .AddCommandHandler<RemoveProductCart, HandleRemoveProductCart>()
             .AddCommandHandler<ConfirmShoppingCart, HandleConfirmCart>()
             .AddCommandHandler<CancelShoppingCart, HandleCancelCart>();
+
+    private static IServiceCollection AddEventHandlers(this IServiceCollection services) =>
+        services
+            .AddEventHandler<EventEnvelope<ShoppingCartConfirmed>, HandleShoppingCartFinalized>();
 
     private static IServiceCollection AddQueryHandlers(this IServiceCollection services) =>
         services
@@ -98,6 +105,7 @@ internal static class ShoppingCartsServices
                     onHandle: ShoppingCartDetailsProjection.Handle,
                     onUpdate: (view, update) => update
                         .Set(e => e.Products, view.Products)
+                        .Set(e => e.TotalPrice, view.Products.Sum(pi => pi.TotalPrice))
                         .Set(e => e.Version, view.Version)
                         .Set(e => e.Position, view.Position)
                 )
@@ -106,6 +114,7 @@ internal static class ShoppingCartsServices
                     onHandle: ShoppingCartDetailsProjection.Handle,
                     onUpdate: (view, update) => update
                         .Set(e => e.Products, view.Products)
+                        .Set(e => e.TotalPrice, view.Products.Sum(pi => pi.TotalPrice))
                         .Set(e => e.Version, view.Version)
                         .Set(e => e.Position, view.Position)
                 )

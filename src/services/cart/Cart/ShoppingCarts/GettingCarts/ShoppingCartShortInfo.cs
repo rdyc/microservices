@@ -44,7 +44,6 @@ public class ShoppingCartShortInfoProjection
         {
             Id = cartId,
             ClientId = clientId,
-            TotalItemsCount = 0,
             Status = status,
             Version = eventEnvelope.Metadata.StreamPosition,
             Position = eventEnvelope.Metadata.LogPosition
@@ -56,7 +55,7 @@ public class ShoppingCartShortInfoProjection
         if (view.Position >= eventEnvelope.Metadata.LogPosition)
             return;
 
-        view.TotalItemsCount -= eventEnvelope.Data.Product.Quantity;
+        view.TotalItemsCount += eventEnvelope.Data.Product.Quantity;
         view.Version = eventEnvelope.Metadata.StreamPosition;
         view.Position = eventEnvelope.Metadata.LogPosition;
     }

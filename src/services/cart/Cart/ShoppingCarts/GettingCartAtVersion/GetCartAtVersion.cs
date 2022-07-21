@@ -1,4 +1,3 @@
-using Cart.ShoppingCarts.GettingCartById;
 using EventStore.Client;
 using FW.Core.EventStoreDB.Events;
 using FW.Core.Exceptions;
@@ -19,7 +18,7 @@ public record GetCartAtVersion(
         if (version == null)
             throw new ArgumentOutOfRangeException(nameof(version));
 
-        return new GetCartAtVersion(cartId.Value, version.Value);
+        return new(cartId.Value, version.Value);
     }
 }
 
@@ -34,10 +33,12 @@ internal class HandleGetCartAtVersion : IQueryHandler<GetCartAtVersion, Shopping
 
     public async Task<ShoppingCart> Handle(GetCartAtVersion request, CancellationToken cancellationToken)
     {
+        var (cartId, version) = request;
+
         var cart = await eventStore.AggregateStream<ShoppingCart>(
-            request.CartId,
+            cartId,
             cancellationToken,
-            request.Version
+            version
         );
 
         if (cart == null)

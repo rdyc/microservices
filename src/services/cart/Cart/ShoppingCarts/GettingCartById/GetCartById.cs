@@ -14,7 +14,7 @@ public record GetCartById(
         if (cartId == null || cartId == Guid.Empty)
             throw new ArgumentOutOfRangeException(nameof(cartId));
 
-        return new GetCartById(cartId.Value);
+        return new(cartId.Value);
     }
 }
 

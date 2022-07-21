@@ -7,18 +7,19 @@ using MongoDB.Driver;
 namespace Cart.ShoppingCarts.GettingCarts;
 
 public record GetCarts(
-    int PageNumber,
-    int PageSize
+    int Index,
+    int Size
 ) : IQuery<IListPaged<ShoppingCartShortInfo>>
 {
-    public static GetCarts Create(int? pageNumber = 1, int? pageSize = 20)
+    public static GetCarts Create(int? index = 0, int? size = 10)
     {
-        if (pageNumber is null or <= 0)
-            throw new ArgumentOutOfRangeException(nameof(pageSize));
-        if (pageSize is null or <= 0 or > 100)
-            throw new ArgumentOutOfRangeException(nameof(pageSize));
+        if (index is null or < 0)
+            throw new ArgumentOutOfRangeException(nameof(index));
 
-        return new GetCarts(pageNumber.Value, pageSize.Value);
+        if (size is null or < 0 or > 100)
+            throw new ArgumentOutOfRangeException(nameof(size));
+
+        return new(index.Value, size.Value);
     }
 }
 

@@ -11,9 +11,15 @@ public record ShoppingCartProduct(
     decimal Price
 ) : IProduct
 {
-    public decimal TotalPrice => Quantity * TotalPrice;
+    public decimal TotalPrice => Quantity * Price;
 
-    public static ShoppingCartProduct From(Guid? productId, string sku, string name, int? quantity, ShoppingCartCurrency? currency, decimal? price)
+    public static ShoppingCartProduct From(
+        Guid? productId,
+        string sku,
+        string name,
+        int? quantity,
+        ShoppingCartCurrency? currency,
+        decimal? price)
     {
         if (!productId.HasValue)
             throw new ArgumentNullException(nameof(productId));

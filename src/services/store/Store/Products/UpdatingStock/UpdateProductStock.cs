@@ -38,7 +38,9 @@ internal class HandleUpdateProductStock : ICommandHandler<UpdateProductStock>
     private readonly IEventStoreDBRepository<Product> repository;
     private readonly IEventStoreDBAppendScope scope;
 
-    public HandleUpdateProductStock(IEventStoreDBRepository<Product> repository, IEventStoreDBAppendScope scope)
+    public HandleUpdateProductStock(
+        IEventStoreDBRepository<Product> repository,
+        IEventStoreDBAppendScope scope)
     {
         this.repository = repository;
         this.scope = scope;

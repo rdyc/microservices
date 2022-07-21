@@ -25,7 +25,7 @@ public record GetCartHistory(
         if (pageSize is null or < 0 or > 100)
             throw new ArgumentOutOfRangeException(nameof(pageSize));
 
-        return new GetCartHistory(cartId.Value, pageNumber.Value, pageSize.Value);
+        return new(cartId.Value, pageNumber.Value, pageSize.Value);
     }
 }
 

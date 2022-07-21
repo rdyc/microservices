@@ -54,22 +54,22 @@ public class ShoppingCartHistoryProjection
 
     public static ShoppingCartHistory Handle(EventEnvelope<ProductCartAdded> eventEnvelope)
     {
-        var (id, sku, name, quantity, currency, price) = eventEnvelope.Data.Product;
+        var (_, sku, name, quantity, currency, price) = eventEnvelope.Data.Product;
 
         return ShoppingCartHistory.Create(
             eventEnvelope.Data.CartId,
-            $"Added product for id: {id}, sku: {sku}, name: {name}, quantity: {quantity} and price: {currency.Symbol} {price}",
+            $"Added product for sku: {sku}, name: {name}, quantity: {quantity} and price: {currency.Symbol} {price}",
             eventEnvelope.Metadata
         );
     }
 
     public static ShoppingCartHistory Handle(EventEnvelope<ProductCartRemoved> eventEnvelope)
     {
-        var (id, sku, name, quantity, currency, price) = eventEnvelope.Data.Product;
+        var (_, sku, name, quantity, currency, price) = eventEnvelope.Data.Product;
 
         return ShoppingCartHistory.Create(
             eventEnvelope.Data.CartId,
-            $"Removed product for id: {id}, sku: {sku}, name: {name}, quantity: {quantity} and price: {currency.Symbol} {price}",
+            $"Removed product for sku: {sku}, name: {name}, quantity: {quantity} and price: {currency.Symbol} {price}",
             eventEnvelope.Metadata
         );
     }

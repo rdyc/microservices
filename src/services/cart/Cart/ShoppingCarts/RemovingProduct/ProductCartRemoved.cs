@@ -10,6 +10,6 @@ public record ProductCartRemoved(
         if (cartId == Guid.Empty)
             throw new ArgumentOutOfRangeException(nameof(cartId));
 
-        return new ProductCartRemoved(cartId, product);
+        return new(cartId, product);
     }
 }
