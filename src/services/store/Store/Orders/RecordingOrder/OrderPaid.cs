@@ -4,30 +4,23 @@ using Store.Products.SellingProduct;
 
 namespace Store.Orders.RecordingOrder;
 
-public class OrderPaid : IExternalEvent
+public record OrderPaid(
+    Guid OrderId,
+    Guid PaymentId,
+    IEnumerable<OrderedProduct> Products
+)
 {
-    public OrderPaid(Guid orderId, Guid paymentId, IEnumerable<OrderProduct> products)
-    {
-        OrderId = orderId;
-        PaymentId = paymentId;
-        Products = products;
-    }
-
-    public Guid OrderId { get; }
-    public Guid PaymentId { get; }
-    public IEnumerable<OrderProduct> Products { get; }
+    public static OrderPaid Create(Guid orderId, Guid paymentId, IEnumerable<OrderedProduct> products) =>
+        new(orderId, paymentId, products);
 }
 
-public class OrderProduct
+public record OrderedProduct(
+    Guid ProductId,
+    int Quantity
+)
 {
-    public OrderProduct(Guid productId, int quantity)
-    {
-        ProductId = productId;
-        Quantity = quantity;
-    }
-
-    public Guid ProductId { get; }
-    public int Quantity { get; }
+    public static OrderedProduct Create(Guid productId, int quantity) =>
+        new(productId, quantity);
 }
 
 internal class HandleOrderPaid : IEventHandler<EventEnvelope<OrderPaid>>
@@ -43,7 +36,8 @@ internal class HandleOrderPaid : IEventHandler<EventEnvelope<OrderPaid>>
     {
         foreach (var product in @event.Data.Products)
         {
-            await commandBus.SendAsync(SellProduct.Create(product.ProductId, product.Quantity));
+            await commandBus.SendAsync(
+                SellProduct.Create(product.ProductId, product.Quantity), cancellationToken);
         }
     }
 }

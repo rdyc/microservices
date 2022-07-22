@@ -1,4 +1,5 @@
 using FW.Core.Commands;
+using FW.Core.Events;
 using FW.Core.EventStoreDB.Repository;
 using FW.Core.MongoDB.Projections;
 using FW.Core.Pagination;
@@ -6,6 +7,7 @@ using FW.Core.Queries;
 using FW.Core.Validation;
 using Microsoft.Extensions.DependencyInjection;
 using MongoDB.Driver;
+using Store.Orders.RecordingOrder;
 using Store.Products.AddingAttribute;
 using Store.Products.GettingProductAtVersion;
 using Store.Products.GettingProductById;
@@ -28,6 +30,7 @@ public static class ProductServices
             .AddScoped<IEventStoreDBRepository<Product>, EventStoreDBRepository<Product>>()
             .AddCommandValidators()
             .AddCommandHandlers()
+            .AddEventHandlers()
             .AddQueryHandlers()
             .AddProjections();
 
@@ -50,6 +53,10 @@ public static class ProductServices
             .AddCommandHandler<UpdateProductPrice, HandleUpdateProductPrice>()
             .AddCommandHandler<UpdateProductStock, HandleUpdateProductStock>()
             .AddCommandHandler<RemoveProduct, HandleRemoveProduct>();
+
+    private static IServiceCollection AddEventHandlers(this IServiceCollection services) =>
+        services
+            .AddEventHandler<EventEnvelope<OrderPaid>, HandleOrderPaid>();
 
     private static IServiceCollection AddQueryHandlers(this IServiceCollection services) =>
         services

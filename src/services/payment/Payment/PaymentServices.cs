@@ -7,6 +7,7 @@ using MediatR;
 using MediatR.Pipeline;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Payment.Payments;
 
 namespace Payment;
 
@@ -23,5 +24,6 @@ public static class PaymentServices
             {
                 SubscriptionId = "payment",
                 FilterOptions = new(EventTypeFilter.RegularExpression(@"Payment"))
-            });
+            })
+            .AddPayment();
 }

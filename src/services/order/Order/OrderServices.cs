@@ -7,6 +7,7 @@ using MediatR;
 using MediatR.Pipeline;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Order.Orders;
 
 namespace Order;
 
@@ -23,5 +24,6 @@ public static class OrderServices
             {
                 SubscriptionId = "order",
                 FilterOptions = new(EventTypeFilter.RegularExpression(@"Order"))
-            });
+            })
+            .AddOrder();
 }

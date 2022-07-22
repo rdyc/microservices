@@ -31,22 +31,22 @@ internal class ValidateCancelShoppingCart : AbstractValidator<CancelShoppingCart
 
 internal class HandleCancelCart : ICommandHandler<CancelShoppingCart>
 {
-    private readonly IEventStoreDBRepository<ShoppingCart> cartRepository;
+    private readonly IEventStoreDBRepository<ShoppingCart> repository;
     private readonly IEventStoreDBAppendScope scope;
 
     public HandleCancelCart(
-        IEventStoreDBRepository<ShoppingCart> cartRepository,
+        IEventStoreDBRepository<ShoppingCart> repository,
         IEventStoreDBAppendScope scope
     )
     {
-        this.cartRepository = cartRepository;
+        this.repository = repository;
         this.scope = scope;
     }
 
     public async Task<Unit> Handle(CancelShoppingCart command, CancellationToken cancellationToken)
     {
         await scope.Do((expectedRevision, eventMetadata) =>
-            cartRepository.GetAndUpdate(
+            repository.GetAndUpdate(
                 command.CartId,
                 cart => cart.Cancel(),
                 expectedRevision,
