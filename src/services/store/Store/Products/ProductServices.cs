@@ -52,7 +52,8 @@ public static class ProductServices
             .AddCommandHandler<RemoveProductAttribute, HandleRemoveAttribute>()
             .AddCommandHandler<UpdateProductPrice, HandleUpdateProductPrice>()
             .AddCommandHandler<UpdateProductStock, HandleUpdateProductStock>()
-            .AddCommandHandler<RemoveProduct, HandleRemoveProduct>();
+            .AddCommandHandler<RemoveProduct, HandleRemoveProduct>()
+            .AddCommandHandler<SellProduct, HandleSellProduct>();
 
     private static IServiceCollection AddEventHandlers(this IServiceCollection services) =>
         services

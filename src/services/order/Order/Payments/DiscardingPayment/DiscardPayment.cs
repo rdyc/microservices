@@ -1,6 +1,5 @@
 using FW.Core.Commands;
-using FW.Core.EventStoreDB.OptimisticConcurrency;
-using FW.Core.EventStoreDB.Repository;
+using FW.Core.Requests;
 using MediatR;
 
 namespace Order.Payments.DiscardingPayment;
@@ -28,29 +27,23 @@ public class DiscardPayment : ICommand
 
 public class HandleDiscardPayment : ICommandHandler<DiscardPayment>
 {
-    private readonly IEventStoreDBRepository<Orders.Order> repository;
-    private readonly IEventStoreDBAppendScope scope;
+    private readonly ExternalServicesConfig config;
+    private readonly IExternalCommandBus commandBus;
 
-    public HandleDiscardPayment(
-        IEventStoreDBRepository<Orders.Order> repository,
-        IEventStoreDBAppendScope scope
-    )
+    public HandleDiscardPayment(ExternalServicesConfig config,
+        IExternalCommandBus commandBus)
     {
-        this.repository = repository;
-        this.scope = scope;
+        this.config = config;
+        this.commandBus = commandBus;
     }
 
     public async Task<Unit> Handle(DiscardPayment command, CancellationToken cancellationToken)
     {
-        /* await scope.Do((expectedRevision, eventMetadata) =>
-            repository.GetAndUpdate(
-                command.PaymentId,
-                order => order.DiscardPayment(),
-                expectedRevision,
-                eventMetadata,
-                cancellationToken
-            )
-        ); */
+        await commandBus.Delete(
+            config.PaymentsUrl!,
+            "payments",
+            command,
+            cancellationToken);
 
         return Unit.Value;
     }

@@ -24,22 +24,22 @@ public record CancelOrder(
 
 public class HandleCancelOrder : ICommandHandler<CancelOrder>
 {
-    private readonly IEventStoreDBRepository<Order> orderRepository;
+    private readonly IEventStoreDBRepository<Order> repository;
     private readonly IEventStoreDBAppendScope scope;
 
     public HandleCancelOrder(
-        IEventStoreDBRepository<Order> orderRepository,
+        IEventStoreDBRepository<Order> repository,
         IEventStoreDBAppendScope scope
     )
     {
-        this.orderRepository = orderRepository;
+        this.repository = repository;
         this.scope = scope;
     }
 
     public async Task<Unit> Handle(CancelOrder command, CancellationToken cancellationToken)
     {
         await scope.Do((expectedVersion, traceMetadata) =>
-            orderRepository.GetAndUpdate(
+            repository.GetAndUpdate(
                 command.OrderId,
                 order => order.Cancel(command.CancellationReason),
                 expectedVersion,

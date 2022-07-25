@@ -26,21 +26,6 @@ public record OrderShortInfo : Document
     [BsonElement("initialized_at")]
     public DateTime InitializedAt { get; set; }
 
-    [BsonElement("payment_id")]
-    public Guid? PaymentId { get; set; }
-
-    [BsonElement("paid_at")]
-    public DateTime? PaidAt { get; set; }
-
-    [BsonElement("cancellation_reason")]
-    public OrderCancellationReason? CancellationReason { get; set; }
-
-    [BsonElement("cancelled_at")]
-    public DateTime? CancelledAt { get; set; }
-
-    [BsonElement("completed_at")]
-    public DateTime? CompletedAt { get; set; }
-
     [BsonElement("version")]
     public ulong Version { get; set; }
 
@@ -72,10 +57,6 @@ internal static class OrderShortInfoProjection
         if (view.Position >= eventEnvelope.Metadata.LogPosition)
             return;
 
-        var (_, paymentId, _, _, recordedAt) = eventEnvelope.Data;
-
-        view.PaymentId = paymentId;
-        view.PaidAt = recordedAt;
         view.Status = OrderStatus.Paid;
         view.Version = eventEnvelope.Metadata.StreamPosition;
         view.Position = eventEnvelope.Metadata.LogPosition;
@@ -86,10 +67,6 @@ internal static class OrderShortInfoProjection
         if (view.Position >= eventEnvelope.Metadata.LogPosition)
             return;
 
-        var (_, _, cancellationReason, cancelledAt) = eventEnvelope.Data;
-
-        view.CancellationReason = cancellationReason;
-        view.CancelledAt = cancelledAt;
         view.Status = OrderStatus.Cancelled;
         view.Version = eventEnvelope.Metadata.StreamPosition;
         view.Position = eventEnvelope.Metadata.LogPosition;
@@ -102,7 +79,6 @@ internal static class OrderShortInfoProjection
 
         var (_, completedAt) = eventEnvelope.Data;
 
-        view.CompletedAt = completedAt;
         view.Status = OrderStatus.Completed;
         view.Version = eventEnvelope.Metadata.StreamPosition;
         view.Position = eventEnvelope.Metadata.LogPosition;

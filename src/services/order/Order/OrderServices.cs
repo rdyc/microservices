@@ -8,6 +8,8 @@ using MediatR.Pipeline;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Order.Orders;
+using Order.Payments;
+using Order.Shipments;
 
 namespace Order;
 
@@ -15,6 +17,7 @@ public static class OrderServices
 {
     public static IServiceCollection AddOrderServices(this IServiceCollection services, IConfiguration configuration) =>
         services
+            .AddSingleton(sp => configuration.GetSection(ExternalServicesConfig.ConfigName).Get<ExternalServicesConfig>())
             .AddScoped(typeof(IPipelineBehavior<,>), typeof(ValidationBehaviour<,>))
             .AddScoped(typeof(IRequestPreProcessor<>), typeof(GenericRequestPreProcessor<>))
             .AddScoped(typeof(IRequestPostProcessor<,>), typeof(GenericRequestPostProcessor<,>))
@@ -25,5 +28,14 @@ public static class OrderServices
                 SubscriptionId = "order",
                 FilterOptions = new(EventTypeFilter.RegularExpression(@"Order"))
             })
+            .AddPayment()
+            .AddShipment()
             .AddOrder();
+}
+
+public class ExternalServicesConfig
+{
+    public static string ConfigName = "ExternalServices";
+    public string? PaymentsUrl { get; set; }
+    public string? ShipmentsUrl { get; set; }
 }

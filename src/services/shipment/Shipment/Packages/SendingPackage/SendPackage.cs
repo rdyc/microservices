@@ -1,18 +1,19 @@
 using FW.Core.Commands;
 using FW.Core.Requests;
 using MediatR;
-using Order.ShoppingCarts.FinalizingCart;
+using Shipment;
+using Shipment.Products;
 
 namespace Order.Shipments.SendingPackage;
 
 public class SendPackage : ICommand
 {
     public Guid OrderId { get; }
-    public IEnumerable<ShoppingCartProduct> Products { get; }
+    public IEnumerable<Product> Products { get; }
 
     private SendPackage(
         Guid orderId,
-        IEnumerable<ShoppingCartProduct> products
+        IEnumerable<Product> products
     )
     {
         OrderId = orderId;
@@ -21,7 +22,7 @@ public class SendPackage : ICommand
 
     public static SendPackage Create(
         Guid orderId,
-        IEnumerable<ShoppingCartProduct> products
+        IEnumerable<Product> products
     )
     {
         if (orderId == Guid.Empty)
@@ -49,8 +50,8 @@ public class HandleSendPackage : ICommandHandler<SendPackage>
     public async Task<Unit> Handle(SendPackage request, CancellationToken cancellationToken)
     {
         await commandBus.Post(
-            config.ShipmentsUrl!,
-            "shipments",
+            config.OrdersUrl!,
+            "orders",
             request,
             cancellationToken);
 

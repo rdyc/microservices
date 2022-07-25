@@ -7,7 +7,8 @@ public record OrderCancelled(
     DateTime CancelledAt
 )
 {
-    public static OrderCancelled Create(Guid orderId,
+    public static OrderCancelled Create(
+        Guid orderId,
         Guid? paymentId,
         OrderCancellationReason orderCancellationReason,
         DateTime cancelledAt)

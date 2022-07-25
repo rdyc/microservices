@@ -35,15 +35,15 @@ public record InitializeOrder(
 
 public class HandleInitializeOrder : ICommandHandler<InitializeOrder>
 {
-    private readonly IEventStoreDBRepository<Order> orderRepository;
+    private readonly IEventStoreDBRepository<Order> repository;
     private readonly IEventStoreDBAppendScope scope;
 
     public HandleInitializeOrder(
-        IEventStoreDBRepository<Order> orderRepository,
+        IEventStoreDBRepository<Order> repository,
         IEventStoreDBAppendScope scope
     )
     {
-        this.orderRepository = orderRepository;
+        this.repository = repository;
         this.scope = scope;
     }
 
@@ -52,12 +52,13 @@ public class HandleInitializeOrder : ICommandHandler<InitializeOrder>
         var (orderId, clientId, products, totalPrice) = command;
 
         await scope.Do((_, eventMetadata) =>
-            orderRepository.Add(
+            repository.Add(
                 Order.Initialize(orderId, clientId, products, totalPrice),
                 eventMetadata,
                 cancellationToken
             )
         );
+
         return Unit.Value;
     }
 }

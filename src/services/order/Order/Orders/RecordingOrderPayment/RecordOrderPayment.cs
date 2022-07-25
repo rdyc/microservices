@@ -26,15 +26,15 @@ public record RecordOrderPayment(
 
 public class HandleRecordOrderPayment : ICommandHandler<RecordOrderPayment>
 {
-    private readonly IEventStoreDBRepository<Order> orderRepository;
+    private readonly IEventStoreDBRepository<Order> repository;
     private readonly IEventStoreDBAppendScope scope;
 
     public HandleRecordOrderPayment(
-        IEventStoreDBRepository<Order> orderRepository,
+        IEventStoreDBRepository<Order> repository,
         IEventStoreDBAppendScope scope
     )
     {
-        this.orderRepository = orderRepository;
+        this.repository = repository;
         this.scope = scope;
     }
 
@@ -43,7 +43,7 @@ public class HandleRecordOrderPayment : ICommandHandler<RecordOrderPayment>
         var (orderId, paymentId, recordedAt) = command;
 
         await scope.Do((expectedVersion, traceMetadata) =>
-            orderRepository.GetAndUpdate(
+            repository.GetAndUpdate(
                 orderId,
                 order => order.RecordPayment(paymentId, recordedAt),
                 expectedVersion,
@@ -51,6 +51,7 @@ public class HandleRecordOrderPayment : ICommandHandler<RecordOrderPayment>
                 cancellationToken
             )
         );
+
         return Unit.Value;
     }
 }

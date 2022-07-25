@@ -20,22 +20,22 @@ public record CompleteOrder(
 
 public class HandleCompleteOrder : ICommandHandler<CompleteOrder>
 {
-    private readonly IEventStoreDBRepository<Order> orderRepository;
+    private readonly IEventStoreDBRepository<Order> repository;
     private readonly IEventStoreDBAppendScope scope;
 
     public HandleCompleteOrder(
-        IEventStoreDBRepository<Order> orderRepository,
+        IEventStoreDBRepository<Order> repository,
         IEventStoreDBAppendScope scope
     )
     {
-        this.orderRepository = orderRepository;
+        this.repository = repository;
         this.scope = scope;
     }
 
     public async Task<Unit> Handle(CompleteOrder command, CancellationToken cancellationToken)
     {
         await scope.Do((expectedVersion, traceMetadata) =>
-            orderRepository.GetAndUpdate(
+            repository.GetAndUpdate(
                 command.OrderId,
                 order => order.Complete(),
                 expectedVersion,

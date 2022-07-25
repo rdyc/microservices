@@ -14,6 +14,7 @@ public static class ShipmentServices
 {
     public static IServiceCollection AddShipmentServices(this IServiceCollection services, IConfiguration configuration) =>
         services
+            .AddSingleton(sp => configuration.GetSection(ExternalServicesConfig.ConfigName).Get<ExternalServicesConfig>())
             .AddScoped(typeof(IPipelineBehavior<,>), typeof(ValidationBehaviour<,>))
             .AddScoped(typeof(IRequestPreProcessor<>), typeof(GenericRequestPreProcessor<>))
             .AddScoped(typeof(IRequestPostProcessor<,>), typeof(GenericRequestPostProcessor<,>))
@@ -24,4 +25,10 @@ public static class ShipmentServices
                 SubscriptionId = "shipment",
                 FilterOptions = new(EventTypeFilter.RegularExpression(@"Shipment"))
             });
+}
+
+public class ExternalServicesConfig
+{
+    public static string ConfigName = "ExternalServices";
+    public string? OrdersUrl { get; set; }
 }
