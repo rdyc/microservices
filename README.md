@@ -92,19 +92,6 @@ tasks.json
                 "--no-restore"
             ],
             "problemMatcher": "$msCompile"
-        },
-        {
-            "label": "build-validator",
-            "command": "dotnet",
-            "type": "process",
-            "args": [
-                "build",
-                "${workspaceFolder}/src/services/validator/Validator.Worker/Validator.Worker.csproj",
-                "/property:GenerateFullPaths=true",
-                "/consoleloggerparameters:NoSummary",
-                "--no-restore"
-            ],
-            "problemMatcher": "$msCompile"
         }
     ]
 }
@@ -188,19 +175,6 @@ launch.json
             "program": "${workspaceFolder}/src/services/shipment/Shipment.WebApi/bin/Debug/net6.0/Shipment.WebApi.dll",
             "args": [],
             "cwd": "${workspaceFolder}/src/services/shipment/Shipment.WebApi",
-            "stopAtEntry": false,
-            "env": {
-                "ASPNETCORE_ENVIRONMENT": "Development"
-            }
-        },
-        {
-            "name": "validator",
-            "type": "coreclr",
-            "request": "launch",
-            "preLaunchTask": "build-validator",
-            "program": "${workspaceFolder}/src/services/validator/Validator.Worker/bin/Debug/net6.0/Validator.Worker.dll",
-            "args": [],
-            "cwd": "${workspaceFolder}/src/services/validator/Validator.Worker",
             "stopAtEntry": false,
             "env": {
                 "ASPNETCORE_ENVIRONMENT": "Development"

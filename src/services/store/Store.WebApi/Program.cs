@@ -67,7 +67,9 @@ if (app.Environment.IsDevelopment())
             options.DisplayRequestDuration();
             options.InjectStylesheet("css/theme-dark.css");
             options.InjectJavascript("js/json-folding.js");
-        });
+        })
+        .UseSwaggerUIThemes()
+        .UseSwaggerUIPlugins();
 }
 
 app.UseResponseTimeMiddleware()

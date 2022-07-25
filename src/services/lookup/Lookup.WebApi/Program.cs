@@ -56,7 +56,7 @@ var app = builder.Build();
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
-    app.UseStaticFiles()
+    app
         .UseSwagger()
         .UseSwaggerUI(options =>
         {
@@ -67,7 +67,9 @@ if (app.Environment.IsDevelopment())
             options.DisplayRequestDuration();
             options.InjectStylesheet("css/theme-dark.css");
             options.InjectJavascript("js/json-folding.js");
-        });
+        })
+        .UseSwaggerUIThemes()
+        .UseSwaggerUIPlugins();
 }
 
 app.UseResponseTimeMiddleware()

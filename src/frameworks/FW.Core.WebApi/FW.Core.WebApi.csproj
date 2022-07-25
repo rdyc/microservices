@@ -12,6 +12,10 @@
     </ItemGroup>
 
     <ItemGroup>
+        <EmbeddedResource Include="wwwroot/swagger/**/*" />
+    </ItemGroup>
+
+    <ItemGroup>
       <ProjectReference Include="..\FW.Core\FW.Core.csproj" />
     </ItemGroup>
 
