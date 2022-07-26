@@ -7,6 +7,8 @@ using MediatR;
 using MediatR.Pipeline;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Shipment.Packages;
+using Shipment.Products;
 
 namespace Shipment;
 
@@ -24,7 +26,9 @@ public static class ShipmentServices
             {
                 SubscriptionId = "shipment",
                 FilterOptions = new(EventTypeFilter.RegularExpression(@"Shipment"))
-            });
+            })
+            .AddProduct()
+            .AddPackage();
 }
 
 public class ExternalServicesConfig

@@ -1,24 +1,16 @@
 using FW.Core.Events;
-using Shipment.Products;
 
 namespace Shipment.Packages.SendingPackage;
 
-public class PackageWasSent : IExternalEvent
+public record PackageWasSent(
+    Guid PackageId,
+    Guid OrderId,
+    DateTime SentAt
+) : IExternalEvent
 {
-    public Guid PackageId { get; }
-    public Guid OrderId { get; }
-    public IReadOnlyList<Product> Products { get; }
-    public DateTime SentAt { get; }
-
-    public PackageWasSent(
+    public static PackageWasSent Create(
         Guid packageId,
         Guid orderId,
-        IReadOnlyList<Product> products,
-        DateTime sentAt)
-    {
-        OrderId = orderId;
-        Products = products;
-        SentAt = sentAt;
-        PackageId = packageId;
-    }
+        DateTime sentAt
+    ) => new(packageId, orderId, sentAt);
 }

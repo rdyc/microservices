@@ -6,20 +6,11 @@ using Shipment.Products;
 
 namespace Order.Shipments.SendingPackage;
 
-public class SendPackage : ICommand
+public record SendPackage(
+    Guid OrderId,
+    IEnumerable<Product> Products
+) : ICommand
 {
-    public Guid OrderId { get; }
-    public IEnumerable<Product> Products { get; }
-
-    private SendPackage(
-        Guid orderId,
-        IEnumerable<Product> products
-    )
-    {
-        OrderId = orderId;
-        Products = products;
-    }
-
     public static SendPackage Create(
         Guid orderId,
         IEnumerable<Product> products
@@ -34,7 +25,7 @@ public class SendPackage : ICommand
     }
 }
 
-public class HandleSendPackage : ICommandHandler<SendPackage>
+internal class HandleSendPackage : ICommandHandler<SendPackage>
 {
     private readonly ExternalServicesConfig config;
     private readonly IExternalCommandBus commandBus;

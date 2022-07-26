@@ -11,27 +11,47 @@ public class Payment : Aggregate
     public Guid OrderId { get; private set; }
     public decimal Amount { get; private set; }
     public PaymentStatus Status { get; private set; }
-
-    public static Payment Initialize(Guid paymentId, Guid orderId, decimal amount)
-        => new(paymentId, orderId, amount);
+    public DateTime RequestedAt { get; private set; }
 
     public Payment() { }
 
     private Payment(Guid id, Guid orderId, decimal amount)
     {
-        var @event = PaymentRequested.Create(id, orderId, amount);
+        var @event = PaymentRequested.Create(id, orderId, amount, DateTime.UtcNow);
 
         Enqueue(@event);
         Apply(@event);
     }
 
+    public override void When(object @event)
+    {
+        switch (@event)
+        {
+            case PaymentRequested requested:
+                Apply(requested);
+                return;
+            case PaymentCompleted completed:
+                Apply(completed);
+                return;
+            case PaymentDiscarded discarded:
+                Apply(discarded);
+                return;
+            case PaymentTimedOut expired:
+                Apply(expired);
+                return;
+        }
+    }
+
+    public static Payment Initialize(Guid paymentId, Guid orderId, decimal amount)
+        => new(paymentId, orderId, amount);
+
     public void Apply(PaymentRequested @event)
     {
-        Version++;
-
         Id = @event.PaymentId;
         OrderId = @event.OrderId;
         Amount = @event.Amount;
+        RequestedAt = @event.RequestedAt;
+        Version = 0;
     }
 
     public void Complete()
@@ -67,7 +87,7 @@ public class Payment : Aggregate
     {
         Version++;
 
-        Status = PaymentStatus.Failed;
+        Status = PaymentStatus.Discarded;
     }
 
     public void TimeOut()

@@ -9,25 +9,11 @@ namespace Order.Orders;
 
 public class Order : Aggregate
 {
-    public Guid? ClientId { get; private set; }
-    public IEnumerable<ShoppingCartProduct> Products { get; private set; } = default!;
+    public Guid ClientId { get; private set; }
+    public IList<ShoppingCartProduct> Products { get; private set; } = default!;
     public decimal TotalPrice { get; private set; } = 0;
     public OrderStatus Status { get; private set; }
     public Guid? PaymentId { get; private set; }
-
-    public static Order Initialize(
-        Guid orderId,
-        Guid clientId,
-        IEnumerable<ShoppingCartProduct> products,
-        decimal totalPrice)
-    {
-        return new Order(
-            orderId,
-            clientId,
-            products,
-            totalPrice
-        );
-    }
 
     public Order() { }
 
@@ -45,13 +31,46 @@ public class Order : Aggregate
         Apply(@event);
     }
 
+    public override void When(object @event)
+    {
+        switch (@event)
+        {
+            case OrderInitialized initialized:
+                Apply(initialized);
+                return;
+            case OrderPaymentRecorded paymentRecorded:
+                Apply(paymentRecorded);
+                return;
+            case OrderCompleted completed:
+                Apply(completed);
+                return;
+            case OrderCancelled cancelled:
+                Apply(cancelled);
+                return;
+        }
+    }
+
+    public static Order Initialize(
+        Guid orderId,
+        Guid clientId,
+        IEnumerable<ShoppingCartProduct> products,
+        decimal totalPrice)
+    {
+        return new Order(
+            orderId,
+            clientId,
+            products,
+            totalPrice
+        );
+    }
+
     public void Apply(OrderInitialized @event)
     {
         Version++;
 
         Id = @event.OrderId;
         ClientId = @event.ClientId;
-        Products = @event.Products;
+        Products = @event.Products.ToList();
         Status = OrderStatus.Opened;
     }
 

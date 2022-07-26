@@ -16,19 +16,19 @@ public record PaymentFinalized(
     public static PaymentFinalized Create(Guid paymentId, Guid orderId, decimal amount, DateTime finalizedAt)
     {
         if (paymentId == Guid.Empty)
-            throw new ArgumentOutOfRangeException(nameof(paymentId));
+            throw new ArgumentNullException(nameof(paymentId));
         if (orderId == Guid.Empty)
-            throw new ArgumentOutOfRangeException(nameof(orderId));
+            throw new ArgumentNullException(nameof(orderId));
         if (amount <= 0)
             throw new ArgumentOutOfRangeException(nameof(amount));
         if (finalizedAt == default)
-            throw new ArgumentOutOfRangeException(nameof(finalizedAt));
+            throw new InvalidOperationException(nameof(finalizedAt));
 
         return new(paymentId, orderId, amount, finalizedAt);
     }
 }
 
-public class TransformIntoPaymentFinalized : IEventHandler<EventEnvelope<PaymentCompleted>>
+internal class TransformIntoPaymentFinalized : IEventHandler<EventEnvelope<PaymentCompleted>>
 {
     private readonly IMongoCollection<PaymentDetails> collection;
     private readonly IEventBus eventBus;

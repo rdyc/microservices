@@ -1,7 +1,11 @@
+using FluentValidation;
 using FW.Core.Commands;
 using FW.Core.EventStoreDB.OptimisticConcurrency;
 using FW.Core.EventStoreDB.Repository;
+using FW.Core.MongoDB;
 using MediatR;
+using MongoDB.Driver;
+using Payment.Payments.GettingPayments;
 
 namespace Payment.Payments.RequestingPayment;
 
@@ -28,7 +32,25 @@ public record RequestPayment(
     }
 }
 
-public class HandleRequestPayment : ICommandHandler<RequestPayment>
+internal class ValidateRequestPayment : AbstractValidator<RequestPayment>
+{
+    public ValidateRequestPayment(IMongoDatabase database)
+    {
+        var collectionName = MongoHelper.GetCollectionName<PaymentShortInfo>();
+        var collection = database.GetCollection<PaymentShortInfo>(collectionName);
+
+        ClassLevelCascadeMode = CascadeMode.Stop;
+
+        RuleFor(p => p.PaymentId).NotEmpty();
+
+        RuleFor(p => p.OrderId).NotEmpty()
+            .MustUniquePaymentForOrder(collection);
+
+        RuleFor(p => p.Amount).GreaterThan(0);
+    }
+}
+
+internal class HandleRequestPayment : ICommandHandler<RequestPayment>
 {
     private readonly IEventStoreDBRepository<Payment> repository;
     private readonly IEventStoreDBAppendScope scope;

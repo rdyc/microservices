@@ -2,21 +2,15 @@ using Shipment.Products;
 
 namespace Shipment.Packages.OutOfStockProduct;
 
-public class ProductWasOutOfStock
+public record ProductWasOutOfStock(
+    Guid OrderId,
+    IEnumerable<Product> AvailableProducts,
+    DateTime AvailabilityCheckedAt
+)
 {
-    public Guid OrderId { get; }
-    public IReadOnlyList<Product> AvailableProducts { get; }
-    public DateTime AvailabilityCheckedAt { get; }
-
-
-    public ProductWasOutOfStock(
+    public static ProductWasOutOfStock Create(
         Guid orderId,
         IReadOnlyList<Product> availableProducts,
         DateTime availabilityCheckedAt
-    )
-    {
-        OrderId = orderId;
-        AvailableProducts = availableProducts;
-        AvailabilityCheckedAt = availabilityCheckedAt;
-    }
+    ) => new(orderId, availableProducts, availabilityCheckedAt);
 }

@@ -1,9 +1,10 @@
-using FW.Core.Events;
-using Order.Orders.InitializingOrder;
+using FW.Core.Commands;
+using FW.Core.Requests;
+using MediatR;
 
 namespace Order.Payments.RequestingPayment;
 
-public class RequestPayment : IExternalEvent
+public class RequestPayment : ICommand
 {
     public Guid OrderId { get; }
     public decimal Amount { get; }
@@ -25,22 +26,27 @@ public class RequestPayment : IExternalEvent
     }
 }
 
-public class HandleRequestPayment : IEventHandler<EventEnvelope<OrderInitialized>>
+public class HandleRequestPayment : ICommandHandler<RequestPayment>
 {
-    private readonly IEventBus eventBus;
+    private readonly ExternalServicesConfig config;
+    private readonly IExternalCommandBus commandBus;
 
-    public HandleRequestPayment(IEventBus eventBus)
+    public HandleRequestPayment(
+        ExternalServicesConfig config,
+        IExternalCommandBus commandBus)
     {
-        this.eventBus = eventBus;
+        this.config = config;
+        this.commandBus = commandBus;
     }
 
-    public async Task Handle(EventEnvelope<OrderInitialized> @event, CancellationToken cancellationToken)
+    public async Task<Unit> Handle(RequestPayment request, CancellationToken cancellationToken)
     {
-        var externalEvent = new EventEnvelope<RequestPayment>(
-            RequestPayment.Create(@event.Data.OrderId, @event.Data.TotalPrice),
-            @event.Metadata
-        );
+        await commandBus.Post(
+            config.PaymentsUrl!,
+            "payments",
+            request,
+            cancellationToken);
 
-        await eventBus.Publish(externalEvent, cancellationToken);
+        return Unit.Value;
     }
 }

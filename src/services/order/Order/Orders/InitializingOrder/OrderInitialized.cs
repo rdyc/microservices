@@ -1,4 +1,3 @@
-using FW.Core.Events;
 using Order.ShoppingCarts.FinalizingCart;
 
 namespace Order.Orders.InitializingOrder;
@@ -9,7 +8,7 @@ public record OrderInitialized(
     IEnumerable<ShoppingCartProduct> Products,
     decimal TotalPrice,
     DateTime InitializedAt
-) : IExternalEvent
+)
 {
     public static OrderInitialized Create(
         Guid orderId,

@@ -1,8 +1,12 @@
+using FluentValidation;
 using FW.Core.Commands;
 using FW.Core.EventStoreDB.OptimisticConcurrency;
 using FW.Core.EventStoreDB.Repository;
+using FW.Core.MongoDB;
 using MediatR;
+using MongoDB.Driver;
 using Payment.Payments.DiscardingPayment;
+using Payment.Payments.GettingPayments;
 
 namespace Payment.Payments.CompletingPayment;
 
@@ -13,13 +17,29 @@ public record CompletePayment(
     public static CompletePayment Create(Guid? paymentId)
     {
         if (paymentId == null || paymentId == Guid.Empty)
-            throw new ArgumentOutOfRangeException(nameof(paymentId));
+            throw new ArgumentNullException(nameof(paymentId));
 
         return new(paymentId.Value);
     }
 }
 
-public class HandleCompletePayment : ICommandHandler<CompletePayment>
+internal class ValidateCompletePayment : AbstractValidator<CompletePayment>
+{
+    public ValidateCompletePayment(IMongoDatabase database)
+    {
+        var collectionName = MongoHelper.GetCollectionName<PaymentShortInfo>();
+        var collection = database.GetCollection<PaymentShortInfo>(collectionName);
+
+        ClassLevelCascadeMode = CascadeMode.Stop;
+
+        RuleFor(p => p.PaymentId).NotEmpty()
+            .MustExistPayment(collection)
+            .MustBeNotExpiredPayment(collection);
+    }
+}
+
+
+internal class HandleCompletePayment : ICommandHandler<CompletePayment>
 {
     private readonly IEventStoreDBRepository<Payment> repository;
     private readonly IEventStoreDBAppendScope scope;

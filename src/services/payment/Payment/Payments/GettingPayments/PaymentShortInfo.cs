@@ -6,10 +6,10 @@ using Payment.Payments.DiscardingPayment;
 using Payment.Payments.RequestingPayment;
 using Payment.Payments.TimingOutPayment;
 
-namespace Payment.Payments.GettingPaymentById;
+namespace Payment.Payments.GettingPayments;
 
-[BsonCollection("payment_details")]
-public record PaymentDetails : Document
+[BsonCollection("payment_shortinfo")]
+public record PaymentShortInfo : Document
 {
     [BsonElement("order_id")]
     public Guid OrderId { get; set; } = default!;
@@ -21,19 +21,10 @@ public record PaymentDetails : Document
     public DateTime RequestedAt { get; set; }
 
     [BsonElement("expired_at")]
-    public DateTime? ExpiredAt { get; set; }
+    public DateTime ExpiredAt { get; set; }
     
     [BsonElement("status")]
     public PaymentStatus Status { get; set; }
-
-    [BsonElement("completed_at")]
-    public DateTime? CompletedAt { get; set; }
-
-    [BsonElement("discarded_reason")]
-    public DiscardReason? DiscardedReason { get; set; }
-
-    [BsonElement("discarded_at")]
-    public DateTime? DiscardedAt { get; set; }
 
     [BsonElement("version")]
     public ulong Version { get; set; }
@@ -42,13 +33,13 @@ public record PaymentDetails : Document
     public ulong Position { get; set; }
 }
 
-public class PaymentDetailsProjection
+internal class PaymentShortInfoProjection
 {
-    public static PaymentDetails Handle(EventEnvelope<PaymentRequested> eventEnvelope)
+    public static PaymentShortInfo Handle(EventEnvelope<PaymentRequested> eventEnvelope)
     {
         var (paymentId, orderId, amount, requestedAt) = eventEnvelope.Data;
 
-        return new PaymentDetails
+        return new PaymentShortInfo
         {
             Id = paymentId,
             OrderId = orderId,
@@ -61,34 +52,27 @@ public class PaymentDetailsProjection
         };
     }
 
-    public static void Handle(EventEnvelope<PaymentCompleted> eventEnvelope, PaymentDetails view)
+    public static void Handle(EventEnvelope<PaymentCompleted> eventEnvelope, PaymentShortInfo view)
     {
         if (view.Position >= eventEnvelope.Metadata.LogPosition)
             return;
 
-        var (_, completedAt) = eventEnvelope.Data;
-
-        view.CompletedAt = completedAt;
         view.Status = PaymentStatus.Completed;
         view.Version = eventEnvelope.Metadata.StreamPosition;
         view.Position = eventEnvelope.Metadata.LogPosition;
     }
 
-    public static void Handle(EventEnvelope<PaymentDiscarded> eventEnvelope, PaymentDetails view)
+    public static void Handle(EventEnvelope<PaymentDiscarded> eventEnvelope, PaymentShortInfo view)
     {
         if (view.Position >= eventEnvelope.Metadata.LogPosition)
             return;
 
-        var (_, reason, discardedAt) = eventEnvelope.Data;
-
-        view.DiscardedReason = reason;
-        view.DiscardedAt = discardedAt;
-        view.Status = PaymentStatus.Failed;
+        view.Status = PaymentStatus.Discarded;
         view.Version = eventEnvelope.Metadata.StreamPosition;
         view.Position = eventEnvelope.Metadata.LogPosition;
     }
 
-    public static void Handle(EventEnvelope<PaymentTimedOut> eventEnvelope, PaymentDetails view)
+    public static void Handle(EventEnvelope<PaymentTimedOut> eventEnvelope, PaymentShortInfo view)
     {
         if (view.Position >= eventEnvelope.Metadata.LogPosition)
             return;

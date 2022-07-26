@@ -8,9 +8,9 @@ public record PaymentTimedOut(
     public static PaymentTimedOut Create(Guid paymentId, in DateTime timedOutAt)
     {
         if (paymentId == Guid.Empty)
-            throw new ArgumentOutOfRangeException(nameof(paymentId));
+            throw new ArgumentNullException(nameof(paymentId));
         if (timedOutAt == default)
-            throw new ArgumentOutOfRangeException(nameof(timedOutAt));
+            throw new InvalidOperationException(nameof(timedOutAt));
 
         return new(paymentId, timedOutAt);
     }

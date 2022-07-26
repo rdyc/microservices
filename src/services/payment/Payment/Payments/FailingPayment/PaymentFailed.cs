@@ -13,7 +13,7 @@ public record PaymentFailed(
     decimal Amount,
     DateTime FailedAt,
     PaymentFailReason FailReason
-): IExternalEvent
+) : IExternalEvent
 {
     public static PaymentFailed Create(
         Guid paymentId,
@@ -21,11 +21,11 @@ public record PaymentFailed(
         decimal amount,
         DateTime failedAt,
         PaymentFailReason failReason
-    ) => new (paymentId, orderId, amount, failedAt, failReason);
+    ) => new(paymentId, orderId, amount, failedAt, failReason);
 }
 
 
-public class TransformIntoPaymentFailed :
+internal class TransformIntoPaymentFailed :
     IEventHandler<EventEnvelope<PaymentDiscarded>>,
     IEventHandler<EventEnvelope<PaymentTimedOut>>
 {
@@ -72,7 +72,7 @@ public class TransformIntoPaymentFailed :
                 payment!.OrderId,
                 payment.Amount,
                 @event.Data.TimedOutAt,
-                PaymentFailReason.Discarded
+                PaymentFailReason.TimedOut
             ),
             @event.Metadata
         );

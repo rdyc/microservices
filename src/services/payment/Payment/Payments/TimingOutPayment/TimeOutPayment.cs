@@ -1,7 +1,11 @@
+using FluentValidation;
 using FW.Core.Commands;
 using FW.Core.EventStoreDB.OptimisticConcurrency;
 using FW.Core.EventStoreDB.Repository;
+using FW.Core.MongoDB;
 using MediatR;
+using MongoDB.Driver;
+using Payment.Payments.GettingPayments;
 
 namespace Payment.Payments.TimingOutPayment;
 
@@ -21,7 +25,24 @@ public record TimeOutPayment(
     }
 }
 
-public class HandleTimeOutPayment : ICommandHandler<TimeOutPayment>
+internal class ValidateTimeOutPayment : AbstractValidator<TimeOutPayment>
+{
+    public ValidateTimeOutPayment(IMongoDatabase database)
+    {
+        var collectionName = MongoHelper.GetCollectionName<PaymentShortInfo>();
+        var collection = database.GetCollection<PaymentShortInfo>(collectionName);
+
+        ClassLevelCascadeMode = CascadeMode.Stop;
+
+        RuleFor(p => p.PaymentId).NotEmpty()
+            .MustBeExpiredPayment(collection)
+            .MustMatchPaymentStatus(PaymentStatus.Pending, collection);
+
+        RuleFor(p => p.TimedOutAt).NotEmpty();
+    }
+}
+
+internal class HandleTimeOutPayment : ICommandHandler<TimeOutPayment>
 {
     private readonly IEventStoreDBRepository<Payment> repository;
     private readonly IEventStoreDBAppendScope scope;

@@ -42,7 +42,7 @@ builder.Services
         options.DescribeAllParametersInCamelCase();
     })
     .AddCoreServices()
-    .AddKafkaProducerAndConsumer()
+    .AddKafkaProducer()
     .AddCorrelationIdMiddleware()
     .AddOptimisticConcurrencyMiddleware(
         sp => sp.GetRequiredService<EventStoreDBExpectedStreamRevisionProvider>().TrySet,

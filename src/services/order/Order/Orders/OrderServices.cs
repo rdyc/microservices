@@ -48,6 +48,7 @@ internal static class OrderServices
     private static IServiceCollection AddEventHandlers(this IServiceCollection services) =>
         services
             .AddEventHandler<ShoppingCartFinalized, OrderSaga>()
+            .AddEventHandler<OrderInitialized, OrderSaga>()
             .AddEventHandler<PaymentFinalized, OrderSaga>()
             .AddEventHandler<PackageWasSent, OrderSaga>()
             .AddEventHandler<ProductWasOutOfStock, OrderSaga>()

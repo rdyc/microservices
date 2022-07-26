@@ -9,6 +9,6 @@ internal static class PaymentsConfig
 {
     internal static IServiceCollection AddPayment(this IServiceCollection services) =>
         services
-            .AddCommandHandler<DiscardPayment, HandleDiscardPayment>();
-            // .AddCommandHandler<RequestPayment, HandleRequestPayment>();
+            .AddCommandHandler<DiscardPayment, HandleDiscardPayment>()
+            .AddCommandHandler<RequestPayment, HandleRequestPayment>();
 }
