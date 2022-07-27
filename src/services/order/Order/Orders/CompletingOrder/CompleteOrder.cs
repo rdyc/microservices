@@ -6,15 +6,16 @@ using MediatR;
 namespace Order.Orders.CompletingOrder;
 
 public record CompleteOrder(
-    Guid OrderId
+    Guid OrderId,
+    DateTime CompletedAt
 ) : ICommand
 {
-    public static CompleteOrder Create(Guid? orderId)
+    public static CompleteOrder Create(Guid? orderId, DateTime completedAt)
     {
         if (orderId == null || orderId == Guid.Empty)
             throw new ArgumentOutOfRangeException(nameof(orderId));
 
-        return new CompleteOrder(orderId.Value);
+        return new CompleteOrder(orderId.Value, completedAt);
     }
 }
 
@@ -32,12 +33,14 @@ public class HandleCompleteOrder : ICommandHandler<CompleteOrder>
         this.scope = scope;
     }
 
-    public async Task<Unit> Handle(CompleteOrder command, CancellationToken cancellationToken)
+    public async Task<Unit> Handle(CompleteOrder request, CancellationToken cancellationToken)
     {
+        var (orderId, completedAt) = request;
+
         await scope.Do((expectedVersion, traceMetadata) =>
             repository.GetAndUpdate(
-                command.OrderId,
-                order => order.Complete(),
+                orderId,
+                order => order.Complete(completedAt),
                 expectedVersion,
                 traceMetadata,
                 cancellationToken

@@ -58,12 +58,12 @@ internal class HandleTimeOutPayment : ICommandHandler<TimeOutPayment>
 
     public async Task<Unit> Handle(TimeOutPayment command, CancellationToken cancellationToken)
     {
-        var (paymentId, _) = command;
+        var (paymentId, timedOutAt) = command;
 
         await scope.Do((expectedVersion, traceMetadata) =>
             repository.GetAndUpdate(
                 paymentId,
-                payment => payment.TimeOut(),
+                payment => payment.TimeOut(timedOutAt),
                 expectedVersion,
                 traceMetadata,
                 cancellationToken

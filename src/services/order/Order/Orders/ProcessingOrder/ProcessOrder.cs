@@ -3,32 +3,32 @@ using FW.Core.EventStoreDB.OptimisticConcurrency;
 using FW.Core.EventStoreDB.Repository;
 using MediatR;
 
-namespace Order.Orders.CancellingOrder;
+namespace Order.Orders.ProcessingOrder;
 
-public record CancelOrder(
+public record ProcessOrder(
     Guid OrderId,
-    OrderCancellationReason CancellationReason,
-    DateTime CancelledAt
+    Guid PackageId,
+    DateTime ProcessedAt
 ) : ICommand
 {
-    public static CancelOrder Create(Guid? orderId, OrderCancellationReason? cancellationReason, DateTime cancelledAt)
+    public static ProcessOrder Create(Guid? orderId, Guid? packageId, DateTime processedAt)
     {
-        if (!orderId.HasValue)
+        if (orderId == null || orderId == Guid.Empty)
             throw new ArgumentNullException(nameof(orderId));
 
-        if (!cancellationReason.HasValue)
-            throw new ArgumentNullException(nameof(cancellationReason));
+        if (packageId == null || packageId == Guid.Empty)
+            throw new ArgumentNullException(nameof(orderId));
 
-        return new CancelOrder(orderId.Value, cancellationReason.Value, cancelledAt);
+        return new ProcessOrder(orderId.Value, packageId.Value, processedAt);
     }
 }
 
-public class HandleCancelOrder : ICommandHandler<CancelOrder>
+public class HandleProcessOrder : ICommandHandler<ProcessOrder>
 {
     private readonly IEventStoreDBRepository<Order> repository;
     private readonly IEventStoreDBAppendScope scope;
 
-    public HandleCancelOrder(
+    public HandleProcessOrder(
         IEventStoreDBRepository<Order> repository,
         IEventStoreDBAppendScope scope
     )
@@ -37,14 +37,14 @@ public class HandleCancelOrder : ICommandHandler<CancelOrder>
         this.scope = scope;
     }
 
-    public async Task<Unit> Handle(CancelOrder request, CancellationToken cancellationToken)
+    public async Task<Unit> Handle(ProcessOrder request, CancellationToken cancellationToken)
     {
-        var (orderId, reason, cancelledAt) = request;
+        var (orderId, packageId, processedAt) = request;
 
         await scope.Do((expectedVersion, traceMetadata) =>
             repository.GetAndUpdate(
                 orderId,
-                order => order.Cancel(reason, cancelledAt),
+                order => order.Process(packageId, processedAt),
                 expectedVersion,
                 traceMetadata,
                 cancellationToken

@@ -1,54 +1,52 @@
 using FW.Core.Aggregates;
+using Shipment.Packages.DiscardingPackage;
+using Shipment.Packages.RequestingPackage;
 using Shipment.Packages.SendingPackage;
 
 namespace Shipment.Packages;
 
 public class Package : Aggregate
 {
-    public Guid OrderId { get; private set; }
-    public IList<PackageProduct> Products { get; private set; }
-    public DateTime RequestedAt { get; private set; }
-    public DateTime? SentAt { get; private set; }
-
-    public override void When(object @event)
-    {
-        switch (@event)
-        {
-            case PackageWasSent sent:
-                Apply(sent);
-                return;
-        }
-    }
-
-    public static Package Initialize(Guid orderId, IEnumerable<PackageProduct> products)
-        => new(orderId, products);
+    public Guid OrderId { get; private set; } = default!;
+    public DateTime PreparedAt { get; private set; } = default!;
+    public DateTime? SentAt { get; private set; } = default!;
+    public DateTime? CheckedAt { get; private set; } = default!;
+    public PackageStatus Status { get; private set; } = default!;
 
     public Package() { }
 
-    private Package(Guid orderId, IEnumerable<PackageProduct> products, DateTime requestedAt)
+    private Package(
+        Guid id,
+        Guid orderId,
+        DateTime preparedAt)
     {
-        var @event = PackageRequested.Create(orderId, products, requestedAt);
+        var @event = PackagePrepared.Create(id, orderId, preparedAt);
 
         Enqueue(@event);
         Apply(@event);
     }
 
-    public void Apply(PackageRequested @event)
-    {
-        Version++;
+    public static Package Initialize(
+        Guid packageId,
+        Guid orderId,
+        DateTime preparedAt)
+        => new(packageId, orderId, preparedAt);
 
+    public void Apply(PackagePrepared @event)
+    {
         Id = @event.PackageId;
         OrderId = @event.OrderId;
-        Amount = @event.Amount;
-        RequestedAt = @event.RequestedAt;
+        PreparedAt = @event.PreparedAt;
+        Status = PackageStatus.Pending;
+        Version = 0;
     }
 
-    public void Sent()
+    public void Sent(DateTime sentAt)
     {
         if (Status != PackageStatus.Pending)
-            throw new InvalidOperationException($"Completing payment in '{Status}' status is not allowed.");
+            throw new InvalidOperationException($"Sending package in '{Status}' status is not allowed.");
 
-        var @event = PackageWasSent.Create(Id, DateTime.UtcNow);
+        var @event = PackageWasSent.Create(Id, OrderId, sentAt);
 
         Enqueue(@event);
         Apply(@event);
@@ -59,26 +57,44 @@ public class Package : Aggregate
         Version++;
 
         SentAt = @event.SentAt;
-        // Status = PackageStatus.Completed;
+        Status = PackageStatus.Sent;
     }
 
-    public void Discard(DiscardReason discardReason)
+    public void Discard(DateTime checkedAt)
     {
         if (Status != PackageStatus.Pending)
-            throw new InvalidOperationException($"Discarding payment in '{Status}' status is not allowed.");
+            throw new InvalidOperationException($"Discarding package in '{Status}' status is not allowed.");
 
-        var @event = PackageDiscarded.Create(Id, discardReason, DateTime.UtcNow);
+        var @event = ProductWasOutOfStock.Create(Id, OrderId, checkedAt);
 
         Enqueue(@event);
         Apply(@event);
     }
 
-    public void Apply(PackageDiscarded _)
+    public void Apply(ProductWasOutOfStock @event)
     {
         Version++;
 
+        CheckedAt = @event.AvailabilityCheckedAt;
         Status = PackageStatus.Discarded;
     }
+
+    public override void When(object @event)
+    {
+        switch (@event)
+        {
+            case PackagePrepared packagePrepared:
+                Apply(packagePrepared);
+                return;
+            case PackageWasSent packageSent:
+                Apply(packageSent);
+                return;
+            case ProductWasOutOfStock packageOutOfStock:
+                Apply(packageOutOfStock);
+                return;
+        }
+    }
+
 }
 
 public class PackageProduct

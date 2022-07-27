@@ -1,11 +1,12 @@
-namespace Order.ShoppingCarts.FinalizingCart;
+namespace Shipment.Orders;
 
-public record ShoppingCartFinalized(
-    Guid CartId,
+public record OrderPaymentRecorded(
     Guid ClientId,
+    Guid OrderId,
+    Guid PaymentId,
     IEnumerable<ShoppingCartProduct> Products,
     decimal TotalPrice,
-    DateTime FinalizedAt
+    DateTime RecordedAt
 );
 
 public record ShoppingCartProduct(

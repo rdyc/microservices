@@ -11,15 +11,16 @@ using Payment.Payments.GettingPayments;
 namespace Payment.Payments.CompletingPayment;
 
 public record CompletePayment(
-    Guid PaymentId
+    Guid PaymentId,
+    DateTime CompletedAt
 ) : ICommand
 {
-    public static CompletePayment Create(Guid? paymentId)
+    public static CompletePayment Create(Guid? paymentId, DateTime completedAt)
     {
         if (paymentId == null || paymentId == Guid.Empty)
             throw new ArgumentNullException(nameof(paymentId));
 
-        return new(paymentId.Value);
+        return new(paymentId.Value, completedAt);
     }
 }
 
@@ -53,9 +54,9 @@ internal class HandleCompletePayment : ICommandHandler<CompletePayment>
         this.scope = scope;
     }
 
-    public async Task<Unit> Handle(CompletePayment command, CancellationToken cancellationToken)
+    public async Task<Unit> Handle(CompletePayment request, CancellationToken cancellationToken)
     {
-        var paymentId = command.PaymentId;
+        var (paymentId, completedAt) = request;
 
         await scope.Do(async (expectedVersion, traceMetadata) =>
             {
@@ -63,7 +64,7 @@ internal class HandleCompletePayment : ICommandHandler<CompletePayment>
                 {
                     return await repository.GetAndUpdate(
                         paymentId,
-                        payment => payment.Complete(),
+                        payment => payment.Complete(completedAt),
                         expectedVersion,
                         traceMetadata,
                         cancellationToken
@@ -73,7 +74,7 @@ internal class HandleCompletePayment : ICommandHandler<CompletePayment>
                 {
                     return await repository.GetAndUpdate(
                         paymentId,
-                        payment => payment.Discard(DiscardReason.UnexpectedError),
+                        payment => payment.Discard(DiscardReason.UnexpectedError, DateTime.UtcNow),
                         expectedVersion,
                         traceMetadata,
                         cancellationToken

@@ -9,7 +9,6 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Order.Orders;
 using Order.Payments;
-using Order.Shipments;
 
 namespace Order;
 
@@ -29,7 +28,6 @@ public static class OrderServices
                 FilterOptions = new(EventTypeFilter.RegularExpression(@"Order"))
             })
             .AddPayment()
-            .AddShipment()
             .AddOrder();
 }
 

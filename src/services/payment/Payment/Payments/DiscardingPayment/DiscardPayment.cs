@@ -11,17 +11,18 @@ namespace Payment.Payments.DiscardingPayment;
 
 public record DiscardPayment(
     Guid PaymentId,
-    DiscardReason DiscardReason
+    DiscardReason DiscardReason,
+    DateTime DiscardedAt
 ) : ICommand
 {
-    public static DiscardPayment Create(Guid? paymentId, DiscardReason? discardReason)
+    public static DiscardPayment Create(Guid? paymentId, DiscardReason? discardReason, DateTime discardedAt)
     {
         if (paymentId == null || paymentId == Guid.Empty)
             throw new ArgumentNullException(nameof(paymentId));
         if (discardReason is null or default(DiscardReason))
             throw new InvalidOperationException(nameof(paymentId));
 
-        return new(paymentId.Value, discardReason.Value);
+        return new(paymentId.Value, discardReason.Value, discardedAt);
     }
 }
 
@@ -35,7 +36,7 @@ internal class ValidateDiscardPayment : AbstractValidator<DiscardPayment>
         ClassLevelCascadeMode = CascadeMode.Stop;
 
         RuleFor(p => p.PaymentId).NotEmpty()
-            .MustMatchPaymentStatus(PaymentStatus.Pending, collection);
+            .MustMatchPaymentStatus(PaymentStatus.Completed, collection);
 
         RuleFor(p => p.DiscardReason).NotEmpty();
     }
@@ -57,12 +58,12 @@ internal class HandleDiscardPayment : ICommandHandler<DiscardPayment>
 
     public async Task<Unit> Handle(DiscardPayment command, CancellationToken cancellationToken)
     {
-        var (paymentId, _) = command;
+        var (paymentId, reason, discardedAt) = command;
 
         await scope.Do((expectedVersion, traceMetadata) =>
             repository.GetAndUpdate(
                 paymentId,
-                payment => payment.TimeOut(),
+                payment => payment.Discard(reason, discardedAt),
                 expectedVersion,
                 traceMetadata,
                 cancellationToken

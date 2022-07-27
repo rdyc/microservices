@@ -1,19 +1,8 @@
-using FW.Core.Events;
-
 namespace Order.Payments.FinalizingPayment;
 
-public class PaymentFinalized : IExternalEvent
-{
-    public Guid OrderId { get; }
-    public Guid PaymentId { get; }
-    public decimal Amount { get; }
-    public DateTime FinalizedAt { get; }
-
-    public PaymentFinalized(Guid orderId, Guid paymentId, decimal amount, DateTime finalizedAt)
-    {
-        OrderId = orderId;
-        PaymentId = paymentId;
-        Amount = amount;
-        FinalizedAt = finalizedAt;
-    }
-}
+public record PaymentFinalized(
+    Guid OrderId,
+    Guid PaymentId,
+    decimal Amount,
+    DateTime FinalizedAt
+);

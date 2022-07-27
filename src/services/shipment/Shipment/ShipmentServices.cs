@@ -7,6 +7,7 @@ using MediatR;
 using MediatR.Pipeline;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Shipment.Orders;
 using Shipment.Packages;
 using Shipment.Products;
 
@@ -16,7 +17,6 @@ public static class ShipmentServices
 {
     public static IServiceCollection AddShipmentServices(this IServiceCollection services, IConfiguration configuration) =>
         services
-            .AddSingleton(sp => configuration.GetSection(ExternalServicesConfig.ConfigName).Get<ExternalServicesConfig>())
             .AddScoped(typeof(IPipelineBehavior<,>), typeof(ValidationBehaviour<,>))
             .AddScoped(typeof(IRequestPreProcessor<>), typeof(GenericRequestPreProcessor<>))
             .AddScoped(typeof(IRequestPostProcessor<,>), typeof(GenericRequestPostProcessor<,>))
@@ -28,11 +28,6 @@ public static class ShipmentServices
                 FilterOptions = new(EventTypeFilter.RegularExpression(@"Shipment"))
             })
             .AddProduct()
+            .AddOrder()
             .AddPackage();
-}
-
-public class ExternalServicesConfig
-{
-    public static string ConfigName = "ExternalServices";
-    public string? OrdersUrl { get; set; }
 }

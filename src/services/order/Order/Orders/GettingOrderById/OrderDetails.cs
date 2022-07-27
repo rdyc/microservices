@@ -14,7 +14,7 @@ public record OrderDetails : Document
     [BsonElement("client_id")]
     public Guid ClientId { get; set; }
 
-    [BsonElement("total_products")]
+    [BsonElement("products")]
     public IList<OrderDetailProduct> Products { get; set; } = default!;
 
     [BsonElement("total_price")]

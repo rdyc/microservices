@@ -3,11 +3,14 @@ using FW.Core.Events;
 using Order.Orders.CancellingOrder;
 using Order.Orders.CompletingOrder;
 using Order.Orders.InitializingOrder;
+using Order.Orders.ProcessingOrder;
 using Order.Orders.RecordingOrderPayment;
 using Order.Payments.DiscardingPayment;
 using Order.Payments.FinalizingPayment;
 using Order.Payments.RequestingPayment;
-using Order.Shipments.OutOfStockProduct;
+using Order.Payments.TimingOutPayment;
+using Order.Shipments.DiscardingPackage;
+using Order.Shipments.RequestingPackage;
 using Order.Shipments.SendingPackage;
 using Order.ShoppingCarts.FinalizingCart;
 
@@ -17,10 +20,11 @@ public class OrderSaga :
     IEventHandler<ShoppingCartFinalized>,
     IEventHandler<OrderInitialized>,
     IEventHandler<PaymentFinalized>,
+    IEventHandler<PaymentTimedOut>,
+    IEventHandler<PackagePrepared>,
     IEventHandler<PackageWasSent>,
     IEventHandler<ProductWasOutOfStock>,
-    IEventHandler<OrderCancelled>,
-    IEventHandler<OrderPaymentRecorded>
+    IEventHandler<OrderCancelled>
 {
     private readonly ICommandBus commandBus;
 
@@ -29,7 +33,6 @@ public class OrderSaga :
         this.commandBus = commandBus;
     }
 
-    // Happy path
     public async Task Handle(ShoppingCartFinalized @event, CancellationToken cancellationToken)
     {
         var orderId = Guid.NewGuid();
@@ -53,26 +56,31 @@ public class OrderSaga :
             cancellationToken);
     }
 
-    public async Task Handle(OrderPaymentRecorded @event, CancellationToken cancellationToken)
+    public async Task Handle(PaymentTimedOut @event, CancellationToken cancellationToken)
     {
         await commandBus.SendAsync(
-            SendPackage.Create(@event.OrderId, @event.Products),
-            cancellationToken
-        );
+            CancelOrder.Create(@event.OrderId, OrderCancellationReason.TimedOut, DateTime.UtcNow),
+            cancellationToken);
+    }
+
+    public async Task Handle(PackagePrepared @event, CancellationToken cancellationToken)
+    {
+        await commandBus.SendAsync(
+            ProcessOrder.Create(@event.OrderId, @event.PackageId, @event.PreparedAt),
+            cancellationToken);
     }
 
     public async Task Handle(PackageWasSent @event, CancellationToken cancellationToken)
     {
         await commandBus.SendAsync(
-            CompleteOrder.Create(@event.OrderId),
+            CompleteOrder.Create(@event.OrderId, DateTime.UtcNow),
             cancellationToken);
     }
 
-    // Compensation
     public async Task Handle(ProductWasOutOfStock @event, CancellationToken cancellationToken)
     {
         await commandBus.SendAsync(
-            CancelOrder.Create(@event.OrderId, OrderCancellationReason.ProductWasOutOfStock),
+            CancelOrder.Create(@event.OrderId, OrderCancellationReason.ProductWasOutOfStock, DateTime.UtcNow),
             cancellationToken);
     }
 

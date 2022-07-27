@@ -23,6 +23,72 @@ public class Payment : Aggregate
         Apply(@event);
     }
 
+    public static Payment Initialize(Guid paymentId, Guid orderId, decimal amount)
+        => new(paymentId, orderId, amount);
+
+    public void Apply(PaymentRequested @event)
+    {
+        Id = @event.PaymentId;
+        OrderId = @event.OrderId;
+        Amount = @event.Amount;
+        RequestedAt = @event.RequestedAt;
+        Version = 0;
+    }
+
+    public void Complete(DateTime completedAt)
+    {
+        if (Status != PaymentStatus.Pending)
+            throw new InvalidOperationException($"Completing payment in '{Status}' status is not allowed.");
+
+        var @event = PaymentCompleted.Create(Id, completedAt);
+
+        Enqueue(@event);
+        Apply(@event);
+    }
+
+    public void Apply(PaymentCompleted _)
+    {
+        Version++;
+
+        Status = PaymentStatus.Completed;
+    }
+
+    public void Discard(DiscardReason discardReason, DateTime discardedAt)
+    {
+        if (Status != PaymentStatus.Completed)
+            throw new InvalidOperationException($"Discarding payment in '{Status}' status is not allowed.");
+
+        var @event = PaymentDiscarded.Create(Id, discardReason, discardedAt);
+
+        Enqueue(@event);
+        Apply(@event);
+    }
+
+    public void Apply(PaymentDiscarded _)
+    {
+        Version++;
+
+        Status = PaymentStatus.Discarded;
+    }
+
+    public void TimeOut(DateTime timedOutAt)
+    {
+        if (Status != PaymentStatus.Pending)
+            throw new InvalidOperationException($"Timed out payment in '{Status}' status is not allowed.");
+
+        var @event = PaymentTimedOut.Create(Id, OrderId, timedOutAt);
+
+        Enqueue(@event);
+        Apply(@event);
+    }
+
+    public void Apply(PaymentTimedOut _)
+    {
+        Version++;
+
+        Status = PaymentStatus.Failed;
+    }
+
     public override void When(object @event)
     {
         switch (@event)
@@ -40,71 +106,5 @@ public class Payment : Aggregate
                 Apply(expired);
                 return;
         }
-    }
-
-    public static Payment Initialize(Guid paymentId, Guid orderId, decimal amount)
-        => new(paymentId, orderId, amount);
-
-    public void Apply(PaymentRequested @event)
-    {
-        Id = @event.PaymentId;
-        OrderId = @event.OrderId;
-        Amount = @event.Amount;
-        RequestedAt = @event.RequestedAt;
-        Version = 0;
-    }
-
-    public void Complete()
-    {
-        if (Status != PaymentStatus.Pending)
-            throw new InvalidOperationException($"Completing payment in '{Status}' status is not allowed.");
-
-        var @event = PaymentCompleted.Create(Id, DateTime.UtcNow);
-
-        Enqueue(@event);
-        Apply(@event);
-    }
-
-    public void Apply(PaymentCompleted _)
-    {
-        Version++;
-
-        Status = PaymentStatus.Completed;
-    }
-
-    public void Discard(DiscardReason discardReason)
-    {
-        if (Status != PaymentStatus.Pending)
-            throw new InvalidOperationException($"Discarding payment in '{Status}' status is not allowed.");
-
-        var @event = PaymentDiscarded.Create(Id, discardReason, DateTime.UtcNow);
-
-        Enqueue(@event);
-        Apply(@event);
-    }
-
-    public void Apply(PaymentDiscarded _)
-    {
-        Version++;
-
-        Status = PaymentStatus.Discarded;
-    }
-
-    public void TimeOut()
-    {
-        if (Status != PaymentStatus.Pending)
-            throw new InvalidOperationException($"Discarding payment in '{Status}' status is not allowed.");
-
-        var @event = PaymentTimedOut.Create(Id, DateTime.UtcNow);
-
-        Enqueue(@event);
-        Apply(@event);
-    }
-
-    public void Apply(PaymentTimedOut _)
-    {
-        Version++;
-
-        Status = PaymentStatus.Failed;
     }
 }

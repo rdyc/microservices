@@ -13,9 +13,12 @@ using Order.Orders.GettingOrderById;
 using Order.Orders.GettingOrderHistory;
 using Order.Orders.GettingOrders;
 using Order.Orders.InitializingOrder;
+using Order.Orders.ProcessingOrder;
 using Order.Orders.RecordingOrderPayment;
 using Order.Payments.FinalizingPayment;
-using Order.Shipments.OutOfStockProduct;
+using Order.Payments.TimingOutPayment;
+using Order.Shipments.DiscardingPackage;
+using Order.Shipments.RequestingPackage;
 using Order.Shipments.SendingPackage;
 using Order.ShoppingCarts.FinalizingCart;
 
@@ -35,6 +38,7 @@ internal static class OrderServices
         services
             .AddCommandHandler<InitializeOrder, HandleInitializeOrder>()
             .AddCommandHandler<RecordOrderPayment, HandleRecordOrderPayment>()
+            .AddCommandHandler<ProcessOrder, HandleProcessOrder>()
             .AddCommandHandler<CompleteOrder, HandleCompleteOrder>()
             .AddCommandHandler<CancelOrder, HandleCancelOrder>();
 
@@ -50,10 +54,11 @@ internal static class OrderServices
             .AddEventHandler<ShoppingCartFinalized, OrderSaga>()
             .AddEventHandler<OrderInitialized, OrderSaga>()
             .AddEventHandler<PaymentFinalized, OrderSaga>()
+            .AddEventHandler<PaymentTimedOut, OrderSaga>()
+            .AddEventHandler<PackagePrepared, OrderSaga>()
             .AddEventHandler<PackageWasSent, OrderSaga>()
             .AddEventHandler<ProductWasOutOfStock, OrderSaga>()
-            .AddEventHandler<OrderCancelled, OrderSaga>()
-            .AddEventHandler<OrderPaymentRecorded, OrderSaga>();
+            .AddEventHandler<OrderCancelled, OrderSaga>();
 
     private static IServiceCollection AddProjections(this IServiceCollection services) =>
         services

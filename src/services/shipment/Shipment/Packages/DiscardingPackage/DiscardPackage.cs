@@ -8,21 +8,21 @@ using MongoDB.Driver;
 using Shipment.Orders;
 using Shipment.Orders.GettingOrders;
 
-namespace Shipment.Packages.SendingPackage;
+namespace Shipment.Packages.DiscardingPackage;
 
-public record SendPackage(
+public record DiscardPackage(
     Guid PackageId,
     Guid OrderId,
-    DateTime SentAt
+    DateTime CheckedAt
 ) : ICommand
 {
-    public static SendPackage Create(Guid packageId, Guid orderId, DateTime sentAt) =>
-        new(packageId, orderId, sentAt);
+    public static DiscardPackage Create(Guid packageId, Guid orderId, DateTime checkedAt) =>
+        new(packageId, orderId, checkedAt);
 }
 
-internal class ValidateSendPackage : AbstractValidator<SendPackage>
+internal class ValidateDiscardPackage : AbstractValidator<DiscardPackage>
 {
-    public ValidateSendPackage(IMongoDatabase database)
+    public ValidateDiscardPackage(IMongoDatabase database)
     {
         var collectionName = MongoHelper.GetCollectionName<Order>();
         var collection = database.GetCollection<Order>(collectionName);
@@ -34,16 +34,16 @@ internal class ValidateSendPackage : AbstractValidator<SendPackage>
         RuleFor(p => p.OrderId).NotEmpty()
             .MustExistOrder(collection);
 
-        RuleFor(p => p.SentAt).NotEmpty();
+        RuleFor(p => p.CheckedAt).NotEmpty();
     }
 }
 
-internal class HandleSendPackage : ICommandHandler<SendPackage>
+internal class HandleDiscardPackage : ICommandHandler<DiscardPackage>
 {
     private readonly IEventStoreDBRepository<Package> repository;
     private readonly IEventStoreDBAppendScope scope;
 
-    public HandleSendPackage(
+    public HandleDiscardPackage(
         IEventStoreDBRepository<Package> repository,
         IEventStoreDBAppendScope scope
     )
@@ -52,14 +52,14 @@ internal class HandleSendPackage : ICommandHandler<SendPackage>
         this.scope = scope;
     }
 
-    public async Task<Unit> Handle(SendPackage request, CancellationToken cancellationToken)
+    public async Task<Unit> Handle(DiscardPackage request, CancellationToken cancellationToken)
     {
-        var (packageId, _, sentAt) = request;
+        var (packageId, _, checkedAt) = request;
 
         await scope.Do((expectedVersion, eventMetadata) =>
             repository.GetAndUpdate(
                 packageId,
-                package => package.Sent(sentAt),
+                package => package.Discard(checkedAt),
                 expectedVersion,
                 eventMetadata,
                 cancellationToken

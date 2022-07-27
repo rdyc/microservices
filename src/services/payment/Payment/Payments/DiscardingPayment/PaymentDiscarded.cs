@@ -1,9 +1,12 @@
+using FW.Core.Events;
+
 namespace Payment.Payments.DiscardingPayment;
 
 public record PaymentDiscarded(
     Guid PaymentId,
     DiscardReason DiscardReason,
-    DateTime DiscardedAt)
+    DateTime DiscardedAt
+) : IExternalEvent
 {
     public static PaymentDiscarded Create(Guid paymentId, DiscardReason discardReason, DateTime discardedAt)
     {
