@@ -4,11 +4,11 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace FW.Core.EventStoreDB.OptimisticConcurrency;
 
-public interface IEventStoreDBAppendScope: IAppendScope<ulong>
+public interface IEventStoreDBAppendScope : IAppendScope<ulong>
 {
 }
 
-public class EventStoreDBAppendScope: AppendScope<ulong>, IEventStoreDBAppendScope
+public class EventStoreDBAppendScope : AppendScope<ulong>, IEventStoreDBAppendScope
 {
     public EventStoreDBAppendScope(Func<ulong?> getExpectedVersion, Action<ulong> setNextExpectedVersion, Func<TraceMetadata?> getEventMetadata) : base(getExpectedVersion, setNextExpectedVersion, getEventMetadata)
     {

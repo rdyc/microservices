@@ -37,6 +37,7 @@ public class EventStoreDBRepository<T> : IEventStoreDBRepository<T> where T : cl
             GetEventsToStore(aggregate, traceMetadata),
             cancellationToken: ct
         );
+        
         return result.NextExpectedStreamRevision;
     }
 

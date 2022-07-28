@@ -41,12 +41,12 @@ public class Package : Aggregate
         Version = 0;
     }
 
-    public void Sent(DateTime sentAt)
+    public void Sent(IEnumerable<PackageItem> items, DateTime sentAt)
     {
         if (Status != PackageStatus.Pending)
             throw new InvalidOperationException($"Sending package in '{Status}' status is not allowed.");
 
-        var @event = PackageWasSent.Create(Id, OrderId, sentAt);
+        var @event = PackageWasSent.Create(Id, OrderId, items, sentAt);
 
         Enqueue(@event);
         Apply(@event);

@@ -25,7 +25,7 @@ public static class ShipmentServices
             .AddEventStoreDBSubscriptionToAll(new EventStoreDBSubscriptionToAllOptions
             {
                 SubscriptionId = "shipment",
-                FilterOptions = new(EventTypeFilter.RegularExpression(@"Shipment"))
+                FilterOptions = new(EventTypeFilter.RegularExpression(@"Package"))
             })
             .AddProduct()
             .AddOrder()

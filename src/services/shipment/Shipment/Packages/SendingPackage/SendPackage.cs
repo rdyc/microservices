@@ -7,18 +7,29 @@ using MediatR;
 using MongoDB.Driver;
 using Shipment.Orders;
 using Shipment.Orders.GettingOrders;
+using Shipment.Products;
 
 namespace Shipment.Packages.SendingPackage;
 
 public record SendPackage(
     Guid PackageId,
     Guid OrderId,
+    IEnumerable<PackageItem> Items,
     DateTime SentAt
 ) : ICommand
 {
-    public static SendPackage Create(Guid packageId, Guid orderId, DateTime sentAt) =>
-        new(packageId, orderId, sentAt);
+    public static SendPackage Create(
+        Guid packageId,
+        Guid orderId,
+        IEnumerable<PackageItem> items,
+        DateTime sentAt) =>
+        new(packageId, orderId, items, sentAt);
 }
+
+public record PackageItem(
+    Guid ProductId,
+    int Quantity
+);
 
 internal class ValidateSendPackage : AbstractValidator<SendPackage>
 {
@@ -26,6 +37,7 @@ internal class ValidateSendPackage : AbstractValidator<SendPackage>
     {
         var collectionName = MongoHelper.GetCollectionName<Order>();
         var collection = database.GetCollection<Order>(collectionName);
+        var products = database.GetCollection<Product>(collectionName);
 
         ClassLevelCascadeMode = CascadeMode.Stop;
 
@@ -33,6 +45,16 @@ internal class ValidateSendPackage : AbstractValidator<SendPackage>
 
         RuleFor(p => p.OrderId).NotEmpty()
             .MustExistOrder(collection);
+
+        RuleForEach(p => p.Items).NotEmpty()
+            .ChildRules(item => 
+            {
+                item.RuleFor(p => p.ProductId).NotEmpty()
+                        .MustExistProduct(products);
+
+                item.RuleFor(p => p.Quantity).NotEmpty()
+                        .MustInStockProduct(products);
+            });
 
         RuleFor(p => p.SentAt).NotEmpty();
     }
@@ -54,12 +76,12 @@ internal class HandleSendPackage : ICommandHandler<SendPackage>
 
     public async Task<Unit> Handle(SendPackage request, CancellationToken cancellationToken)
     {
-        var (packageId, _, sentAt) = request;
+        var (packageId, _, items, sentAt) = request;
 
         await scope.Do((expectedVersion, eventMetadata) =>
             repository.GetAndUpdate(
                 packageId,
-                package => package.Sent(sentAt),
+                package => package.Sent(items, sentAt),
                 expectedVersion,
                 eventMetadata,
                 cancellationToken

@@ -4,6 +4,7 @@ using MongoDB.Bson.Serialization.Attributes;
 using Order.Orders.CancellingOrder;
 using Order.Orders.CompletingOrder;
 using Order.Orders.InitializingOrder;
+using Order.Orders.ProcessingOrder;
 using Order.Orders.RecordingOrderPayment;
 
 namespace Order.Orders.GettingOrderById;
@@ -147,6 +148,16 @@ internal static class OrderDetailsProjection
         view.PaymentId = paymentId;
         view.PaidAt = recordedAt;
         view.Status = OrderStatus.Paid;
+        view.Version = eventEnvelope.Metadata.StreamPosition;
+        view.Position = eventEnvelope.Metadata.LogPosition;
+    }
+
+    public static void Handle(EventEnvelope<OrderProcessed> eventEnvelope, OrderDetails view)
+    {
+        if (view.Position >= eventEnvelope.Metadata.LogPosition)
+            return;
+
+        view.Status = OrderStatus.Processed;
         view.Version = eventEnvelope.Metadata.StreamPosition;
         view.Position = eventEnvelope.Metadata.LogPosition;
     }

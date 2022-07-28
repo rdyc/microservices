@@ -44,12 +44,13 @@ public class HandleCancelOrder : ICommandHandler<CancelOrder>
         await scope.Do((expectedVersion, traceMetadata) =>
             repository.GetAndUpdate(
                 orderId,
-                order => order.Cancel(reason, cancelledAt),
+                (order) => order.Cancel(reason, cancelledAt),
                 expectedVersion,
                 traceMetadata,
                 cancellationToken
             )
         );
+
         return Unit.Value;
     }
 }

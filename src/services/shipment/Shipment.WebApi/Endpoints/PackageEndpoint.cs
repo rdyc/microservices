@@ -84,8 +84,10 @@ public static class PackageEndpoint
         CancellationToken cancellationToken)
     {
         var log = logger.CreateLogger<Program>();
+        var (orderId, items) = request;
         var task = command.SendAsync(
-            SendPackage.Create(packageId, request.OrderId, DateTime.UtcNow),
+            SendPackage.Create(packageId, orderId, items.Select(e => 
+                new PackageItem(e.ProductId, e.Quantity)), DateTime.UtcNow),
             cancellationToken);
 
         return await WithCancellation.TryExecute(

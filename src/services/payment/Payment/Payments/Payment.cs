@@ -40,7 +40,7 @@ public class Payment : Aggregate
         if (Status != PaymentStatus.Pending)
             throw new InvalidOperationException($"Completing payment in '{Status}' status is not allowed.");
 
-        var @event = PaymentCompleted.Create(Id, completedAt);
+        var @event = PaymentCompleted.Create(Id, OrderId, completedAt);
 
         Enqueue(@event);
         Apply(@event);
@@ -102,8 +102,8 @@ public class Payment : Aggregate
             case PaymentDiscarded discarded:
                 Apply(discarded);
                 return;
-            case PaymentTimedOut expired:
-                Apply(expired);
+            case PaymentTimedOut timedOut:
+                Apply(timedOut);
                 return;
         }
     }

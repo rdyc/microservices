@@ -44,7 +44,7 @@ public class HandleProcessOrder : ICommandHandler<ProcessOrder>
         await scope.Do((expectedVersion, traceMetadata) =>
             repository.GetAndUpdate(
                 orderId,
-                order => order.Process(packageId, processedAt),
+                (order) => order.Process(packageId, processedAt),
                 expectedVersion,
                 traceMetadata,
                 cancellationToken

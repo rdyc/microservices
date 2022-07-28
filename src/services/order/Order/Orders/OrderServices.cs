@@ -15,8 +15,8 @@ using Order.Orders.GettingOrders;
 using Order.Orders.InitializingOrder;
 using Order.Orders.ProcessingOrder;
 using Order.Orders.RecordingOrderPayment;
+using Order.Payments.FailingPayment;
 using Order.Payments.FinalizingPayment;
-using Order.Payments.TimingOutPayment;
 using Order.Shipments.DiscardingPackage;
 using Order.Shipments.RequestingPackage;
 using Order.Shipments.SendingPackage;
@@ -54,7 +54,7 @@ internal static class OrderServices
             .AddEventHandler<ShoppingCartFinalized, OrderSaga>()
             .AddEventHandler<OrderInitialized, OrderSaga>()
             .AddEventHandler<PaymentFinalized, OrderSaga>()
-            .AddEventHandler<PaymentTimedOut, OrderSaga>()
+            .AddEventHandler<PaymentFailed, OrderSaga>()
             .AddEventHandler<PackagePrepared, OrderSaga>()
             .AddEventHandler<PackageWasSent, OrderSaga>()
             .AddEventHandler<ProductWasOutOfStock, OrderSaga>()
@@ -65,6 +65,14 @@ internal static class OrderServices
             .Projection<OrderShortInfo>(builder => builder
                 .AddOn<OrderInitialized>(OrderShortInfoProjection.Handle)
                 .UpdateOn<OrderPaymentRecorded>(
+                    onGet: e => e.OrderId,
+                    onHandle: OrderShortInfoProjection.Handle,
+                    onUpdate: (view, update) => update
+                        .Set(e => e.Status, view.Status)
+                        .Set(e => e.Version, view.Version)
+                        .Set(e => e.Position, view.Position)
+                )
+                .UpdateOn<OrderProcessed>(
                     onGet: e => e.OrderId,
                     onHandle: OrderShortInfoProjection.Handle,
                     onUpdate: (view, update) => update
@@ -97,6 +105,14 @@ internal static class OrderServices
                     onUpdate: (view, update) => update
                         .Set(e => e.PaymentId, view.PaymentId)
                         .Set(e => e.PaidAt, view.PaidAt)
+                        .Set(e => e.Status, view.Status)
+                        .Set(e => e.Version, view.Version)
+                        .Set(e => e.Position, view.Position)
+                )
+                .UpdateOn<OrderProcessed>(
+                    onGet: e => e.OrderId,
+                    onHandle: OrderDetailsProjection.Handle,
+                    onUpdate: (view, update) => update
                         .Set(e => e.Status, view.Status)
                         .Set(e => e.Version, view.Version)
                         .Set(e => e.Position, view.Position)

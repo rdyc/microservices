@@ -8,5 +8,5 @@ public record CreatePaymentRequest(
 );
 
 public record DiscardPaymentRequest(
-    DiscardReason Reason
+    DiscardReason DiscardReason
 );

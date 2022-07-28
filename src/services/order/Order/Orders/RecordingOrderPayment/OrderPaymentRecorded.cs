@@ -7,7 +7,7 @@ public record OrderPaymentRecorded(
     Guid OrderId,
     Guid PaymentId,
     IEnumerable<ShoppingCartProduct> Products,
-    decimal Amount,
+    decimal TotalPrice,
     DateTime RecordedAt
 ) : IExternalEvent
 {
@@ -15,7 +15,7 @@ public record OrderPaymentRecorded(
         Guid orderId,
         Guid paymentId,
         IEnumerable<ShoppingCartProduct> products,
-        decimal amount,
+        decimal totalPrice,
         DateTime recordedAt)
     {
         if (orderId == Guid.Empty)
@@ -24,8 +24,8 @@ public record OrderPaymentRecorded(
             throw new ArgumentOutOfRangeException(nameof(paymentId));
         if (products is null || !products.Any())
             throw new ArgumentOutOfRangeException(nameof(products));
-        if (amount > 0)
-            throw new ArgumentOutOfRangeException(nameof(amount));
+        if (totalPrice > 0)
+            throw new ArgumentOutOfRangeException(nameof(totalPrice));
         if (recordedAt == default)
             throw new ArgumentOutOfRangeException(nameof(recordedAt));
 
@@ -33,7 +33,7 @@ public record OrderPaymentRecorded(
             orderId,
             paymentId,
             products,
-            amount,
+            totalPrice,
             recordedAt
         );
     }

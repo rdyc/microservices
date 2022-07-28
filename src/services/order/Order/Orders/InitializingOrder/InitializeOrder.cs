@@ -35,6 +35,7 @@ public record InitializeOrder(
 
 public class HandleInitializeOrder : ICommandHandler<InitializeOrder>
 {
+    
     private readonly IEventStoreDBRepository<Order> repository;
     private readonly IEventStoreDBAppendScope scope;
 

@@ -10,14 +10,14 @@ namespace Order.Orders;
 
 public class Order : Aggregate
 {
+    private Order(){}
+
     public Guid ClientId { get; private set; }
     public IList<ShoppingCartProduct> Products { get; private set; } = default!;
     public decimal TotalPrice { get; private set; } = 0;
     public OrderStatus Status { get; private set; }
     public Guid? PaymentId { get; private set; }
     public Guid? PackageId { get; private set; }
-
-    public Order() { }
 
     private Order(Guid id, Guid clientId, IEnumerable<ShoppingCartProduct> products, decimal totalPrice)
     {
@@ -49,8 +49,7 @@ public class Order : Aggregate
 
     public void Apply(OrderInitialized @event)
     {
-        Version++;
-
+        Version = 0;
         Id = @event.OrderId;
         ClientId = @event.ClientId;
         Products = @event.Products.ToList();
@@ -59,6 +58,9 @@ public class Order : Aggregate
 
     public void Process(Guid packageId, DateTime processedAt)
     {
+        if (Status != OrderStatus.Paid)
+            throw new InvalidOperationException($"Process order in '{Status}' is not allowed.");
+
         var @event = OrderProcessed.Create(Id, packageId, processedAt);
 
         Enqueue(@event);
@@ -75,6 +77,9 @@ public class Order : Aggregate
 
     public void RecordPayment(Guid paymentId, DateTime recordedAt)
     {
+        if (Status != OrderStatus.Opened)
+            throw new InvalidOperationException($"Record payment in '{Status}' status is not allowed.");
+
         var @event = OrderPaymentRecorded.Create(
             Id,
             paymentId,
@@ -97,8 +102,8 @@ public class Order : Aggregate
 
     public void Complete(DateTime completedAt)
     {
-        if (Status != OrderStatus.Paid)
-            throw new InvalidOperationException($"Cannot complete a not paid order.");
+        if (Status != OrderStatus.Processed)
+            throw new InvalidOperationException($"Complete order in '{Status}' is not allowed.");
 
         var @event = OrderCompleted.Create(Id, completedAt);
 

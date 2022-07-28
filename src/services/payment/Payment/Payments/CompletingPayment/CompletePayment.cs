@@ -64,7 +64,7 @@ internal class HandleCompletePayment : ICommandHandler<CompletePayment>
                 {
                     return await repository.GetAndUpdate(
                         paymentId,
-                        payment => payment.Complete(completedAt),
+                        (payment) => payment.Complete(completedAt),
                         expectedVersion,
                         traceMetadata,
                         cancellationToken

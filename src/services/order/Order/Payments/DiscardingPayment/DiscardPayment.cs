@@ -4,23 +4,17 @@ using MediatR;
 
 namespace Order.Payments.DiscardingPayment;
 
-public class DiscardPayment : ICommand
+public record DiscardPayment(
+    Guid PaymentId,
+    DiscardReason DiscardReason
+) : ICommand
 {
-    public Guid PaymentId { get; }
-    public DiscardReason DiscardReason { get; }
-
-    private DiscardPayment(Guid paymentId, DiscardReason discardReason)
-    {
-        PaymentId = paymentId;
-        DiscardReason = discardReason;
-    }
-
     public static DiscardPayment Create(Guid paymentId)
     {
         if (paymentId == Guid.Empty)
             throw new ArgumentOutOfRangeException(nameof(paymentId));
 
-        return new DiscardPayment(paymentId, DiscardReason.OrderCancelled);
+        return new(paymentId, DiscardReason.OrderCancelled);
     }
 }
 
@@ -39,9 +33,9 @@ public class HandleDiscardPayment : ICommandHandler<DiscardPayment>
 
     public async Task<Unit> Handle(DiscardPayment command, CancellationToken cancellationToken)
     {
-        await commandBus.Delete(
+        await commandBus.Post(
             config.PaymentsUrl!,
-            "payments",
+            $"payments/{command.PaymentId}/discard",
             command,
             cancellationToken);
 

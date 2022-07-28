@@ -9,19 +9,17 @@ namespace Payment.Payments.FailingPayment;
 
 public record PaymentFailed(
     Guid OrderId,
-    Guid PaymentId,
-    decimal Amount,
+    Guid? PaymentId,
     DateTime FailedAt,
     PaymentFailReason FailReason
 ) : IExternalEvent
 {
     public static PaymentFailed Create(
-        Guid paymentId,
         Guid orderId,
-        decimal amount,
+        Guid? paymentId,
         DateTime failedAt,
         PaymentFailReason failReason
-    ) => new(paymentId, orderId, amount, failedAt, failReason);
+    ) => new(orderId, paymentId, failedAt, failReason);
 }
 
 
@@ -49,9 +47,8 @@ internal class TransformIntoPaymentFailed :
 
         var externalEvent = new EventEnvelope<PaymentFailed>(
             PaymentFailed.Create(
-                @event.Data.PaymentId,
                 payment!.OrderId,
-                payment.Amount,
+                @event.Data.PaymentId,
                 @event.Data.DiscardedAt,
                 PaymentFailReason.Discarded
             ),
@@ -68,9 +65,8 @@ internal class TransformIntoPaymentFailed :
 
         var externalEvent = new EventEnvelope<PaymentFailed>(
             PaymentFailed.Create(
-                @event.Data.PaymentId,
-                payment!.OrderId,
-                payment.Amount,
+                @event.Data.OrderId,
+                null,
                 @event.Data.TimedOutAt,
                 PaymentFailReason.TimedOut
             ),

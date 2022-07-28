@@ -83,11 +83,11 @@ public class EventStoreDBSubscriptionToAll
                 // then we might get events that are from other module and we might not be able to deserialize them.
                 // In that case it's safe to ignore deserialization error.
                 // You may add more sophisticated logic checking if it should be ignored or not.
-                logger.LogWarning("Couldn't deserialize event with id: {EventId}", resolvedEvent.Event.EventId);
+                logger.LogWarning("Couldn't deserialize event with type: '{EventType}' id: '{EventId}'", resolvedEvent.Event.EventType, resolvedEvent.Event.EventId);
 
                 if (!subscriptionOptions.IgnoreDeserializationErrors)
                     throw new InvalidOperationException(
-                        $"Unable to deserialize event {resolvedEvent.Event.EventType} with id: {resolvedEvent.Event.EventId}"
+                        $"Unable to deserialize event type: '{resolvedEvent.Event.EventType}' with id: '{resolvedEvent.Event.EventId}'"
                     );
 
                 return;

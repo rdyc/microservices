@@ -7,6 +7,7 @@ using Store.Products.RegisteringProduct;
 using Store.Products.RemovingAttribute;
 using Store.Products.RemovingProduct;
 using Store.Products.SellingProduct;
+using Store.Products.ShippingProduct;
 using Store.Products.UpdatingPrice;
 using Store.Products.UpdatingStock;
 
@@ -111,6 +112,13 @@ public class ProductHistoryProjection
         var (id, qty) = eventEnvelope.Data;
 
         return ProductHistory.Create(id, $"Sold for {qty} item(s)", eventEnvelope.Metadata);
+    }
+    
+    public static ProductHistory Handle(EventEnvelope<ProductShipped> eventEnvelope)
+    {
+        var (id, qty) = eventEnvelope.Data;
+
+        return ProductHistory.Create(id, $"Shipped for {qty} item(s)", eventEnvelope.Metadata);
     }
 
     public static ProductHistory Handle(EventEnvelope<ProductRemoved> eventEnvelope) =>

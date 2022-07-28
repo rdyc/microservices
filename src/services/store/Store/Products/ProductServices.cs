@@ -7,7 +7,7 @@ using FW.Core.Queries;
 using FW.Core.Validation;
 using Microsoft.Extensions.DependencyInjection;
 using MongoDB.Driver;
-using Store.Orders.RecordingOrder;
+using Store.Orders.RecordingOrderPayment;
 using Store.Products.AddingAttribute;
 using Store.Products.GettingProductAtVersion;
 using Store.Products.GettingProductById;
@@ -18,8 +18,10 @@ using Store.Products.RegisteringProduct;
 using Store.Products.RemovingAttribute;
 using Store.Products.RemovingProduct;
 using Store.Products.SellingProduct;
+using Store.Products.ShippingProduct;
 using Store.Products.UpdatingPrice;
 using Store.Products.UpdatingStock;
+using Store.Shipments.SendingPackage;
 
 namespace Store.Products;
 
@@ -53,11 +55,13 @@ public static class ProductServices
             .AddCommandHandler<UpdateProductPrice, HandleUpdateProductPrice>()
             .AddCommandHandler<UpdateProductStock, HandleUpdateProductStock>()
             .AddCommandHandler<RemoveProduct, HandleRemoveProduct>()
+            .AddCommandHandler<ShipProduct, HandleShipProduct>()
             .AddCommandHandler<SellProduct, HandleSellProduct>();
 
     private static IServiceCollection AddEventHandlers(this IServiceCollection services) =>
         services
-            .AddEventHandler<EventEnvelope<OrderPaid>, HandleOrderPaid>();
+            .AddEventHandler<EventEnvelope<OrderPaymentRecorded>, HandleOrderPaid>()
+            .AddEventHandler<EventEnvelope<PackageWasSent>, HandlePackageShipment>();
 
     private static IServiceCollection AddQueryHandlers(this IServiceCollection services) =>
         services
@@ -98,10 +102,18 @@ public static class ProductServices
                         .Set(e => e.Position, view.Position)
                 )
                 .UpdateOn<ProductSold>(
-                    onGet: e => e.Id,
+                    onGet: e => e.ProductId,
                     onHandle: ProductShortInfoProjection.Handle,
                     onUpdate: (view, update) => update
                         .Set(e => e.Sold, view.Sold)
+                        .Set(e => e.Version, view.Version)
+                        .Set(e => e.Position, view.Position)
+                )
+                .UpdateOn<ProductShipped>(
+                    onGet: e => e.ProductId,
+                    onHandle: ProductShortInfoProjection.Handle,
+                    onUpdate: (view, update) => update
+                        .Set(e => e.Stock, view.Stock)
                         .Set(e => e.Version, view.Version)
                         .Set(e => e.Position, view.Position)
                 )
@@ -160,10 +172,18 @@ public static class ProductServices
                         .Set(e => e.Position, view.Position)
                 )
                 .UpdateOn<ProductSold>(
-                    onGet: e => e.Id,
+                    onGet: e => e.ProductId,
                     onHandle: ProductDetailProjection.Handle,
                     onUpdate: (view, update) => update
                         .Set(e => e.Sold, view.Sold)
+                        .Set(e => e.Version, view.Version)
+                        .Set(e => e.Position, view.Position)
+                )
+                .UpdateOn<ProductShipped>(
+                    onGet: e => e.ProductId,
+                    onHandle: ProductDetailProjection.Handle,
+                    onUpdate: (view, update) => update
+                        .Set(e => e.Stock, view.Stock)
                         .Set(e => e.Version, view.Version)
                         .Set(e => e.Position, view.Position)
                 )
@@ -184,6 +204,7 @@ public static class ProductServices
                 .AddOn<ProductPriceChanged>(ProductHistoryProjection.Handle)
                 .AddOn<ProductStockChanged>(ProductHistoryProjection.Handle)
                 .AddOn<ProductSold>(ProductHistoryProjection.Handle)
+                .AddOn<ProductShipped>(ProductHistoryProjection.Handle)
                 .AddOn<ProductRemoved>(ProductHistoryProjection.Handle)
             );
 }

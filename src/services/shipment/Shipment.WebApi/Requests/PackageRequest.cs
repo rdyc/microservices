@@ -5,7 +5,13 @@ public record PreparePackageRequest(
 );
 
 public record SendPackageRequest(
-    Guid OrderId
+    Guid OrderId,
+    IList<PackageItemRequest> Items
+);
+
+public record PackageItemRequest(
+    Guid ProductId,
+    int Quantity
 );
 
 public record DiscardPackageRequest(

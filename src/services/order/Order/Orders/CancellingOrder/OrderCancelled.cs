@@ -17,8 +17,6 @@ public record OrderCancelled(
             throw new ArgumentOutOfRangeException(nameof(orderId));
         if (paymentId == Guid.Empty)
             throw new ArgumentOutOfRangeException(nameof(paymentId));
-        if (orderCancellationReason == default)
-            throw new ArgumentOutOfRangeException(nameof(orderCancellationReason));
         if (cancelledAt == default)
             throw new ArgumentOutOfRangeException(nameof(cancelledAt));
 

@@ -8,6 +8,7 @@ using Store.Products.RegisteringProduct;
 using Store.Products.RemovingAttribute;
 using Store.Products.RemovingProduct;
 using Store.Products.SellingProduct;
+using Store.Products.ShippingProduct;
 using Store.Products.UpdatingPrice;
 using Store.Products.UpdatingStock;
 
@@ -120,7 +121,7 @@ public class ProductDetailProjection
 
         var (_, stock) = eventEnvelope.Data;
 
-        view.Stock = stock;
+        view.Stock += stock;
         view.Version = eventEnvelope.Metadata.StreamPosition;
         view.Position = eventEnvelope.Metadata.LogPosition;
     }
@@ -133,6 +134,18 @@ public class ProductDetailProjection
         var (_, quantity) = eventEnvelope.Data;
 
         view.Sold += quantity;
+        view.Version = eventEnvelope.Metadata.StreamPosition;
+        view.Position = eventEnvelope.Metadata.LogPosition;
+    }
+
+    public static void Handle(EventEnvelope<ProductShipped> eventEnvelope, ProductDetail view)
+    {
+        if (view.Position >= eventEnvelope.Metadata.LogPosition)
+            return;
+
+        var (_, quantity) = eventEnvelope.Data;
+
+        view.Stock += quantity;
         view.Version = eventEnvelope.Metadata.StreamPosition;
         view.Position = eventEnvelope.Metadata.LogPosition;
     }

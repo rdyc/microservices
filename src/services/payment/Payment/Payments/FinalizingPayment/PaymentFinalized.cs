@@ -1,60 +1,44 @@
 using FW.Core.Events;
-using FW.Core.MongoDB;
-using MongoDB.Driver;
 using Payment.Payments.CompletingPayment;
-using Payment.Payments.GettingPaymentById;
 
 namespace Payment.Payments.FinalizingPayment;
 
 public record PaymentFinalized(
-    Guid OrderId,
     Guid PaymentId,
-    decimal Amount,
+    Guid OrderId,
     DateTime FinalizedAt
 ) : IExternalEvent
 {
-    public static PaymentFinalized Create(Guid paymentId, Guid orderId, decimal amount, DateTime finalizedAt)
+    public static PaymentFinalized Create(Guid paymentId, Guid orderId, DateTime finalizedAt)
     {
         if (paymentId == Guid.Empty)
             throw new ArgumentNullException(nameof(paymentId));
         if (orderId == Guid.Empty)
             throw new ArgumentNullException(nameof(orderId));
-        if (amount <= 0)
-            throw new ArgumentOutOfRangeException(nameof(amount));
         if (finalizedAt == default)
             throw new InvalidOperationException(nameof(finalizedAt));
 
-        return new(paymentId, orderId, amount, finalizedAt);
+        return new(paymentId, orderId, finalizedAt);
     }
 }
 
 internal class TransformIntoPaymentFinalized : IEventHandler<EventEnvelope<PaymentCompleted>>
 {
-    private readonly IMongoCollection<PaymentDetails> collection;
     private readonly IEventBus eventBus;
 
-    public TransformIntoPaymentFinalized(
-        IMongoDatabase database,
-        IEventBus eventBus
-    )
+    public TransformIntoPaymentFinalized(IEventBus eventBus)
     {
-        var collectionName = MongoHelper.GetCollectionName<PaymentDetails>();
-        this.collection = database.GetCollection<PaymentDetails>(collectionName);
         this.eventBus = eventBus;
     }
 
     public async Task Handle(EventEnvelope<PaymentCompleted> @event, CancellationToken cancellationToken)
     {
-        var (paymentId, completedAt) = @event.Data;
-
-        var payment = await collection.Find(e => e.Id.Equals(paymentId))
-            .SingleAsync(cancellationToken);
+        var (paymentId, orderId, completedAt) = @event.Data;
 
         var externalEvent = new EventEnvelope<PaymentFinalized>(
             PaymentFinalized.Create(
                 paymentId,
-                payment!.OrderId,
-                payment.Amount,
+                orderId,
                 completedAt
             ),
             @event.Metadata

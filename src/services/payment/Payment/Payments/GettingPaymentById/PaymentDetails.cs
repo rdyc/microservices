@@ -54,7 +54,7 @@ public class PaymentDetailsProjection
             OrderId = orderId,
             Amount = amount,
             RequestedAt = requestedAt,
-            ExpiredAt = requestedAt.AddMinutes(5),
+            ExpiredAt = requestedAt.AddHours(6),
             Status = PaymentStatus.Pending,
             Version = eventEnvelope.Metadata.StreamPosition,
             Position = eventEnvelope.Metadata.LogPosition
@@ -66,7 +66,7 @@ public class PaymentDetailsProjection
         if (view.Position >= eventEnvelope.Metadata.LogPosition)
             return;
 
-        var (_, completedAt) = eventEnvelope.Data;
+        var (_, _, completedAt) = eventEnvelope.Data;
 
         view.CompletedAt = completedAt;
         view.Status = PaymentStatus.Completed;

@@ -1,12 +1,10 @@
-using FW.Core.Events;
-
 namespace Payment.Payments.TimingOutPayment;
 
 public record PaymentTimedOut(
     Guid PaymentId,
     Guid OrderId,
     DateTime TimedOutAt
-) : IExternalEvent
+)
 {
     public static PaymentTimedOut Create(Guid paymentId, Guid orderId, in DateTime timedOutAt)
     {

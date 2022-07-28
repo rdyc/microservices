@@ -6,6 +6,7 @@ using Store.Products.RegisteringProduct;
 using Store.Products.RemovingAttribute;
 using Store.Products.RemovingProduct;
 using Store.Products.SellingProduct;
+using Store.Products.ShippingProduct;
 using Store.Products.UpdatingPrice;
 using Store.Products.UpdatingStock;
 
@@ -19,6 +20,7 @@ public class Product : Aggregate
     public IList<ProductAttribute> Attributes { get; private set; } = default!;
     public ProductCurrency Currency { get; private set; } = default!;
     public decimal Price { get; private set; } = default!;
+    public int Sold { get; private set; } = default!;
     public int Stock { get; private set; } = default!;
     public ProductStatus Status { get; private set; } = default!;
 
@@ -38,37 +40,6 @@ public class Product : Aggregate
 
         Enqueue(evt);
         Apply(evt);
-    }
-
-    public override void When(object evt)
-    {
-        switch (evt)
-        {
-            case ProductRegistered registered:
-                Apply(registered);
-                return;
-            case ProductModified modified:
-                Apply(modified);
-                return;
-            case ProductAttributeAdded attributeAdded:
-                Apply(attributeAdded);
-                return;
-            case ProductAttributeRemoved attributeRemoved:
-                Apply(attributeRemoved);
-                return;
-            case ProductPriceChanged priceChanged:
-                Apply(priceChanged);
-                return;
-            case ProductStockChanged stockChanged:
-                Apply(stockChanged);
-                return;
-            case ProductSold productSold:
-                Apply(productSold);
-                return;
-            case ProductRemoved productRemoved:
-                Apply(productRemoved);
-                return;
-        }
     }
 
     public void Apply(ProductRegistered evt)
@@ -202,10 +173,10 @@ public class Product : Aggregate
     {
         Version++;
 
-        Stock = evt.Stock;
+        Stock += evt.Stock;
     }
 
-    public void Sold(int quantity)
+    public void SoldFor(int quantity)
     {
         if (Status == ProductStatus.Discontinue)
             throw new InvalidOperationException($"The product has discontinued");
@@ -216,7 +187,25 @@ public class Product : Aggregate
         Apply(evt);
     }
 
-    public void Apply(ProductSold evt)
+    public void Apply(ProductSold _)
+    {
+        Version++;
+
+        Sold++;
+    }
+
+    public void PullStock(int quantity)
+    {
+        if (Status == ProductStatus.Discontinue)
+            throw new InvalidOperationException($"The product has discontinued");
+
+        var evt = ProductShipped.Create(Id, quantity);
+
+        Enqueue(evt);
+        Apply(evt);
+    }
+
+    public void Apply(ProductShipped evt)
     {
         Version++;
 
@@ -239,6 +228,40 @@ public class Product : Aggregate
         Version++;
 
         Status = ProductStatus.Discontinue;
+    }
+
+    public override void When(object evt)
+    {
+        switch (evt)
+        {
+            case ProductRegistered registered:
+                Apply(registered);
+                return;
+            case ProductModified modified:
+                Apply(modified);
+                return;
+            case ProductAttributeAdded attributeAdded:
+                Apply(attributeAdded);
+                return;
+            case ProductAttributeRemoved attributeRemoved:
+                Apply(attributeRemoved);
+                return;
+            case ProductPriceChanged priceChanged:
+                Apply(priceChanged);
+                return;
+            case ProductStockChanged stockChanged:
+                Apply(stockChanged);
+                return;
+            case ProductSold productSold:
+                Apply(productSold);
+                return;
+            case ProductShipped productShipped:
+                Apply(productShipped);
+                return;
+            case ProductRemoved productRemoved:
+                Apply(productRemoved);
+                return;
+        }
     }
 
     private ProductAttribute? FindAttributeMatchingWith(Guid attributeId)

@@ -28,28 +28,6 @@ public class ShoppingCart : Aggregate
         Apply(@event);
     }
 
-    public override void When(object @event)
-    {
-        switch (@event)
-        {
-            case ShoppingCartOpened cartOpened:
-                Apply(cartOpened);
-                return;
-            case ProductCartAdded productAdded:
-                Apply(productAdded);
-                return;
-            case ProductCartRemoved productRemoved:
-                Apply(productRemoved);
-                return;
-            case ShoppingCartConfirmed cartConfirmed:
-                Apply(cartConfirmed);
-                return;
-            case ShoppingCartCanceled cartCanceled:
-                Apply(cartCanceled);
-                return;
-        }
-    }
-
     public static ShoppingCart Open(Guid cartId, Guid clientId)
         => new(cartId, clientId, ShoppingCartStatus.Pending);
 
@@ -170,6 +148,28 @@ public class ShoppingCart : Aggregate
         Version++;
 
         Status = ShoppingCartStatus.Canceled;
+    }
+
+    public override void When(object @event)
+    {
+        switch (@event)
+        {
+            case ShoppingCartOpened cartOpened:
+                Apply(cartOpened);
+                return;
+            case ProductCartAdded productAdded:
+                Apply(productAdded);
+                return;
+            case ProductCartRemoved productRemoved:
+                Apply(productRemoved);
+                return;
+            case ShoppingCartConfirmed cartConfirmed:
+                Apply(cartConfirmed);
+                return;
+            case ShoppingCartCanceled cartCanceled:
+                Apply(cartCanceled);
+                return;
+        }
     }
 
     private ShoppingCartProduct? FindProductMatchingWith(ShoppingCartProduct product)

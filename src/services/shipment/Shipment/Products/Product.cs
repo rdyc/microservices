@@ -69,7 +69,19 @@ public class ProductProjection
 
         var (_, stock) = eventEnvelope.Data;
 
-        view.Stock = stock;
+        view.Stock += stock;
+        view.Version = eventEnvelope.Metadata.StreamPosition;
+        view.Position = eventEnvelope.Metadata.LogPosition;
+    }
+
+    public static void Handle(EventEnvelope<ProductShipped> eventEnvelope, Product view)
+    {
+        if (view.Position >= eventEnvelope.Metadata.LogPosition)
+            return;
+
+        var (_, quantity) = eventEnvelope.Data;
+
+        view.Stock -= quantity;
         view.Version = eventEnvelope.Metadata.StreamPosition;
         view.Position = eventEnvelope.Metadata.LogPosition;
     }

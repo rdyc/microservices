@@ -47,7 +47,7 @@ public static class PackageServices
             .Projection<PackageShortInfo>(builder => builder
                 .AddOn<PackagePrepared>(PackageShortInfoProjection.Handle)
                 .UpdateOn<PackageWasSent>(
-                    onGet: e => e.OrderId,
+                    onGet: e => e.PackageId,
                     onHandle: PackageShortInfoProjection.Handle,
                     onUpdate: (view, update) => update
                         .Set(e => e.Status, view.Status)
@@ -55,7 +55,7 @@ public static class PackageServices
                         .Set(e => e.Position, view.Position)
                 )
                 .UpdateOn<ProductWasOutOfStock>(
-                    onGet: e => e.OrderId,
+                    onGet: e => e.PackageId,
                     onHandle: PackageShortInfoProjection.Handle,
                     onUpdate: (view, update) => update
                         .Set(e => e.Status, view.Status)
@@ -66,7 +66,7 @@ public static class PackageServices
             .Projection<PackageDetails>(builder => builder
                 .AddOn<PackagePrepared>(PackageDetailsProjection.Handle)
                 .UpdateOn<PackageWasSent>(
-                    onGet: e => e.OrderId,
+                    onGet: e => e.PackageId,
                     onHandle: PackageDetailsProjection.Handle,
                     onUpdate: (view, update) => update
                         .Set(e => e.SentAt, view.SentAt)
@@ -75,7 +75,7 @@ public static class PackageServices
                         .Set(e => e.Position, view.Position)
                 )
                 .UpdateOn<ProductWasOutOfStock>(
-                    onGet: e => e.OrderId,
+                    onGet: e => e.PackageId,
                     onHandle: PackageDetailsProjection.Handle,
                     onUpdate: (view, update) => update
                         .Set(e => e.CheckedAt, view.CheckedAt)

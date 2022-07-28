@@ -13,30 +13,37 @@ public interface IExternalCommandBus
 
 public class ExternalCommandBus : IExternalCommandBus
 {
-    public Task Post<T>(string url, string path, T command, CancellationToken cancellationToken = default) where T : ICommand
+    public async Task Post<T>(string url, string path, T command, CancellationToken cancellationToken) where T : ICommand
     {
-        var client = new RestClient(url);
-        var request = new RestRequest(path, Method.Post);
-        request.AddBody(command, ContentType.Json);
+        try
+        {
+            var client = new RestClient(url);
+            var request = new RestRequest(path, Method.Post);
+            request.AddBody(command, ContentType.Json);
 
-        return client.PostAsync<dynamic>(request, cancellationToken);
+            await client.PostAsync<dynamic>(request, cancellationToken);   
+        }
+        catch (Exception ex)
+        {
+            await Task.CompletedTask;
+        }
     }
 
-    public Task Put<T>(string url, string path, T command, CancellationToken cancellationToken = default) where T : ICommand
+    public async Task Put<T>(string url, string path, T command, CancellationToken cancellationToken) where T : ICommand
     {
         var client = new RestClient(url);
         var request = new RestRequest(path, Method.Put);
         request.AddBody(command, ContentType.Json);
 
-        return client.PutAsync<dynamic>(request, cancellationToken);
+        await client.PutAsync<dynamic>(request, cancellationToken);
     }
 
-    public Task Delete<T>(string url, string path, T command, CancellationToken cancellationToken = default) where T : ICommand
+    public async Task Delete<T>(string url, string path, T command, CancellationToken cancellationToken) where T : ICommand
     {
         var client = new RestClient(url);
         var request = new RestRequest(path, Method.Delete);
         request.AddBody(command, ContentType.Json);
 
-        return client.DeleteAsync<dynamic>(request, cancellationToken);
+        await client.DeleteAsync<dynamic>(request, cancellationToken);
     }
 }

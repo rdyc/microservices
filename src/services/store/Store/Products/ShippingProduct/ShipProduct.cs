@@ -3,23 +3,23 @@ using FW.Core.EventStoreDB.OptimisticConcurrency;
 using FW.Core.EventStoreDB.Repository;
 using MediatR;
 
-namespace Store.Products.SellingProduct;
+namespace Store.Products.ShippingProduct;
 
-public record SellProduct(
+public record ShipProduct(
     Guid ProductId,
     int Quantity
 ) : ICommand
 {
-    public static SellProduct Create(Guid productId, int quantity)
+    public static ShipProduct Create(Guid productId, int quantity)
         => new(productId, quantity);
 }
 
-internal class HandleSellProduct : ICommandHandler<SellProduct>
+internal class HandleShipProduct : ICommandHandler<ShipProduct>
 {
     private readonly IEventStoreDBRepository<Product> repository;
     private readonly IEventStoreDBAppendScope scope;
 
-    public HandleSellProduct(
+    public HandleShipProduct(
         IEventStoreDBRepository<Product> repository,
         IEventStoreDBAppendScope scope)
     {
@@ -27,14 +27,14 @@ internal class HandleSellProduct : ICommandHandler<SellProduct>
         this.scope = scope;
     }
 
-    public async Task<Unit> Handle(SellProduct request, CancellationToken cancellationToken)
+    public async Task<Unit> Handle(ShipProduct request, CancellationToken cancellationToken)
     {
         var (productId, quantity) = request;
 
         await scope.Do((expectedVersion, eventMetadata) =>
             repository.GetAndUpdate(
                 productId,
-                (product) => product.SoldFor(quantity),
+                (product) => product.PullStock(quantity),
                 expectedVersion,
                 eventMetadata,
                 cancellationToken

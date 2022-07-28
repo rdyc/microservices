@@ -85,8 +85,9 @@ public class AddProjection<TDocument, TEvent> :
     public async Task Handle(EventEnvelope<TEvent> eventEnvelope, CancellationToken cancellationToken)
     {
         var view = onCreate(eventEnvelope);
+        var filter = Builders<TDocument>.Filter.Eq(doc => doc.Id, view.Id);
 
-        await collection.InsertOneAsync(view, default, cancellationToken);
+        await collection.ReplaceOneAsync(filter, view, new ReplaceOptions { IsUpsert = true }, cancellationToken);
     }
 }
 

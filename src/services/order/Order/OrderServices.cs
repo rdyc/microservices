@@ -35,5 +35,4 @@ public class ExternalServicesConfig
 {
     public static string ConfigName = "ExternalServices";
     public string? PaymentsUrl { get; set; }
-    public string? ShipmentsUrl { get; set; }
 }

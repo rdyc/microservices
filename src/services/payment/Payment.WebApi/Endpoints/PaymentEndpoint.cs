@@ -105,7 +105,7 @@ public static class PaymentEndpoint
     {
         var log = logger.CreateLogger<Program>();
         var task = command.SendAsync(
-            DiscardPayment.Create(paymentId, request.Reason, DateTime.UtcNow), cancellationToken);
+            DiscardPayment.Create(paymentId, request.DiscardReason, DateTime.UtcNow), cancellationToken);
 
         return await WithCancellation.TryExecute(
             task: task,

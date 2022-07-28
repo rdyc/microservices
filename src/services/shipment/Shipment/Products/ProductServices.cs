@@ -31,6 +31,14 @@ public static class ProductServices
                         .Set(e => e.Version, view.Version)
                         .Set(e => e.Position, view.Position)
                 )
+                .UpdateOn<ProductShipped>(
+                    onGet: e => e.ProductId,
+                    onHandle: ProductProjection.Handle,
+                    onUpdate: (view, update) => update
+                        .Set(e => e.Stock, view.Stock)
+                        .Set(e => e.Version, view.Version)
+                        .Set(e => e.Position, view.Position)
+                )
                 .UpdateOn<ProductRemoved>(
                     onGet: e => e.Id,
                     onHandle: ProductProjection.Handle,

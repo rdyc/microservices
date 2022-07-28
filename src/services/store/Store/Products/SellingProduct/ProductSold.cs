@@ -1,10 +1,10 @@
 namespace Store.Products.SellingProduct;
 
 public record ProductSold(
-    Guid Id,
+    Guid ProductId,
     int Quantity
 )
 {
-    public static ProductSold Create(Guid id, int quantity) =>
-        new(id, quantity);
+    public static ProductSold Create(Guid productId, int quantity) =>
+        new(productId, quantity);
 }
