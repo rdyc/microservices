@@ -66,7 +66,7 @@ public class AttributeHistoryProjection
     }
 
     public static History Handle(EventEnvelope<AttributeRemoved> eventEnvelope) =>
-        History.Create(eventEnvelope.Data.Id, "Removed", eventEnvelope.Metadata);
+        History.Create(eventEnvelope.Data.AttributeId, "Removed", eventEnvelope.Metadata);
 }
 
 public class CurrencyHistoryProjection
@@ -94,5 +94,5 @@ public class CurrencyHistoryProjection
     }
 
     public static History Handle(EventEnvelope<CurrencyRemoved> eventEnvelope) =>
-        History.Create(eventEnvelope.Data.Id, "Removed", eventEnvelope.Metadata);
+        History.Create(eventEnvelope.Data.CurrencyId, "Removed", eventEnvelope.Metadata);
 }

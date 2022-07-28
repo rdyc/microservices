@@ -2,8 +2,8 @@ using FW.Core.Events;
 
 namespace Lookup.Attributes.RemovingAttribute;
 
-public record AttributeRemoved(Guid Id) : IExternalEvent
+public record AttributeRemoved(Guid AttributeId) : IExternalEvent
 {
-    public static AttributeRemoved Create(Guid id) =>
-        new(id);
+    public static AttributeRemoved Create(Guid attributeId) =>
+        new(attributeId);
 }

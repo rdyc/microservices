@@ -15,18 +15,11 @@ public class ExternalCommandBus : IExternalCommandBus
 {
     public async Task Post<T>(string url, string path, T command, CancellationToken cancellationToken) where T : ICommand
     {
-        try
-        {
-            var client = new RestClient(url);
-            var request = new RestRequest(path, Method.Post);
-            request.AddBody(command, ContentType.Json);
+        var client = new RestClient(url);
+        var request = new RestRequest(path, Method.Post);
+        request.AddBody(command, ContentType.Json);
 
-            await client.PostAsync<dynamic>(request, cancellationToken);   
-        }
-        catch (Exception ex)
-        {
-            await Task.CompletedTask;
-        }
+        await client.PostAsync<dynamic>(request, cancellationToken);
     }
 
     public async Task Put<T>(string url, string path, T command, CancellationToken cancellationToken) where T : ICommand

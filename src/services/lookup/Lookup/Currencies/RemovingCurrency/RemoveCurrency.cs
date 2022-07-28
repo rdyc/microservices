@@ -13,7 +13,8 @@ public record RemoveCurrency(
     Guid Id
 ) : ICurrency, ICommand
 {
-    public static RemoveCurrency Create(Guid id) => new(id);
+    public static RemoveCurrency Create(Guid id) =>
+        new(id);
 }
 
 internal class ValidateRemoveCurrency : AbstractValidator<RemoveCurrency>

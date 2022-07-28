@@ -122,5 +122,5 @@ public class ProductHistoryProjection
     }
 
     public static ProductHistory Handle(EventEnvelope<ProductRemoved> eventEnvelope) =>
-        ProductHistory.Create(eventEnvelope.Data.Id, "Removed", eventEnvelope.Metadata);
+        ProductHistory.Create(eventEnvelope.Data.ProductId, "Removed", eventEnvelope.Metadata);
 }

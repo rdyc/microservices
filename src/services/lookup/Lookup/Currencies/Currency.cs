@@ -12,31 +12,7 @@ public class Currency : Aggregate
     public string Symbol { get; private set; } = default!;
     public LookupStatus Status { get; private set; } = default!;
 
-    public static Currency Register(Guid? id, string name, string code, string symbol, LookupStatus status)
-    {
-        if (id is null)
-            throw new ArgumentNullException(nameof(id));
-
-        return new Currency(id.Value, name, code, symbol, status);
-    }
-
     private Currency() { }
-
-    public override void When(object evt)
-    {
-        switch (evt)
-        {
-            case CurrencyRegistered currency:
-                Apply(currency);
-                return;
-            case CurrencyModified currency:
-                Apply(currency);
-                return;
-            case CurrencyRemoved currency:
-                Apply(currency);
-                return;
-        }
-    }
 
     private Currency(Guid id, string name, string code, string symbol, LookupStatus status)
     {
@@ -46,9 +22,12 @@ public class Currency : Aggregate
         Apply(evt);
     }
 
+    public static Currency Register(Guid id, string name, string code, string symbol, LookupStatus status) =>
+        new Currency(id, name, code, symbol, status);
+
     public void Apply(CurrencyRegistered evt)
     {
-        Id = evt.Id;
+        Id = evt.CurrencyId;
         Name = evt.Name;
         Code = evt.Code;
         Symbol = evt.Symbol;
@@ -91,5 +70,21 @@ public class Currency : Aggregate
         Version++;
 
         Status = LookupStatus.Removed;
+    }
+
+    public override void When(object evt)
+    {
+        switch (evt)
+        {
+            case CurrencyRegistered currency:
+                Apply(currency);
+                return;
+            case CurrencyModified currency:
+                Apply(currency);
+                return;
+            case CurrencyRemoved currency:
+                Apply(currency);
+                return;
+        }
     }
 }

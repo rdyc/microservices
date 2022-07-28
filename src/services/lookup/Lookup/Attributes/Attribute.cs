@@ -12,14 +12,6 @@ public class Attribute : Aggregate
     public string Unit { get; private set; } = default!;
     public LookupStatus Status { get; private set; } = default!;
 
-    public static Attribute Register(Guid? id, string name, AttributeType type, string unit, LookupStatus status)
-    {
-        if (id is null)
-            throw new ArgumentNullException(nameof(id));
-
-        return new Attribute(id.Value, name, type, unit, status);
-    }
-
     private Attribute() { }
 
     private Attribute(Guid id, string name, AttributeType code, string unit, LookupStatus status)
@@ -30,25 +22,12 @@ public class Attribute : Aggregate
         Apply(evt);
     }
 
-    public override void When(object evt)
-    {
-        switch (evt)
-        {
-            case AttributeRegistered registered:
-                Apply(registered);
-                return;
-            case AttributeModified modified:
-                Apply(modified);
-                return;
-            case AttributeRemoved removed:
-                Apply(removed);
-                return;
-        }
-    }
+    public static Attribute Register(Guid id, string name, AttributeType type, string unit, LookupStatus status) =>
+        new Attribute(id, name, type, unit, status);
 
     public void Apply(AttributeRegistered evt)
     {
-        Id = evt.Id;
+        Id = evt.AttributeId;
         Name = evt.Name;
         Type = evt.Type;
         Unit = evt.Unit;
@@ -91,5 +70,21 @@ public class Attribute : Aggregate
         Version++;
 
         Status = LookupStatus.Removed;
+    }
+
+    public override void When(object evt)
+    {
+        switch (evt)
+        {
+            case AttributeRegistered registered:
+                Apply(registered);
+                return;
+            case AttributeModified modified:
+                Apply(modified);
+                return;
+            case AttributeRemoved removed:
+                Apply(removed);
+                return;
+        }
     }
 }

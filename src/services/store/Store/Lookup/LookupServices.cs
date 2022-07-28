@@ -17,7 +17,7 @@ internal static class LookupServices
             .Projection<Attribute>(builder => builder
                 .AddOn<AttributeRegistered>(AttributeProjection.Handle)
                 .UpdateOn<AttributeModified>(
-                    onGet: e => e.Id,
+                    onGet: e => e.AttributeId,
                     onHandle: AttributeProjection.Handle,
                     onUpdate: (view, update) => update
                         .Set(e => e.Name, view.Name)
@@ -27,7 +27,7 @@ internal static class LookupServices
                         .Set(e => e.Position, view.Position)
                 )
                 .UpdateOn<AttributeRemoved>(
-                    onGet: e => e.Id,
+                    onGet: e => e.AttributeId,
                     onHandle: AttributeProjection.Handle,
                     onUpdate: (view, update) => update
                         .Set(e => e.Status, view.Status)
@@ -38,7 +38,7 @@ internal static class LookupServices
             .Projection<Currency>(builder => builder
                 .AddOn<CurrencyRegistered>(CurrencyProjection.Handle)
                 .UpdateOn<CurrencyModified>(
-                    onGet: e => e.Id,
+                    onGet: e => e.CurrencyId,
                     onHandle: CurrencyProjection.Handle,
                     onUpdate: (view, update) => update
                         .Set(e => e.Name, view.Name)
@@ -48,7 +48,7 @@ internal static class LookupServices
                         .Set(e => e.Position, view.Position)
                 )
                 .UpdateOn<CurrencyRemoved>(
-                    onGet: e => e.Id,
+                    onGet: e => e.CurrencyId,
                     onHandle: CurrencyProjection.Handle,
                     onUpdate: (view, update) => update
                         .Set(e => e.Status, view.Status)

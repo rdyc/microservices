@@ -60,11 +60,11 @@ internal class HandleRegisterCurrency : ICommandHandler<RegisterCurrency>
 
     public async Task<Unit> Handle(RegisterCurrency request, CancellationToken cancellationToken)
     {
-        var (currencyId, name, code, symbol, status) = request;
+        var (id, name, code, symbol, status) = request;
 
         await scope.Do((_, eventMetadata) =>
             repository.Add(
-                Currency.Register(currencyId, name, code, symbol, status),
+                Currency.Register(id, name, code, symbol, status),
                 eventMetadata,
                 cancellationToken
             )

@@ -27,10 +27,7 @@ internal class HandlePackageShipment : IEventHandler<EventEnvelope<PackageWasSen
 
     public async Task Handle(EventEnvelope<PackageWasSent> @event, CancellationToken cancellationToken)
     {
-        var items = new List<PackageItem>();
-        items.Add(new PackageItem(Guid.Parse("7d348ef4-8d90-40db-8bf5-40bf2122dac1"), 2));
-        
-        foreach (var product in items)
+        foreach (var product in @event.Data.Items)
         {
             await commandBus.SendAsync(
                 ShipProduct.Create(product.ProductId, product.Quantity),

@@ -4,7 +4,7 @@ using Store.Lookup.Attributes;
 namespace Store.Products.RemovingAttribute;
 
 public record ProductAttributeRemoved(
-    Guid Id,
+    Guid ProductId,
     Guid AttributeId,
     string Name,
     AttributeType Type,

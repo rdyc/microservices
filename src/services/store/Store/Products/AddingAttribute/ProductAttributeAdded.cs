@@ -4,7 +4,7 @@ using Store.Lookup.Attributes;
 namespace Store.Products.AddingAttribute;
 
 public record ProductAttributeAdded(
-    Guid Id,
+    Guid ProductId,
     Guid AttributeId,
     string Name,
     AttributeType Type,

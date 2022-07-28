@@ -3,7 +3,7 @@ using FW.Core.Events;
 namespace Store.Products.RegisteringProduct;
 
 public record ProductRegistered(
-    Guid Id,
+    Guid ProductId,
     string Sku,
     string Name,
     string Description,
@@ -11,10 +11,10 @@ public record ProductRegistered(
 ) : IExternalEvent
 {
     public static ProductRegistered Create(
-        Guid id,
+        Guid productId,
         string sku,
         string name,
         string description,
         ProductStatus status
-    ) => new(id, sku, name, description, status);
+    ) => new(productId, sku, name, description, status);
 }

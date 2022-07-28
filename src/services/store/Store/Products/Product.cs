@@ -44,7 +44,7 @@ public class Product : Aggregate
 
     public void Apply(ProductRegistered evt)
     {
-        Id = evt.Id;
+        Id = evt.ProductId;
         Sku = evt.Sku;
         Name = evt.Name;
         Description = evt.Description;

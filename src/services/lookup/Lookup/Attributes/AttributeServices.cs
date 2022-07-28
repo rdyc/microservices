@@ -48,7 +48,7 @@ internal static class AttributeServices
             .Projection<AttributeShortInfo>(builder => builder
                 .AddOn<AttributeRegistered>(AttributeShortInfoProjection.Handle)
                 .UpdateOn<AttributeModified>(
-                    onGet: e => e.Id,
+                    onGet: e => e.AttributeId,
                     onHandle: AttributeShortInfoProjection.Handle,
                     onUpdate: (view, update) => update
                         .Set(e => e.Name, view.Name)
@@ -58,7 +58,7 @@ internal static class AttributeServices
                         .Set(e => e.Position, view.Position)
                 )
                 .UpdateOn<AttributeRemoved>(
-                    onGet: e => e.Id,
+                    onGet: e => e.AttributeId,
                     onHandle: AttributeShortInfoProjection.Handle,
                     onUpdate: (view, update) => update
                         .Set(e => e.Status, view.Status)

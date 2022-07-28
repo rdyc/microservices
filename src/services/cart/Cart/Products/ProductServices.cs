@@ -14,7 +14,7 @@ public static class ProductServices
             .Projection<Product>(builder => builder
                 .AddOn<ProductRegistered>(ProductProjection.Handle)
                 .UpdateOn<ProductModified>(
-                    onGet: e => e.Id,
+                    onGet: e => e.ProductId,
                     onHandle: ProductProjection.Handle,
                     onUpdate: (view, update) => update
                         .Set(e => e.Sku, view.Sku)
@@ -24,7 +24,7 @@ public static class ProductServices
                         .Set(e => e.Position, view.Position)
                 )
                 .UpdateOn<ProductAttributeAdded>(
-                    onGet: e => e.Id,
+                    onGet: e => e.ProductId,
                     onHandle: ProductProjection.Handle,
                     onUpdate: (view, update) => update
                         .Set(e => e.Attributes, view.Attributes)
@@ -32,7 +32,7 @@ public static class ProductServices
                         .Set(e => e.Position, view.Position)
                 )
                 .UpdateOn<ProductAttributeRemoved>(
-                    onGet: e => e.Id,
+                    onGet: e => e.ProductId,
                     onHandle: ProductProjection.Handle,
                     onUpdate: (view, update) => update
                         .Set(e => e.Attributes, view.Attributes)
@@ -40,7 +40,7 @@ public static class ProductServices
                         .Set(e => e.Position, view.Position)
                 )
                 .UpdateOn<ProductPriceChanged>(
-                    onGet: e => e.Id,
+                    onGet: e => e.ProductId,
                     onHandle: ProductProjection.Handle,
                     onUpdate: (view, update) => update
                         .Set(e => e.Currency, view.Currency)
@@ -49,7 +49,7 @@ public static class ProductServices
                         .Set(e => e.Position, view.Position)
                 )
                 .UpdateOn<ProductStockChanged>(
-                    onGet: e => e.Id,
+                    onGet: e => e.ProductId,
                     onHandle: ProductProjection.Handle,
                     onUpdate: (view, update) => update
                         .Set(e => e.Stock, view.Stock)
@@ -65,7 +65,7 @@ public static class ProductServices
                         .Set(e => e.Position, view.Position)
                 )
                 .UpdateOn<ProductRemoved>(
-                    onGet: e => e.Id,
+                    onGet: e => e.ProductId,
                     onHandle: ProductProjection.Handle,
                     onUpdate: (view, update) => update
                         .Set(e => e.Status, view.Status)

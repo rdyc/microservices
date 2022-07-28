@@ -3,10 +3,12 @@ using FW.Core.Events;
 namespace Store.Products.UpdatingStock;
 
 public record ProductStockChanged(
-    Guid Id,
+    Guid ProductId,
     int Stock
 ) : IExternalEvent
 {
-    public static ProductStockChanged Create(Guid id, int stock) =>
-        new(id, stock);
+    public static ProductStockChanged Create(
+        Guid productId,
+        int stock
+    ) => new(productId, stock);
 }
