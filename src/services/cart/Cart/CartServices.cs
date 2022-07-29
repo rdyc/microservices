@@ -1,5 +1,5 @@
 using Cart.Products;
-using Carts.ShoppingCarts;
+using Cart.Carts;
 using EventStore.Client;
 using FW.Core.EventStoreDB;
 using FW.Core.EventStoreDB.Subscriptions;

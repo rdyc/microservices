@@ -1,11 +1,11 @@
-using Order.ShoppingCarts.FinalizingCart;
+using Order.Carts;
 
 namespace Order.Orders.InitializingOrder;
 
 public record OrderInitialized(
     Guid OrderId,
     Guid ClientId,
-    IEnumerable<ShoppingCartProduct> Products,
+    IEnumerable<CartProduct> Products,
     decimal TotalPrice,
     DateTime InitializedAt
 )
@@ -13,7 +13,7 @@ public record OrderInitialized(
     public static OrderInitialized Create(
         Guid orderId,
         Guid clientId,
-        IEnumerable<ShoppingCartProduct> products,
+        IEnumerable<CartProduct> products,
         decimal totalPrice,
         DateTime initializedAt)
     {

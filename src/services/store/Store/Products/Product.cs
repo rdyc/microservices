@@ -26,13 +26,8 @@ public class Product : Aggregate
 
     private Product() { }
 
-    public static Product Register(Guid? id, string sku, string name, string description)
-    {
-        if (id is null)
-            throw new ArgumentNullException(nameof(id));
-
-        return new Product(id.Value, sku, name, description, ProductStatus.Available);
-    }
+    public static Product Register(Guid id, string sku, string name, string description) =>
+        new(id, sku, name, description, ProductStatus.Available);
 
     private Product(Guid id, string sku, string name, string description, ProductStatus status)
     {
@@ -187,11 +182,11 @@ public class Product : Aggregate
         Apply(evt);
     }
 
-    public void Apply(ProductSold _)
+    public void Apply(ProductSold @event)
     {
         Version++;
 
-        Sold++;
+        Sold += @event.Quantity;
     }
 
     public void PullStock(int quantity)

@@ -1,3 +1,11 @@
+using Cart.Products.AddingAttribute;
+using Cart.Products.ModifyingProduct;
+using Cart.Products.RegisteringProduct;
+using Cart.Products.RemovingAttribute;
+using Cart.Products.RemovingProduct;
+using Cart.Products.ShippingProduct;
+using Cart.Products.UpdatingPrice;
+using Cart.Products.UpdatingStock;
 using FW.Core.MongoDB.Projections;
 using Microsoft.Extensions.DependencyInjection;
 using MongoDB.Driver;

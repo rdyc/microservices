@@ -1,6 +1,7 @@
 using FW.Core.Events;
 using FW.Core.MongoDB;
 using MongoDB.Bson.Serialization.Attributes;
+using Shipment.Orders.RecordingOrderPayment;
 
 namespace Shipment.Orders.GettingOrders;
 
@@ -47,7 +48,7 @@ internal static class OrderProjection
 {
     public static Order Handle(EventEnvelope<OrderPaymentRecorded> eventEnvelope)
     {
-        var (clientId, orderId, paymentId, products, amount, recordedAt) = eventEnvelope.Data;
+        var (clientId, orderId, paymentId, products, _, recordedAt) = eventEnvelope.Data;
 
         return new Order
         {

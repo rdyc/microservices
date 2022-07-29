@@ -20,7 +20,7 @@ using Order.Payments.FinalizingPayment;
 using Order.Shipments.DiscardingPackage;
 using Order.Shipments.RequestingPackage;
 using Order.Shipments.SendingPackage;
-using Order.ShoppingCarts.FinalizingCart;
+using Order.Carts.FinalizingCart;
 
 namespace Order.Orders;
 
@@ -51,7 +51,7 @@ internal static class OrderServices
 
     private static IServiceCollection AddEventHandlers(this IServiceCollection services) =>
         services
-            .AddEventHandler<ShoppingCartFinalized, OrderSaga>()
+            .AddEventHandler<CartFinalized, OrderSaga>()
             .AddEventHandler<OrderInitialized, OrderSaga>()
             .AddEventHandler<PaymentFinalized, OrderSaga>()
             .AddEventHandler<PaymentFailed, OrderSaga>()

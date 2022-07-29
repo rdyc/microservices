@@ -1,13 +1,12 @@
-using Cart.ShoppingCarts;
-using Cart.ShoppingCarts.AddingProduct;
-using Cart.ShoppingCarts.CancelingCart;
-using Cart.ShoppingCarts.ConfirmingCart;
-using Cart.ShoppingCarts.GettingCartAtVersion;
-using Cart.ShoppingCarts.GettingCartById;
-using Cart.ShoppingCarts.GettingCartHistory;
-using Cart.ShoppingCarts.GettingCarts;
-using Cart.ShoppingCarts.OpeningCart;
-using Cart.ShoppingCarts.RemovingProduct;
+using Cart.Carts.AddingProduct;
+using Cart.Carts.CancelingCart;
+using Cart.Carts.ConfirmingCart;
+using Cart.Carts.GettingCartAtVersion;
+using Cart.Carts.GettingCartById;
+using Cart.Carts.GettingCartHistory;
+using Cart.Carts.GettingCarts;
+using Cart.Carts.OpeningCart;
+using Cart.Carts.RemovingProduct;
 using Cart.WebApi.Requests;
 using FW.Core.Commands;
 using FW.Core.Pagination;
@@ -29,7 +28,7 @@ internal static class CartEndpoint
         CancellationToken cancellationToken)
     {
         var log = logger.CreateLogger<Program>();
-        var task = query.SendAsync<GetCarts, IListPaged<ShoppingCartShortInfo>>(
+        var task = query.SendAsync<GetCarts, IListPaged<CartShortInfo>>(
             GetCarts.Create(page, size), cancellationToken);
 
         return await WithCancellation.TryExecute(
@@ -48,7 +47,7 @@ internal static class CartEndpoint
         CancellationToken cancellationToken)
     {
         var log = logger.CreateLogger<Program>();
-        var task = query.SendAsync<GetCartById, ShoppingCartDetails>(
+        var task = query.SendAsync<GetCartById, CartDetails>(
             GetCartById.Create(cartId), cancellationToken);
 
         return await WithCancellation.TryExecute(
@@ -68,7 +67,7 @@ internal static class CartEndpoint
         CancellationToken cancellationToken)
     {
         var log = logger.CreateLogger<Program>();
-        var task = query.SendAsync<GetCartAtVersion, ShoppingCart>(
+        var task = query.SendAsync<GetCartAtVersion, Carts.Cart>(
             GetCartAtVersion.Create(cartId, version), cancellationToken);
 
         return await WithCancellation.TryExecute(
@@ -89,7 +88,7 @@ internal static class CartEndpoint
         CancellationToken cancellationToken)
     {
         var log = logger.CreateLogger<Program>();
-        var task = query.SendAsync<GetCartHistory, IListPaged<ShoppingCartHistory>>(
+        var task = query.SendAsync<GetCartHistory, IListPaged<CartHistory>>(
             GetCartHistory.Create(cartId, page, size), cancellationToken);
 
         return await WithCancellation.TryExecute(
@@ -102,14 +101,14 @@ internal static class CartEndpoint
 
     [SwaggerOperation(Summary = "Open a new cart", OperationId = "open", Tags = new[] { "Cart" })]
     internal static async Task<IResult> Open(
-        [FromBody] OpenShoppingCartRequest request,
+        [FromBody] OpenCartRequest request,
         [FromServices] ICommandBus command,
         [FromServices] ILoggerFactory logger,
         CancellationToken cancellationToken)
     {
         var log = logger.CreateLogger<Program>();
         var cartId = Guid.NewGuid();
-        var task = command.SendAsync(OpenShoppingCart.Create(cartId, request.ClientId), cancellationToken);
+        var task = command.SendAsync(OpenCart.Create(cartId, request.ClientId), cancellationToken);
 
         return await WithCancellation.TryExecute(
             task: task,
@@ -166,7 +165,7 @@ internal static class CartEndpoint
         CancellationToken cancellationToken)
     {
         var log = logger.CreateLogger<Program>();
-        var task = command.SendAsync(CancelShoppingCart.Create(cartId), cancellationToken);
+        var task = command.SendAsync(CancelCart.Create(cartId), cancellationToken);
 
         return await WithCancellation.TryExecute(
             task: task,
@@ -184,7 +183,7 @@ internal static class CartEndpoint
         CancellationToken cancellationToken)
     {
         var log = logger.CreateLogger<Program>();
-        var task = command.SendAsync(ConfirmShoppingCart.Create(cartId), cancellationToken);
+        var task = command.SendAsync(ConfirmCart.Create(cartId), cancellationToken);
 
         return await WithCancellation.TryExecute(
             task: task,

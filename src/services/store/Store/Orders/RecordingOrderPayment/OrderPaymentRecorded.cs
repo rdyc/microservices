@@ -1,38 +1,24 @@
 using FW.Core.Commands;
 using FW.Core.Events;
 using Store.Products.SellingProduct;
+using Store.Carts;
 
 namespace Store.Orders.RecordingOrderPayment;
 
 public record OrderPaymentRecorded(
+    Guid ClientId,
     Guid OrderId,
     Guid PaymentId,
-    IEnumerable<ShoppingCartProduct> Products,
-    decimal Amount,
+    IEnumerable<CartProduct> Products,
+    decimal TotalPrice,
     DateTime RecordedAt
 );
 
-public record ShoppingCartProduct(
-    Guid ProductId,
-    string Sku,
-    string Name,
-    int Quantity,
-    ShoppingCartCurrency Currency,
-    decimal Price
-);
-
-public record ShoppingCartCurrency(
-    Guid Id,
-    string Name,
-    string Code,
-    string Symbol
-);
-
-internal class HandleOrderPaid : IEventHandler<EventEnvelope<OrderPaymentRecorded>>
+internal class HandleOrderPaymentRecorded : IEventHandler<EventEnvelope<OrderPaymentRecorded>>
 {
     private readonly ICommandBus commandBus;
 
-    public HandleOrderPaid(ICommandBus commandBus)
+    public HandleOrderPaymentRecorded(ICommandBus commandBus)
     {
         this.commandBus = commandBus;
     }

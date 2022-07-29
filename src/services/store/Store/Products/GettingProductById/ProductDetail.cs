@@ -145,7 +145,7 @@ public class ProductDetailProjection
 
         var (_, quantity) = eventEnvelope.Data;
 
-        view.Stock += quantity;
+        view.Stock -= quantity;
         view.Version = eventEnvelope.Metadata.StreamPosition;
         view.Position = eventEnvelope.Metadata.LogPosition;
     }

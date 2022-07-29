@@ -14,12 +14,12 @@ using Order.Payments.RequestingPayment;
 using Order.Shipments.DiscardingPackage;
 using Order.Shipments.RequestingPackage;
 using Order.Shipments.SendingPackage;
-using Order.ShoppingCarts.FinalizingCart;
+using Order.Carts.FinalizingCart;
 
 namespace Order.Orders;
 
 public class OrderSaga :
-    IEventHandler<ShoppingCartFinalized>,
+    IEventHandler<CartFinalized>,
     IEventHandler<OrderInitialized>,
     IEventHandler<PaymentFinalized>,
     IEventHandler<PaymentFailed>,
@@ -39,7 +39,7 @@ public class OrderSaga :
         this.commandBus = commandBus;
     }
 
-    public async Task Handle(ShoppingCartFinalized @event, CancellationToken cancellationToken)
+    public async Task Handle(CartFinalized @event, CancellationToken cancellationToken)
     {
         var (cartId, clientId, products, totalPrice, _) = @event;
 

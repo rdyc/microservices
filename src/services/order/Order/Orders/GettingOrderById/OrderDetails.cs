@@ -143,7 +143,7 @@ internal static class OrderDetailsProjection
         if (view.Position >= eventEnvelope.Metadata.LogPosition)
             return;
 
-        var (_, paymentId, _, _, recordedAt) = eventEnvelope.Data;
+        var (_, _, paymentId, _, _, recordedAt) = eventEnvelope.Data;
 
         view.PaymentId = paymentId;
         view.PaidAt = recordedAt;

@@ -20,9 +20,7 @@ public static class ProductValidatorExtensions
     ) where T : PackageItem => ruleBuilder
         .MustAsync(async (instance, value, cancellationToken) =>
         {
-            var builder = Builders<Product>.Filter;
-            var filter = builder.Eq(e => e.Id, instance.ProductId);
-            var product = await collection.Find(filter)
+            var product = await collection.Find(e => e.Id.Equals(instance.ProductId))
                 .SingleAsync(cancellationToken);
 
             return product.Stock >= value;

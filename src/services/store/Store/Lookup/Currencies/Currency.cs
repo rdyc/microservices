@@ -1,6 +1,9 @@
 using FW.Core.Events;
 using FW.Core.MongoDB;
 using MongoDB.Bson.Serialization.Attributes;
+using Store.Lookup.Currencies.ModifyingCurrency;
+using Store.Lookup.Currencies.RegisteringCurrency;
+using Store.Lookup.Currencies.RemovingCurrency;
 
 namespace Store.Lookup.Currencies;
 

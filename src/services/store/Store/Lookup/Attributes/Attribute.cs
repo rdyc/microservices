@@ -2,6 +2,9 @@ using System.Text.Json.Serialization;
 using FW.Core.Events;
 using FW.Core.MongoDB;
 using MongoDB.Bson.Serialization.Attributes;
+using Store.Lookup.Attributes.ModifyingAttribute;
+using Store.Lookup.Attributes.RegisteringAttribute;
+using Store.Lookup.Attributes.RemovingAttribute;
 
 namespace Store.Lookup.Attributes;
 

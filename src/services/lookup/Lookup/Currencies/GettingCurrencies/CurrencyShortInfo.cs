@@ -7,7 +7,7 @@ using MongoDB.Bson.Serialization.Attributes;
 
 namespace Lookup.Currencies.GettingCurrencies;
 
-[BsonCollection("currency_shortinfo")]
+[BsonCollection("currency")]
 public record CurrencyShortInfo : Document
 {
     [BsonElement("name")]

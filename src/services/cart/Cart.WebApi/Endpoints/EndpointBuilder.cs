@@ -1,8 +1,7 @@
 using System.Net;
-using Cart.ShoppingCarts;
-using Cart.ShoppingCarts.GettingCartById;
-using Cart.ShoppingCarts.GettingCartHistory;
-using Cart.ShoppingCarts.GettingCarts;
+using Cart.Carts.GettingCartById;
+using Cart.Carts.GettingCartHistory;
+using Cart.Carts.GettingCarts;
 using FW.Core.Pagination;
 
 namespace Cart.WebApi.Endpoints;
@@ -14,13 +13,13 @@ internal static class EndpointBuilder
 
     private static WebApplication UseCartEndpoint(this WebApplication app)
     {
-        app.MapGet("/carts", CartEndpoint.Carts).Produces((int)HttpStatusCode.OK, typeof(IListPaged<ShoppingCartShortInfo>));
+        app.MapGet("/carts", CartEndpoint.Carts).Produces((int)HttpStatusCode.OK, typeof(IListPaged<CartShortInfo>));
         app.MapPost("/carts", CartEndpoint.Open).Produces((int)HttpStatusCode.Created, typeof(Guid));
-        app.MapGet("/carts/{cartId}", CartEndpoint.CartDetails).Produces((int)HttpStatusCode.OK, typeof(ShoppingCartDetails));
-        app.MapGet("/carts/{cartId}/version/{version}", CartEndpoint.CartAtVersion).Produces((int)HttpStatusCode.OK, typeof(ShoppingCart));
-        app.MapGet("/carts/{cartId}/histories", CartEndpoint.Histories).Produces((int)HttpStatusCode.OK, typeof(IListPaged<ShoppingCartHistory>));
-        app.MapPost("/carts/{cartId}/products/add", CartEndpoint.Add).Produces((int)HttpStatusCode.Accepted, typeof(Guid));
-        app.MapPost("/carts/{cartId}/products/remove", CartEndpoint.Remove).Produces((int)HttpStatusCode.Accepted, typeof(Guid));
+        app.MapGet("/carts/{cartId}", CartEndpoint.CartDetails).Produces((int)HttpStatusCode.OK, typeof(CartDetails));
+        app.MapGet("/carts/{cartId}/version/{version}", CartEndpoint.CartAtVersion).Produces((int)HttpStatusCode.OK, typeof(Carts.Cart));
+        app.MapGet("/carts/{cartId}/histories", CartEndpoint.Histories).Produces((int)HttpStatusCode.OK, typeof(IListPaged<CartHistory>));
+        app.MapPost("/carts/{cartId}/products", CartEndpoint.Add).Produces((int)HttpStatusCode.Accepted, typeof(Guid));
+        app.MapDelete("/carts/{cartId}/products", CartEndpoint.Remove).Produces((int)HttpStatusCode.Accepted, typeof(Guid));
         app.MapPost("/carts/{cartId}", CartEndpoint.Confirm).Produces((int)HttpStatusCode.Accepted);
         app.MapDelete("/carts/{cartId}", CartEndpoint.Cancel).Produces((int)HttpStatusCode.NoContent);
 

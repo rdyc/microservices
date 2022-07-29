@@ -4,7 +4,7 @@ using Order.Orders.CompletingOrder;
 using Order.Orders.InitializingOrder;
 using Order.Orders.ProcessingOrder;
 using Order.Orders.RecordingOrderPayment;
-using Order.ShoppingCarts.FinalizingCart;
+using Order.Carts;
 
 namespace Order.Orders;
 
@@ -13,13 +13,13 @@ public class Order : Aggregate
     private Order(){}
 
     public Guid ClientId { get; private set; }
-    public IList<ShoppingCartProduct> Products { get; private set; } = default!;
+    public IList<CartProduct> Products { get; private set; } = default!;
     public decimal TotalPrice { get; private set; } = 0;
     public OrderStatus Status { get; private set; }
     public Guid? PaymentId { get; private set; }
     public Guid? PackageId { get; private set; }
 
-    private Order(Guid id, Guid clientId, IEnumerable<ShoppingCartProduct> products, decimal totalPrice)
+    private Order(Guid id, Guid clientId, IEnumerable<CartProduct> products, decimal totalPrice)
     {
         var @event = OrderInitialized.Create(
             id,
@@ -36,7 +36,7 @@ public class Order : Aggregate
     public static Order Initialize(
         Guid orderId,
         Guid clientId,
-        IEnumerable<ShoppingCartProduct> products,
+        IEnumerable<CartProduct> products,
         decimal totalPrice)
     {
         return new Order(
@@ -81,6 +81,7 @@ public class Order : Aggregate
             throw new InvalidOperationException($"Record payment in '{Status}' status is not allowed.");
 
         var @event = OrderPaymentRecorded.Create(
+            ClientId,
             Id,
             paymentId,
             Products,

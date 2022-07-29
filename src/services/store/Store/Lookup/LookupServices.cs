@@ -2,7 +2,13 @@ using FW.Core.MongoDB.Projections;
 using Microsoft.Extensions.DependencyInjection;
 using MongoDB.Driver;
 using Store.Lookup.Attributes;
+using Store.Lookup.Attributes.ModifyingAttribute;
+using Store.Lookup.Attributes.RegisteringAttribute;
+using Store.Lookup.Attributes.RemovingAttribute;
 using Store.Lookup.Currencies;
+using Store.Lookup.Currencies.ModifyingCurrency;
+using Store.Lookup.Currencies.RegisteringCurrency;
+using Store.Lookup.Currencies.RemovingCurrency;
 using Attribute = Store.Lookup.Attributes.Attribute;
 
 namespace Store.Lookup;

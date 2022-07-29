@@ -2,21 +2,21 @@ using FW.Core.Commands;
 using FW.Core.EventStoreDB.OptimisticConcurrency;
 using FW.Core.EventStoreDB.Repository;
 using MediatR;
-using Order.ShoppingCarts.FinalizingCart;
+using Order.Carts;
 
 namespace Order.Orders.InitializingOrder;
 
 public record InitializeOrder(
     Guid OrderId,
     Guid ClientId,
-    IEnumerable<ShoppingCartProduct> Products,
+    IEnumerable<CartProduct> Products,
     decimal TotalPrice
 ) : ICommand
 {
     public static InitializeOrder Create(
         Guid? orderId,
         Guid? clientId,
-        IEnumerable<ShoppingCartProduct>? products,
+        IEnumerable<CartProduct>? products,
         decimal? totalPrice
     )
     {
@@ -35,7 +35,7 @@ public record InitializeOrder(
 
 public class HandleInitializeOrder : ICommandHandler<InitializeOrder>
 {
-    
+
     private readonly IEventStoreDBRepository<Order> repository;
     private readonly IEventStoreDBAppendScope scope;
 

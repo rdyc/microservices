@@ -1,6 +1,11 @@
+using Cart.Products.UpdatingStock;
 using FW.Core.MongoDB.Projections;
 using Microsoft.Extensions.DependencyInjection;
 using MongoDB.Driver;
+using Shipment.Products.ModifyingProduct;
+using Shipment.Products.RegisteringProduct;
+using Shipment.Products.RemovingProduct;
+using Shipment.Products.ShippingProduct;
 
 namespace Shipment.Products;
 

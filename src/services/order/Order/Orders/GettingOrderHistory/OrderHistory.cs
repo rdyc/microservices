@@ -53,7 +53,7 @@ public class OrderHistoryProjection
 
     public static OrderHistory Handle(EventEnvelope<OrderPaymentRecorded> eventEnvelope)
     {
-        var (_, paymentId, _, _, recordedAt) = eventEnvelope.Data;
+        var (_, _, paymentId, _, _, recordedAt) = eventEnvelope.Data;
 
         return OrderHistory.Create(
             eventEnvelope.Data.OrderId,

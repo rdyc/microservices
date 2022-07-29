@@ -1,20 +1,22 @@
 using FW.Core.Events;
-using Order.ShoppingCarts.FinalizingCart;
+using Order.Carts;
 
 namespace Order.Orders.RecordingOrderPayment;
 
 public record OrderPaymentRecorded(
+    Guid ClientId,
     Guid OrderId,
     Guid PaymentId,
-    IEnumerable<ShoppingCartProduct> Products,
+    IEnumerable<CartProduct> Products,
     decimal TotalPrice,
     DateTime RecordedAt
 ) : IExternalEvent
 {
     public static OrderPaymentRecorded Create(
+        Guid clientId,
         Guid orderId,
         Guid paymentId,
-        IEnumerable<ShoppingCartProduct> products,
+        IEnumerable<CartProduct> products,
         decimal totalPrice,
         DateTime recordedAt)
     {
@@ -30,6 +32,7 @@ public record OrderPaymentRecorded(
             throw new ArgumentOutOfRangeException(nameof(recordedAt));
 
         return new OrderPaymentRecorded(
+            clientId,
             orderId,
             paymentId,
             products,

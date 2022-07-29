@@ -1,3 +1,11 @@
+using Cart.Products.AddingAttribute;
+using Cart.Products.ModifyingProduct;
+using Cart.Products.RegisteringProduct;
+using Cart.Products.RemovingAttribute;
+using Cart.Products.RemovingProduct;
+using Cart.Products.ShippingProduct;
+using Cart.Products.UpdatingPrice;
+using Cart.Products.UpdatingStock;
 using FW.Core.Events;
 using FW.Core.MongoDB;
 using MongoDB.Bson.Serialization.Attributes;
@@ -37,71 +45,6 @@ public record Product : Document
     [BsonElement("position")]
     public ulong Position { get; set; }
 }
-
-public record ProductCurrency
-{
-    private ProductCurrency(
-        Guid id,
-        string name,
-        string code,
-        string symbol)
-    {
-        Id = id;
-        Name = name;
-        Code = code;
-        Symbol = symbol;
-    }
-
-    public static ProductCurrency Create(
-        Guid id,
-        string name,
-        string code,
-        string symbol
-    ) => new(id, name, code, symbol);
-
-    [BsonElement("id")]
-    public Guid Id { get; set; } = default!;
-
-    [BsonElement("name")]
-    public string Name { get; set; } = default!;
-
-    [BsonElement("code")]
-    public string Code { get; set; } = default!;
-
-    [BsonElement("symbol")]
-    public string Symbol { get; set; } = default!;
-}
-
-public record ProductAttribute
-{
-    private ProductAttribute(Guid id, string name, AttributeType type, string unit, string value)
-    {
-        Id = id;
-        Name = name;
-        Type = type;
-        Unit = unit;
-        Value = value;
-    }
-
-    public static ProductAttribute Create(Guid id, string name, AttributeType type, string unit, string value) =>
-        new(id, name, type, unit, value);
-
-    [BsonElement("id")]
-    public Guid Id { get; set; } = default!;
-
-    [BsonElement("name")]
-    public string Name { get; set; } = default!;
-
-    [BsonElement("type")]
-    public AttributeType Type { get; set; } = default!;
-
-    [BsonElement("unit")]
-    public string Unit { get; set; } = default!;
-
-    [BsonElement("value")]
-    public string Value { get; set; } = default!;
-}
-
 
 public class ProductProjection
 {
@@ -196,7 +139,7 @@ public class ProductProjection
         view.Version = eventEnvelope.Metadata.StreamPosition;
         view.Position = eventEnvelope.Metadata.LogPosition;
     }
-    
+
     public static void Handle(EventEnvelope<ProductShipped> eventEnvelope, Product view)
     {
         if (view.Position >= eventEnvelope.Metadata.LogPosition)

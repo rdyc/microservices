@@ -60,7 +60,7 @@ public static class ProductServices
 
     private static IServiceCollection AddEventHandlers(this IServiceCollection services) =>
         services
-            .AddEventHandler<EventEnvelope<OrderPaymentRecorded>, HandleOrderPaid>()
+            .AddEventHandler<EventEnvelope<OrderPaymentRecorded>, HandleOrderPaymentRecorded>()
             .AddEventHandler<EventEnvelope<PackageWasSent>, HandlePackageShipment>();
 
     private static IServiceCollection AddQueryHandlers(this IServiceCollection services) =>

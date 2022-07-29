@@ -35,16 +35,15 @@ internal class ValidateSendPackage : AbstractValidator<SendPackage>
 {
     public ValidateSendPackage(IMongoDatabase database)
     {
-        var collectionName = MongoHelper.GetCollectionName<Order>();
-        var collection = database.GetCollection<Order>(collectionName);
-        var products = database.GetCollection<Product>(collectionName);
+        var orders = database.GetCollection<Order>(MongoHelper.GetCollectionName<Order>());
+        var products = database.GetCollection<Product>(MongoHelper.GetCollectionName<Product>());
 
         ClassLevelCascadeMode = CascadeMode.Stop;
 
         RuleFor(p => p.PackageId).NotEmpty();
 
         RuleFor(p => p.OrderId).NotEmpty()
-            .MustExistOrder(collection);
+            .MustExistOrder(orders);
 
         RuleForEach(p => p.Items).NotEmpty()
             .ChildRules(item => 

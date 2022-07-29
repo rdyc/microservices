@@ -7,7 +7,7 @@ using MongoDB.Bson.Serialization.Attributes;
 
 namespace Lookup.Attributes.GettingAttributes;
 
-[BsonCollection("attribute_shortinfo")]
+[BsonCollection("attribute")]
 public record AttributeShortInfo : Document
 {
     [BsonElement("name")]
