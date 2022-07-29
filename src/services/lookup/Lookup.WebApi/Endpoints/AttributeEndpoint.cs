@@ -16,17 +16,17 @@ namespace Lookup.WebApi.Endpoints;
 
 public static class AttributeEndpoint
 {
-    [SwaggerOperation(Summary = "Retrieve all attributes", OperationId = "get_all", Tags = new[] { "Attribute" })]
+    [SwaggerOperation(Summary = "Retrieve all attributes", OperationId = "attributes", Tags = new[] { "Attribute" })]
     internal static async Task<IResult> Attributes(
-        int index,
-        int size,
+        [FromQuery] int? page,
+        [FromQuery] int? size,
         [FromServices] IQueryBus query,
         [FromServices] ILoggerFactory logger,
         CancellationToken cancellationToken)
     {
         var log = logger.CreateLogger<Program>();
         var task = query.SendAsync<GetAttributes, IListPaged<AttributeShortInfo>>(
-            GetAttributes.Create(index, size), cancellationToken);
+            GetAttributes.Create(page, size), cancellationToken);
 
         return await WithCancellation.TryExecute(
             task: task,
@@ -36,7 +36,7 @@ public static class AttributeEndpoint
         );
     }
 
-    [SwaggerOperation(Summary = "Retrieve attribute", OperationId = "get_detail", Tags = new[] { "Attribute" })]
+    [SwaggerOperation(Summary = "Retrieve attribute", OperationId = "attribute", Tags = new[] { "Attribute" })]
     internal static async Task<IResult> Attribute(
         [FromRoute] Guid attributeId,
         [FromServices] IQueryBus query,
@@ -55,7 +55,7 @@ public static class AttributeEndpoint
         );
     }
 
-    [SwaggerOperation(Summary = "Retrieve attribute list", OperationId = "get_list", Tags = new[] { "Attribute" })]
+    [SwaggerOperation(Summary = "Retrieve attribute list", OperationId = "attribute_list", Tags = new[] { "Attribute" })]
     internal static async Task<IResult> AttributeList(
         [FromQuery] LookupStatus? status,
         [FromServices] IQueryBus query,
@@ -74,7 +74,7 @@ public static class AttributeEndpoint
         );
     }
 
-    [SwaggerOperation(Summary = "Register a new attribute", OperationId = "post", Tags = new[] { "Attribute" })]
+    [SwaggerOperation(Summary = "Register a new attribute", OperationId = "register", Tags = new[] { "Attribute" })]
     internal static async Task<IResult> Create(
         [FromBody] AttributeCreateRequest request,
         [FromServices] ICommandBus command,
@@ -94,7 +94,7 @@ public static class AttributeEndpoint
         );
     }
 
-    [SwaggerOperation(Summary = "Modify existing attribute", OperationId = "put", Tags = new[] { "Attribute" })]
+    [SwaggerOperation(Summary = "Modify existing attribute", OperationId = "modify", Tags = new[] { "Attribute" })]
     internal static async Task<IResult> Update(
         [FromRoute] Guid attributeId,
         [FromBody] AttributeModifyRequest request,
@@ -114,7 +114,7 @@ public static class AttributeEndpoint
         );
     }
 
-    [SwaggerOperation(Summary = "Remove existing attribute", OperationId = "delete", Tags = new[] { "Attribute" })]
+    [SwaggerOperation(Summary = "Remove existing attribute", OperationId = "remove", Tags = new[] { "Attribute" })]
     internal static async Task<IResult> Delete(
         [FromRoute] Guid attributeId,
         [FromServices] ICommandBus command,

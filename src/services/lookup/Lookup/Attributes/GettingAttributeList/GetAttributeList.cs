@@ -26,7 +26,7 @@ internal class HandleGetAttributeList : IQueryHandler<GetAttributeList, IListUnp
 
     public async Task<IListUnpaged<AttributeShortInfo>> Handle(GetAttributeList request, CancellationToken cancellationToken)
     {
-        var filter = Builders<AttributeShortInfo>.Filter.Eq(e => e.Status, request.Status.HasValue ? request.Status : LookupStatus.Active);
+        var filter = Builders<AttributeShortInfo>.Filter.Eq(e => e.Status, request.Status ?? LookupStatus.Active);
 
         var data = await collection.Find(filter).ToListAsync(cancellationToken);
 

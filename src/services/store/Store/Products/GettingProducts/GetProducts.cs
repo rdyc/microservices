@@ -7,20 +7,11 @@ using MongoDB.Driver;
 namespace Store.Products.GettingProducts;
 
 public record GetProducts(
-    int PageNumber,
-    int PageSize
+    PagedOption Option
 ) : IQuery<IListPaged<ProductShortInfo>>
 {
-    public static GetProducts Create(int? pageNumber = 0, int? pageSize = 20)
-    {
-        if (pageNumber is null or < 0)
-            throw new ArgumentOutOfRangeException(nameof(pageNumber));
-
-        if (pageSize is null or < 0 or > 100)
-            throw new ArgumentOutOfRangeException(nameof(pageSize));
-
-        return new(pageNumber.Value, pageSize.Value);
-    }
+    public static GetProducts Create(int? page, int? size) =>
+        new(PagedOption.Create(page ?? 1, size ?? 10));
 }
 
 internal class HandleGetProducts : IQueryHandler<GetProducts, IListPaged<ProductShortInfo>>
@@ -35,10 +26,8 @@ internal class HandleGetProducts : IQueryHandler<GetProducts, IListPaged<Product
 
     public async Task<IListPaged<ProductShortInfo>> Handle(GetProducts request, CancellationToken cancellationToken)
     {
-        var (index, size) = request;
-
         var filter = Builders<ProductShortInfo>.Filter.Empty;
 
-        return await collection.FindWithPagingAsync(filter, index, size, cancellationToken);
+        return await collection.FindWithPagingAsync(filter, request.Option, cancellationToken);
     }
 }

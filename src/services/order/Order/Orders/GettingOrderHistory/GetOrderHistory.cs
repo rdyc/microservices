@@ -1,5 +1,3 @@
-
-
 using FW.Core.MongoDB;
 using FW.Core.MongoDB.Extensions;
 using FW.Core.Pagination;
@@ -10,23 +8,11 @@ namespace Order.Orders.GettingOrderHistory;
 
 public record GetOrderHistory(
     Guid OrderId,
-    int PageNumber,
-    int PageSize
+    PagedOption Option
 ) : IQuery<IListPaged<OrderHistory>>
 {
-    public static GetOrderHistory Create(Guid? cartId, int? pageNumber = 1, int? pageSize = 20)
-    {
-        if (cartId == null || cartId == Guid.Empty)
-            throw new ArgumentOutOfRangeException(nameof(cartId));
-
-        if (pageNumber is null or < 0)
-            throw new ArgumentOutOfRangeException(nameof(pageNumber));
-
-        if (pageSize is null or < 0 or > 100)
-            throw new ArgumentOutOfRangeException(nameof(pageSize));
-
-        return new(cartId.Value, pageNumber.Value, pageSize.Value);
-    }
+    public static GetOrderHistory Create(Guid orderId, int? page, int? size) =>
+        new(orderId, PagedOption.Create(page ?? 1, size ?? 10));
 }
 
 internal class HandleGetOrderHistory : IQueryHandler<GetOrderHistory, IListPaged<OrderHistory>>
@@ -41,10 +27,10 @@ internal class HandleGetOrderHistory : IQueryHandler<GetOrderHistory, IListPaged
 
     public async Task<IListPaged<OrderHistory>> Handle(GetOrderHistory request, CancellationToken cancellationToken)
     {
-        var (cartId, index, size) = request;
+        var (orderId, option) = request;
 
-        var filter = Builders<OrderHistory>.Filter.Eq(e => e.AggregateId, cartId);
+        var filter = Builders<OrderHistory>.Filter.Eq(e => e.AggregateId, orderId);
 
-        return await collection.FindWithPagingAsync(filter, index, size, cancellationToken);
+        return await collection.FindWithPagingAsync(filter, option, cancellationToken);
     }
 }

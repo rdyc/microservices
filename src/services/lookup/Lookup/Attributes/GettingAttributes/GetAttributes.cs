@@ -7,12 +7,11 @@ using MongoDB.Driver;
 namespace Lookup.Attributes.GettingAttributes;
 
 public record GetAttributes(
-    int Index,
-    int Size
+    PagedOption Option
 ) : IQuery<IListPaged<AttributeShortInfo>>
 {
-    public static GetAttributes Create(int index, int size) =>
-        new(index, size);
+    public static GetAttributes Create(int? page, int? size) =>
+        new(PagedOption.Create(page ?? 1, size ?? 10));
 }
 
 internal class HandleGetAttributes : IQueryHandler<GetAttributes, IListPaged<AttributeShortInfo>>
@@ -27,10 +26,8 @@ internal class HandleGetAttributes : IQueryHandler<GetAttributes, IListPaged<Att
 
     public async Task<IListPaged<AttributeShortInfo>> Handle(GetAttributes request, CancellationToken cancellationToken)
     {
-        var (index, size) = request;
-
         var filter = Builders<AttributeShortInfo>.Filter.Empty;
 
-        return await collection.FindWithPagingAsync(filter, index, size, cancellationToken);
+        return await collection.FindWithPagingAsync(filter, request.Option, cancellationToken);
     }
 }

@@ -18,15 +18,15 @@ public static class PaymentEndpoint
 {
     [SwaggerOperation(Summary = "Retrieve all payments", OperationId = "payments", Tags = new[] { "Payment" })]
     internal static async Task<IResult> Payments(
-        int index,
-        int size,
+        [FromQuery] int? page,
+        [FromQuery] int? size,
         [FromServices] IQueryBus query,
         [FromServices] ILoggerFactory logger,
         CancellationToken cancellationToken)
     {
         var log = logger.CreateLogger<Program>();
         var task = query.SendAsync<GetPayments, IListPaged<PaymentShortInfo>>(
-            GetPayments.Create(index, size), cancellationToken);
+            GetPayments.Create(page, size), cancellationToken);
 
         return await WithCancellation.TryExecute(
             task: task,

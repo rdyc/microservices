@@ -7,12 +7,11 @@ using MongoDB.Driver;
 namespace Lookup.Currencies.GettingCurrencies;
 
 public record GetCurrencies(
-    int Index,
-    int Size
+    PagedOption Option
 ) : IQuery<IListPaged<CurrencyShortInfo>>
 {
-    public static GetCurrencies Create(int index, int size) =>
-        new(index, size);
+    public static GetCurrencies Create(int? page, int? size) =>
+        new(PagedOption.Create(page ?? 1, size ?? 10));
 }
 
 internal class HandleGetCurrencies : IQueryHandler<GetCurrencies, IListPaged<CurrencyShortInfo>>
@@ -27,10 +26,8 @@ internal class HandleGetCurrencies : IQueryHandler<GetCurrencies, IListPaged<Cur
 
     public async Task<IListPaged<CurrencyShortInfo>> Handle(GetCurrencies request, CancellationToken cancellationToken)
     {
-        var (index, size) = request;
-
         var filter = Builders<CurrencyShortInfo>.Filter.Empty;
 
-        return await collection.FindWithPagingAsync(filter, index, size, cancellationToken);
+        return await collection.FindWithPagingAsync(filter, request.Option, cancellationToken);
     }
 }

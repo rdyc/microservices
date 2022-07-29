@@ -10,15 +10,15 @@ public record GetOrderAtVersion(
     ulong Version
 ) : IQuery<Order>
 {
-    public static GetOrderAtVersion Create(Guid? cartId, ulong? version)
+    public static GetOrderAtVersion Create(Guid? orderId, ulong? version)
     {
-        if (cartId == null || cartId == Guid.Empty)
-            throw new ArgumentOutOfRangeException(nameof(cartId));
+        if (orderId == null || orderId == Guid.Empty)
+            throw new ArgumentOutOfRangeException(nameof(orderId));
 
         if (version == null)
             throw new ArgumentOutOfRangeException(nameof(version));
 
-        return new(cartId.Value, version.Value);
+        return new(orderId.Value, version.Value);
     }
 }
 
@@ -33,17 +33,17 @@ internal class HandleGetOrderAtVersion : IQueryHandler<GetOrderAtVersion, Order>
 
     public async Task<Order> Handle(GetOrderAtVersion request, CancellationToken cancellationToken)
     {
-        var (cartId, version) = request;
+        var (orderId, version) = request;
 
-        var cart = await eventStore.AggregateStream<Order>(
-            cartId,
+        var order = await eventStore.AggregateStream<Order>(
+            orderId,
             cancellationToken,
             version
         );
 
-        if (cart == null)
+        if (order == null)
             throw AggregateNotFoundException.For<Order>(request.OrderId);
 
-        return cart;
+        return order;
     }
 }

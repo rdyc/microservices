@@ -7,20 +7,11 @@ using MongoDB.Driver;
 namespace Shipment.Orders.GettingOrders;
 
 public record GetOrders(
-    int Index,
-    int Size
+    PagedOption Option
 ) : IQuery<IListPaged<Order>>
 {
-    public static GetOrders Create(int? index = 0, int? size = 10)
-    {
-        if (index is null or < 0)
-            throw new ArgumentOutOfRangeException(nameof(index));
-
-        if (size is null or < 0 or > 100)
-            throw new ArgumentOutOfRangeException(nameof(size));
-
-        return new(index.Value, size.Value);
-    }
+    public static GetOrders Create(int? page, int? size) =>
+        new(PagedOption.Create(page ?? 1, size ?? 10));
 }
 
 internal class HandleGetOrders : IQueryHandler<GetOrders, IListPaged<Order>>
@@ -35,10 +26,8 @@ internal class HandleGetOrders : IQueryHandler<GetOrders, IListPaged<Order>>
 
     public async Task<IListPaged<Order>> Handle(GetOrders request, CancellationToken cancellationToken)
     {
-        var (index, size) = request;
-
         var filter = Builders<Order>.Filter.Empty;
 
-        return await collection.FindWithPagingAsync(filter, index, size, cancellationToken);
+        return await collection.FindWithPagingAsync(filter, request.Option, cancellationToken);
     }
 }

@@ -20,17 +20,17 @@ namespace Store.WebApi.Endpoints;
 
 public static class ProductEndpoint
 {
-    [SwaggerOperation(Summary = "Retrieve all products", OperationId = "get_products", Tags = new[] { "Product" })]
+    [SwaggerOperation(Summary = "Retrieve all products", OperationId = "products", Tags = new[] { "Product" })]
     internal static async Task<IResult> Products(
-        int index,
-        int size,
+        [FromQuery] int? page,
+        [FromQuery] int? size,
         [FromServices] IQueryBus query,
         [FromServices] ILoggerFactory logger,
         CancellationToken cancellationToken)
     {
         var log = logger.CreateLogger<Program>();
         var task = query.SendAsync<GetProducts, IListPaged<ProductShortInfo>>(
-            GetProducts.Create(index, size), cancellationToken);
+            GetProducts.Create(page, size), cancellationToken);
 
         return await WithCancellation.TryExecute(
             task: task,
@@ -40,7 +40,7 @@ public static class ProductEndpoint
         );
     }
 
-    [SwaggerOperation(Summary = "Retrieve product", OperationId = "get_product", Tags = new[] { "Product" })]
+    [SwaggerOperation(Summary = "Retrieve product", OperationId = "product", Tags = new[] { "Product" })]
     internal static async Task<IResult> Product(
         [FromRoute] Guid productId,
         [FromServices] IQueryBus query,
@@ -59,18 +59,18 @@ public static class ProductEndpoint
         );
     }
 
-    [SwaggerOperation(Summary = "Retrieve product histories", OperationId = "get_history", Tags = new[] { "Product" })]
+    [SwaggerOperation(Summary = "Retrieve product histories", OperationId = "histories", Tags = new[] { "Product" })]
     internal static async Task<IResult> Histories(
         [FromRoute] Guid productId,
-        int index,
-        int size,
+        [FromQuery] int? page,
+        [FromQuery] int? size,
         [FromServices] IQueryBus query,
         [FromServices] ILoggerFactory logger,
         CancellationToken cancellationToken)
     {
         var log = logger.CreateLogger<Program>();
         var task = query.SendAsync<GetProductHistory, IListPaged<ProductHistory>>(
-            GetProductHistory.Create(productId, index, size), cancellationToken);
+            GetProductHistory.Create(productId, page, size), cancellationToken);
 
         return await WithCancellation.TryExecute(
             task: task,

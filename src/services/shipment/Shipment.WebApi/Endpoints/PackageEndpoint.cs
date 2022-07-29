@@ -17,15 +17,15 @@ public static class PackageEndpoint
 {
     [SwaggerOperation(Summary = "Retrieve all packages", OperationId = "packages", Tags = new[] { "Package" })]
     internal static async Task<IResult> Packages(
-        int index,
-        int size,
+        [FromQuery] int? page,
+        [FromQuery] int? size,
         [FromServices] IQueryBus query,
         [FromServices] ILoggerFactory logger,
         CancellationToken cancellationToken)
     {
         var log = logger.CreateLogger<Program>();
         var task = query.SendAsync<GetPackages, IListPaged<PackageShortInfo>>(
-            GetPackages.Create(index, size), cancellationToken);
+            GetPackages.Create(page, size), cancellationToken);
 
         return await WithCancellation.TryExecute(
             task: task,
@@ -86,7 +86,7 @@ public static class PackageEndpoint
         var log = logger.CreateLogger<Program>();
         var (orderId, items) = request;
         var task = command.SendAsync(
-            SendPackage.Create(packageId, orderId, items.Select(e => 
+            SendPackage.Create(packageId, orderId, items.Select(e =>
                 new PackageItem(e.ProductId, e.Quantity)), DateTime.UtcNow),
             cancellationToken);
 

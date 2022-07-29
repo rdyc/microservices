@@ -10,23 +10,11 @@ namespace Cart.ShoppingCarts.GettingCartHistory;
 
 public record GetCartHistory(
     Guid CartId,
-    int PageNumber,
-    int PageSize
+    PagedOption Option
 ) : IQuery<IListPaged<ShoppingCartHistory>>
 {
-    public static GetCartHistory Create(Guid? cartId, int? pageNumber = 1, int? pageSize = 20)
-    {
-        if (cartId == null || cartId == Guid.Empty)
-            throw new ArgumentOutOfRangeException(nameof(cartId));
-
-        if (pageNumber is null or < 0)
-            throw new ArgumentOutOfRangeException(nameof(pageNumber));
-
-        if (pageSize is null or < 0 or > 100)
-            throw new ArgumentOutOfRangeException(nameof(pageSize));
-
-        return new(cartId.Value, pageNumber.Value, pageSize.Value);
-    }
+    public static GetCartHistory Create(Guid cartId, int? page, int? size) =>
+        new(cartId, PagedOption.Create(page ?? 1, size ?? 10));
 }
 
 internal class HandleGetCartHistory : IQueryHandler<GetCartHistory, IListPaged<ShoppingCartHistory>>
@@ -41,10 +29,10 @@ internal class HandleGetCartHistory : IQueryHandler<GetCartHistory, IListPaged<S
 
     public async Task<IListPaged<ShoppingCartHistory>> Handle(GetCartHistory request, CancellationToken cancellationToken)
     {
-        var (cartId, index, size) = request;
+        var (cartId, option) = request;
 
         var filter = Builders<ShoppingCartHistory>.Filter.Eq(e => e.AggregateId, cartId);
 
-        return await collection.FindWithPagingAsync(filter, index, size, cancellationToken);
+        return await collection.FindWithPagingAsync(filter, option, cancellationToken);
     }
 }

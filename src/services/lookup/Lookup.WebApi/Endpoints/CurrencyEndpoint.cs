@@ -16,17 +16,17 @@ namespace Lookup.WebApi.Endpoints;
 
 public static class CurrencyEndpoint
 {
-    [SwaggerOperation(Summary = "Retrieve all currencies", OperationId = "get_all", Tags = new[] { "Currency" })]
+    [SwaggerOperation(Summary = "Retrieve all currencies", OperationId = "currencies", Tags = new[] { "Currency" })]
     internal static async Task<IResult> Currencies(
-        int index,
-        int size,
+        [FromQuery] int? page,
+        [FromQuery] int? size,
         [FromServices] IQueryBus query,
         [FromServices] ILoggerFactory logger,
         CancellationToken cancellationToken)
     {
         var log = logger.CreateLogger<Program>();
         var task = query.SendAsync<GetCurrencies, IListPaged<CurrencyShortInfo>>(
-            GetCurrencies.Create(index, size), cancellationToken);
+            GetCurrencies.Create(page, size), cancellationToken);
 
         return await WithCancellation.TryExecute(
             task: task,
@@ -36,7 +36,7 @@ public static class CurrencyEndpoint
         );
     }
 
-    [SwaggerOperation(Summary = "Retrieve currency", OperationId = "get_detail", Tags = new[] { "Currency" })]
+    [SwaggerOperation(Summary = "Retrieve currency", OperationId = "currency", Tags = new[] { "Currency" })]
     internal static async Task<IResult> Currency(
         [FromRoute] Guid currencyId,
         [FromServices] IQueryBus query,
@@ -55,7 +55,7 @@ public static class CurrencyEndpoint
         );
     }
 
-    [SwaggerOperation(Summary = "Retrieve currency list", OperationId = "get_list", Tags = new[] { "Currency" })]
+    [SwaggerOperation(Summary = "Retrieve currency list", OperationId = "currency_list", Tags = new[] { "Currency" })]
     internal static async Task<IResult> CurrencyList(
         [FromQuery] LookupStatus? status,
         [FromServices] IQueryBus query,
@@ -74,7 +74,7 @@ public static class CurrencyEndpoint
         );
     }
 
-    [SwaggerOperation(Summary = "Register a new currency", OperationId = "post", Tags = new[] { "Currency" })]
+    [SwaggerOperation(Summary = "Register a new currency", OperationId = "register", Tags = new[] { "Currency" })]
     internal static async Task<IResult> Create(
         [FromBody] CurrencyCreateRequest request,
         [FromServices] ICommandBus command,
@@ -95,7 +95,7 @@ public static class CurrencyEndpoint
         );
     }
 
-    [SwaggerOperation(Summary = "Modify existing currency", OperationId = "put", Tags = new[] { "Currency" })]
+    [SwaggerOperation(Summary = "Modify existing currency", OperationId = "modify", Tags = new[] { "Currency" })]
     internal static async Task<IResult> Update(
         [FromRoute] Guid currencyId,
         [FromBody] CurrencyModifyRequest request,
@@ -116,7 +116,7 @@ public static class CurrencyEndpoint
         );
     }
 
-    [SwaggerOperation(Summary = "Remove existing currency", OperationId = "delete", Tags = new[] { "Currency" })]
+    [SwaggerOperation(Summary = "Remove existing currency", OperationId = "remove", Tags = new[] { "Currency" })]
     internal static async Task<IResult> Delete(
         [FromRoute] Guid currencyId,
         [FromServices] ICommandBus command,

@@ -20,17 +20,17 @@ namespace Cart.WebApi.Endpoints;
 
 internal static class CartEndpoint
 {
-    [SwaggerOperation(Summary = "Retrieve all carts", OperationId = "get_carts", Tags = new[] { "Cart" })]
+    [SwaggerOperation(Summary = "Retrieve all carts", OperationId = "carts", Tags = new[] { "Cart" })]
     internal static async Task<IResult> Carts(
-        int index,
-        int size,
+        [FromQuery] int? page,
+        [FromQuery] int? size,
         [FromServices] IQueryBus query,
         [FromServices] ILoggerFactory logger,
         CancellationToken cancellationToken)
     {
         var log = logger.CreateLogger<Program>();
         var task = query.SendAsync<GetCarts, IListPaged<ShoppingCartShortInfo>>(
-            GetCarts.Create(index, size), cancellationToken);
+            GetCarts.Create(page, size), cancellationToken);
 
         return await WithCancellation.TryExecute(
             task: task,
@@ -40,7 +40,7 @@ internal static class CartEndpoint
         );
     }
 
-    [SwaggerOperation(Summary = "Retrieve cart", OperationId = "get_cart", Tags = new[] { "Cart" })]
+    [SwaggerOperation(Summary = "Retrieve cart", OperationId = "cart", Tags = new[] { "Cart" })]
     internal static async Task<IResult> CartDetails(
         [FromRoute] Guid cartId,
         [FromServices] IQueryBus query,
@@ -59,7 +59,7 @@ internal static class CartEndpoint
         );
     }
 
-    [SwaggerOperation(Summary = "Retrieve cart at version", OperationId = "get_cart_version", Tags = new[] { "Cart" })]
+    [SwaggerOperation(Summary = "Retrieve cart at version", OperationId = "cart_version", Tags = new[] { "Cart" })]
     internal static async Task<IResult> CartAtVersion(
         [FromRoute] Guid cartId,
         [FromRoute] ulong version,
@@ -79,18 +79,18 @@ internal static class CartEndpoint
         );
     }
 
-    [SwaggerOperation(Summary = "Retrieve cart histories", OperationId = "get_history", Tags = new[] { "Cart" })]
+    [SwaggerOperation(Summary = "Retrieve cart histories", OperationId = "histories", Tags = new[] { "Cart" })]
     internal static async Task<IResult> Histories(
         [FromRoute] Guid cartId,
-        int index,
-        int size,
+        [FromQuery] int? page,
+        [FromQuery] int? size,
         [FromServices] IQueryBus query,
         [FromServices] ILoggerFactory logger,
         CancellationToken cancellationToken)
     {
         var log = logger.CreateLogger<Program>();
         var task = query.SendAsync<GetCartHistory, IListPaged<ShoppingCartHistory>>(
-            GetCartHistory.Create(cartId, index, size), cancellationToken);
+            GetCartHistory.Create(cartId, page, size), cancellationToken);
 
         return await WithCancellation.TryExecute(
             task: task,

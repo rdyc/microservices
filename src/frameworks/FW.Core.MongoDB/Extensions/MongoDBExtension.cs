@@ -8,19 +8,19 @@ public static class MongoDBExtension
     public static async Task<IListPaged<TDocument>> FindWithPagingAsync<TDocument>(
         this IMongoCollection<TDocument> collection,
         FilterDefinition<TDocument> filter,
-        int index,
-        int size,
-        CancellationToken cancellationToken = default
+        PagedOption option,
+        CancellationToken cancellationToken
     ) where TDocument : class
     {
+        var (page, size) = option;
         var count = collection.CountDocumentsAsync(filter, null, cancellationToken);
         var records = collection.Find(filter)
-            .Skip(index * size)
+            .Skip((page - 1) * size)
             .Limit(size)
             .ToListAsync(cancellationToken);
 
         await Task.WhenAll(count, records);
 
-        return ListPaged<TDocument>.Create(records.Result, Metadata.Create(count.Result, index, size));
+        return ListPaged<TDocument>.Create(records.Result, Metadata.Create(count.Result, page, size));
     }
 }

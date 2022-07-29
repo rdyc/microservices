@@ -8,15 +8,11 @@ namespace Lookup.Histories.GettingHistories;
 
 public record GetHistory(
     Guid AggregateId,
-    int Index,
-    int Size
+    PagedOption Option
 ) : IQuery<IListPaged<History>>
 {
-    public static GetHistory Create(
-        Guid aggregateId,
-        int index,
-        int size
-    ) => new(aggregateId, index, size);
+    public static GetHistory Create(Guid aggregateId, int? page, int? size) =>
+        new(aggregateId, PagedOption.Create(page ?? 1, size ?? 10));
 }
 
 internal class HandleGetHistory : IQueryHandler<GetHistory, IListPaged<History>>
@@ -31,10 +27,10 @@ internal class HandleGetHistory : IQueryHandler<GetHistory, IListPaged<History>>
 
     public async Task<IListPaged<History>> Handle(GetHistory request, CancellationToken cancellationToken)
     {
-        var (aggregateId, index, size) = request;
+        var (aggregateId, option) = request;
 
         var filter = Builders<History>.Filter.Eq(e => e.AggregateId, aggregateId);
 
-        return await collection.FindWithPagingAsync(filter, index, size, cancellationToken);
+        return await collection.FindWithPagingAsync(filter, option, cancellationToken);
     }
 }

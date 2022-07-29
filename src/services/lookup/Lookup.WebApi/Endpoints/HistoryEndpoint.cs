@@ -9,18 +9,18 @@ namespace Lookup.WebApi.Endpoints;
 
 public static class HistoryEndpoint
 {
-    [SwaggerOperation(Summary = "Retrieve lookup histories", OperationId = "get", Tags = new[] { "History" })]
+    [SwaggerOperation(Summary = "Retrieve lookup histories", OperationId = "histories", Tags = new[] { "History" })]
     internal static async Task<IResult> Histories(
         [FromRoute] Guid aggregateId,
-        int index,
-        int size,
+        [FromQuery] int? page,
+        [FromQuery] int? size,
         [FromServices] IQueryBus query,
         [FromServices] ILoggerFactory logger,
         CancellationToken cancellationToken)
     {
         var log = logger.CreateLogger<Program>();
         var task = query.SendAsync<GetHistory, IListPaged<History>>(
-            GetHistory.Create(aggregateId, index, size), cancellationToken);
+            GetHistory.Create(aggregateId, page, size), cancellationToken);
 
         return await WithCancellation.TryExecute(
             task: task,
