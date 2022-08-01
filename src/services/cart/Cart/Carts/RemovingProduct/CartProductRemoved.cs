@@ -1,15 +1,15 @@
 namespace Cart.Carts.RemovingProduct;
 
 public record CartProductRemoved(
-    Guid CartId,
+    Guid Id,
     CartProduct Product
 )
 {
-    public static CartProductRemoved Create(Guid cartId, CartProduct product)
+    public static CartProductRemoved Create(Guid id, CartProduct product)
     {
-        if (cartId == Guid.Empty)
-            throw new ArgumentOutOfRangeException(nameof(cartId));
+        if (id == Guid.Empty)
+            throw new ArgumentOutOfRangeException(nameof(id));
 
-        return new(cartId, product);
+        return new(id, product);
     }
 }

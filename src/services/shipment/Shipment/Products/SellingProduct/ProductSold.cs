@@ -1,6 +1,6 @@
 namespace Shipment.Products.SellingProduct;
 
 public record ProductSold(
-    Guid ProductId,
+    Guid Id,
     int Quantity
 );

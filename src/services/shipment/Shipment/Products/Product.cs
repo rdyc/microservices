@@ -1,4 +1,3 @@
-using Cart.Products.UpdatingStock;
 using FW.Core.Events;
 using FW.Core.MongoDB;
 using MongoDB.Bson.Serialization.Attributes;
@@ -6,6 +5,7 @@ using Shipment.Products.ModifyingProduct;
 using Shipment.Products.RegisteringProduct;
 using Shipment.Products.RemovingProduct;
 using Shipment.Products.ShippingProduct;
+using Shipment.Products.UpdatingStock;
 
 namespace Shipment.Products;
 

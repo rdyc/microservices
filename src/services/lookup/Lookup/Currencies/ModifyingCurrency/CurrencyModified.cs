@@ -3,16 +3,16 @@ using FW.Core.Events;
 namespace Lookup.Currencies.ModifyingCurrency;
 
 public record CurrencyModified(
-    Guid CurrencyId,
+    Guid Id,
     string Name,
     string Code,
     string Symbol
 ) : IExternalEvent
 {
     public static CurrencyModified Create(
-        Guid currencyId,
+        Guid id,
         string name,
         string code,
         string symbol
-    ) => new(currencyId, name, code, symbol);
+    ) => new(id, name, code, symbol);
 }

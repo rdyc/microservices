@@ -1,7 +1,7 @@
 namespace Shipment.Products.ModifyingProduct;
 
 public record ProductModified(
-    Guid ProductId,
+    Guid Id,
     string Sku,
     string Name,
     string Description

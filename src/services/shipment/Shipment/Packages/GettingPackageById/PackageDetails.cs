@@ -43,7 +43,7 @@ internal class PackageDetailsProjection
             Id = packageId,
             OrderId = orderId,
             PreparedAt = preparedAt,
-            Status = PackageStatus.Pending,
+            Status = PackageStatus.Prepared,
             Version = eventEnvelope.Metadata.StreamPosition,
             Position = eventEnvelope.Metadata.LogPosition
         };

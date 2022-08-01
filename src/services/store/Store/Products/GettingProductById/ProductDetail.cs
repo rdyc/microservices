@@ -158,7 +158,7 @@ public class ProductDetailProjection
         if (view.Attributes is null)
             view.Attributes = new List<ProductDetailAttribute>();
 
-        var (_, id, name, type, unit, value) = eventEnvelope.Data;
+        var (id, name, type, unit, value) = eventEnvelope.Data.Attribute;
 
         view.Attributes.Add(new ProductDetailAttribute
         {
@@ -168,6 +168,7 @@ public class ProductDetailProjection
             Unit = unit,
             Value = value
         });
+
         view.Version = eventEnvelope.Metadata.StreamPosition;
         view.Position = eventEnvelope.Metadata.LogPosition;
     }
@@ -179,7 +180,7 @@ public class ProductDetailProjection
 
         if (view.Attributes != null)
         {
-            var (_, id, name, type, unit, value) = eventEnvelope.Data;
+            var (id, name, type, unit, value) = eventEnvelope.Data.Attribute;
 
             if (view.Attributes.Any(e => e.Id.Equals(id) && e.Value.Equals(value)))
             {

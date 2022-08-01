@@ -39,7 +39,7 @@ public class Product : Aggregate
 
     public void Apply(ProductRegistered evt)
     {
-        Id = evt.ProductId;
+        Id = evt.Id;
         Sku = evt.Sku;
         Name = evt.Name;
         Description = evt.Description;
@@ -84,7 +84,7 @@ public class Product : Aggregate
         if (Attributes is null)
             Attributes = new List<ProductAttribute>();
 
-        var (_, id, name, type, unit, value) = @event;
+        var (id, name, type, unit, value) = @event.Attribute;
         var newAttribute = ProductAttribute.Create(id, name, type, unit, value);
         var existingAttribute = FindAttributeMatchingWith(newAttribute);
 
@@ -123,7 +123,7 @@ public class Product : Aggregate
         if (Attributes is null)
             return;
 
-        var existingAttribute = FindAttributeMatchingWith(@event.AttributeId);
+        var existingAttribute = FindAttributeMatchingWith(@event.Id);
 
         if (existingAttribute == null)
             return;

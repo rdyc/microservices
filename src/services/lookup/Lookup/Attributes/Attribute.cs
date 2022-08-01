@@ -27,7 +27,7 @@ public class Attribute : Aggregate
 
     public void Apply(AttributeRegistered evt)
     {
-        Id = evt.AttributeId;
+        Id = evt.Id;
         Name = evt.Name;
         Type = evt.Type;
         Unit = evt.Unit;

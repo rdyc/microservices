@@ -1,7 +1,7 @@
 namespace Shipment.Products.UpdatingPrice;
 
 public record ProductPriceChanged(
-    Guid ProductId,
+    Guid Id,
     ProductCurrency Currency,
     decimal Price
 );

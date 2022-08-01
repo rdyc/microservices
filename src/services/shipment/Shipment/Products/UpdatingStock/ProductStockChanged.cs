@@ -1,6 +1,6 @@
-namespace Cart.Products.UpdatingStock;
+namespace Shipment.Products.UpdatingStock;
 
 public record ProductStockChanged(
-    Guid ProductId,
+    Guid Id,
     int Stock
 );

@@ -3,9 +3,9 @@ using FW.Core.Events;
 namespace Store.Products.RemovingProduct;
 
 public record ProductRemoved(
-    Guid ProductId
+    Guid Id
 ) : IExternalEvent
 {
-    public static ProductRemoved Create(Guid productId) =>
-        new(productId);
+    public static ProductRemoved Create(Guid id) =>
+        new(id);
 }

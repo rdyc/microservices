@@ -1,5 +1,5 @@
 namespace Cart.Products.RemovingProduct;
 
 public record ProductRemoved(
-    Guid ProductId
+    Guid Id
 );

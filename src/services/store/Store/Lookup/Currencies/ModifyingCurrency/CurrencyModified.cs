@@ -1,7 +1,7 @@
 namespace Store.Lookup.Currencies.ModifyingCurrency;
 
 public record CurrencyModified(
-    Guid CurrencyId,
+    Guid Id,
     string Name,
     string Code,
     string Symbol

@@ -3,10 +3,10 @@ using FW.Core.Events;
 namespace Store.Products.ShippingProduct;
 
 public record ProductShipped(
-    Guid ProductId,
+    Guid Id,
     int Quantity
 ) : IExternalEvent
 {
-    public static ProductShipped Create(Guid productId, int quantity) =>
-        new(productId, quantity);
+    public static ProductShipped Create(Guid id, int quantity) =>
+        new(id, quantity);
 }

@@ -1,17 +1,17 @@
 namespace Cart.Carts.CancelingCart;
 
 public record CartCanceled(
-    Guid CartId,
+    Guid Id,
     DateTime CanceledAt
 )
 {
-    public static CartCanceled Create(Guid cartId, DateTime canceledAt)
+    public static CartCanceled Create(Guid id, DateTime canceledAt)
     {
-        if (cartId == Guid.Empty)
-            throw new ArgumentNullException(nameof(cartId));
+        if (id == Guid.Empty)
+            throw new ArgumentNullException(nameof(id));
         if (canceledAt == default)
             throw new ArgumentNullException(nameof(canceledAt));
 
-        return new CartCanceled(cartId, canceledAt);
+        return new CartCanceled(id, canceledAt);
     }
 }

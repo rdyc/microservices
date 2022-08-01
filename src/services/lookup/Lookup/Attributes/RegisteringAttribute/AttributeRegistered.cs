@@ -3,7 +3,7 @@ using FW.Core.Events;
 namespace Lookup.Attributes.RegisteringAttribute;
 
 public record AttributeRegistered(
-    Guid AttributeId,
+    Guid Id,
     string Name,
     AttributeType Type,
     string Unit,
@@ -11,10 +11,10 @@ public record AttributeRegistered(
 ) : IExternalEvent
 {
     public static AttributeRegistered Create(
-        Guid attributeId,
+        Guid id,
         string name,
         AttributeType type,
         string unit,
         LookupStatus status
-    ) => new(attributeId, name, type, unit, status);
+    ) => new(id, name, type, unit, status);
 }

@@ -48,7 +48,7 @@ internal static class CurrencyServices
             .Projection<CurrencyShortInfo>(builder => builder
                 .AddOn<CurrencyRegistered>(CurrencyShortInfoProjection.Handle)
                 .UpdateOn<CurrencyModified>(
-                    onGet: e => e.CurrencyId,
+                    onGet: e => e.Id,
                     onHandle: CurrencyShortInfoProjection.Handle,
                     onUpdate: (view, update) => update
                         .Set(e => e.Name, view.Name)
@@ -58,7 +58,7 @@ internal static class CurrencyServices
                         .Set(e => e.Position, view.Position)
                 )
                 .UpdateOn<CurrencyRemoved>(
-                    onGet: e => e.CurrencyId,
+                    onGet: e => e.Id,
                     onHandle: CurrencyShortInfoProjection.Handle,
                     onUpdate: (view, update) => update
                         .Set(e => e.Status, view.Status)

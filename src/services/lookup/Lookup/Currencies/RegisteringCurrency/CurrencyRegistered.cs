@@ -3,7 +3,7 @@ using FW.Core.Events;
 namespace Lookup.Currencies.RegisteringCurrency;
 
 public record CurrencyRegistered(
-    Guid CurrencyId,
+    Guid Id,
     string Name,
     string Code,
     string Symbol,
@@ -11,10 +11,10 @@ public record CurrencyRegistered(
 ) : IExternalEvent
 {
     public static CurrencyRegistered Create(
-        Guid currencyId,
+        Guid id,
         string name,
         string code,
         string symbol,
         LookupStatus status
-    ) => new (currencyId, name, code, symbol, status);
+    ) => new (id, name, code, symbol, status);
 }

@@ -2,7 +2,7 @@ namespace Shipment.Packages;
 
 public enum PackageStatus
 {
-    Pending,
+    Prepared,
     Discarded,
     Sent
 }

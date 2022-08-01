@@ -1,7 +1,7 @@
 namespace Store.Lookup.Currencies.RegisteringCurrency;
 
 public record CurrencyRegistered(
-    Guid CurrencyId,
+    Guid Id,
     string Name,
     string Code,
     string Symbol,

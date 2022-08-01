@@ -5,6 +5,9 @@ using Order.Orders.CancellingOrder;
 using Order.Orders.CompletingOrder;
 using Order.Orders.InitializingOrder;
 using Order.Orders.RecordingOrderPayment;
+using Order.Shipments.DiscardingPackage;
+using Order.Shipments.RequestingPackage;
+using Order.Shipments.SendingPackage;
 
 namespace Order.Orders.GettingOrderHistory;
 
@@ -58,6 +61,39 @@ public class OrderHistoryProjection
         return OrderHistory.Create(
             eventEnvelope.Data.OrderId,
             $"Paid at: {recordedAt} with paymentId: {paymentId}",
+            eventEnvelope.Metadata
+        );
+    }
+
+    public static OrderHistory Handle(EventEnvelope<PackagePrepared> eventEnvelope)
+    {
+        var (packageId, _, preparedAt) = eventEnvelope.Data;
+
+        return OrderHistory.Create(
+            eventEnvelope.Data.OrderId,
+            $"Package processed at: {preparedAt} with packageId: {packageId}",
+            eventEnvelope.Metadata
+        );
+    }
+
+    public static OrderHistory Handle(EventEnvelope<PackageWasSent> eventEnvelope)
+    {
+        var (_, _, _, sentAt) = eventEnvelope.Data;
+
+        return OrderHistory.Create(
+            eventEnvelope.Data.OrderId,
+            $"Package was sent at: {sentAt}",
+            eventEnvelope.Metadata
+        );
+    }
+
+    public static OrderHistory Handle(EventEnvelope<ProductWasOutOfStock> eventEnvelope)
+    {
+        var (_, _, checkedAt) = eventEnvelope.Data;
+
+        return OrderHistory.Create(
+            eventEnvelope.Data.OrderId,
+            $"Product was out of stock, avaibility checked at: {checkedAt}",
             eventEnvelope.Metadata
         );
     }

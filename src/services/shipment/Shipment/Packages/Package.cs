@@ -37,13 +37,13 @@ public class Package : Aggregate
         Id = @event.PackageId;
         OrderId = @event.OrderId;
         PreparedAt = @event.PreparedAt;
-        Status = PackageStatus.Pending;
+        Status = PackageStatus.Prepared;
         Version = 0;
     }
 
     public void Sent(IEnumerable<PackageItem> items, DateTime sentAt)
     {
-        if (Status != PackageStatus.Pending)
+        if (Status != PackageStatus.Prepared)
             throw new InvalidOperationException($"Sending package in '{Status}' status is not allowed.");
 
         var @event = PackageWasSent.Create(Id, OrderId, items, sentAt);
@@ -62,7 +62,7 @@ public class Package : Aggregate
 
     public void Discard(DateTime checkedAt)
     {
-        if (Status != PackageStatus.Pending)
+        if (Status != PackageStatus.Prepared)
             throw new InvalidOperationException($"Discarding package in '{Status}' status is not allowed.");
 
         var @event = ProductWasOutOfStock.Create(Id, OrderId, checkedAt);

@@ -86,7 +86,7 @@ public class ProductProjection
         if (view.Attributes is null)
             view.Attributes = new List<ProductAttribute>();
 
-        var (_, id, name, type, unit, value) = eventEnvelope.Data;
+        var (id, name, type, unit, value) = eventEnvelope.Data.Attribute;
 
         view.Attributes.Add(ProductAttribute.Create(id, name, type, unit, value));
         view.Version = eventEnvelope.Metadata.StreamPosition;
@@ -100,7 +100,7 @@ public class ProductProjection
 
         if (view.Attributes != null)
         {
-            var (_, id, name, type, unit, value) = eventEnvelope.Data;
+            var (id, name, type, unit, value) = eventEnvelope.Data.Attribute;
 
             var removedAttribute = view.Attributes
                 .SingleOrDefault(e => e.Id.Equals(id) && e.Value.Equals(value));

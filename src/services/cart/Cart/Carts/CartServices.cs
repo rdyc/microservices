@@ -63,7 +63,7 @@ internal static class CartsServices
             .Projection<CartShortInfo>(builder => builder
                 .AddOn<CartOpened>(CartShortInfoProjection.Handle)
                 .UpdateOn<CartProductAdded>(
-                    onGet: e => e.CartId,
+                    onGet: e => e.Id,
                     onHandle: CartShortInfoProjection.Handle,
                     onUpdate: (view, update) => update
                         .Set(e => e.TotalItemsCount, view.TotalItemsCount)
@@ -71,7 +71,7 @@ internal static class CartsServices
                         .Set(e => e.Position, view.Position)
                 )
                 .UpdateOn<CartProductRemoved>(
-                    onGet: e => e.CartId,
+                    onGet: e => e.Id,
                     onHandle: CartShortInfoProjection.Handle,
                     onUpdate: (view, update) => update
                         .Set(e => e.TotalItemsCount, view.TotalItemsCount)
@@ -79,7 +79,7 @@ internal static class CartsServices
                         .Set(e => e.Position, view.Position)
                 )
                 .UpdateOn<CartConfirmed>(
-                    onGet: e => e.CartId,
+                    onGet: e => e.Id,
                     onHandle: CartShortInfoProjection.Handle,
                     onUpdate: (view, update) => update
                         .Set(e => e.Status, view.Status)
@@ -88,7 +88,7 @@ internal static class CartsServices
                         .Set(e => e.Position, view.Position)
                 )
                 .UpdateOn<CartCanceled>(
-                    onGet: e => e.CartId,
+                    onGet: e => e.Id,
                     onHandle: CartShortInfoProjection.Handle,
                     onUpdate: (view, update) => update
                         .Set(e => e.Status, view.Status)
@@ -100,7 +100,7 @@ internal static class CartsServices
             .Projection<CartDetails>(builder => builder
                 .AddOn<CartOpened>(CartDetailsProjection.Handle)
                 .UpdateOn<CartProductAdded>(
-                    onGet: e => e.CartId,
+                    onGet: e => e.Id,
                     onHandle: CartDetailsProjection.Handle,
                     onUpdate: (view, update) => update
                         .Set(e => e.Products, view.Products)
@@ -109,7 +109,7 @@ internal static class CartsServices
                         .Set(e => e.Position, view.Position)
                 )
                 .UpdateOn<CartProductRemoved>(
-                    onGet: e => e.CartId,
+                    onGet: e => e.Id,
                     onHandle: CartDetailsProjection.Handle,
                     onUpdate: (view, update) => update
                         .Set(e => e.Products, view.Products)
@@ -118,7 +118,7 @@ internal static class CartsServices
                         .Set(e => e.Position, view.Position)
                 )
                 .UpdateOn<CartConfirmed>(
-                    onGet: e => e.CartId,
+                    onGet: e => e.Id,
                     onHandle: CartDetailsProjection.Handle,
                     onUpdate: (view, update) => update
                         .Set(e => e.Status, view.Status)
@@ -127,7 +127,7 @@ internal static class CartsServices
                         .Set(e => e.Position, view.Position)
                 )
                 .UpdateOn<CartCanceled>(
-                    onGet: e => e.CartId,
+                    onGet: e => e.Id,
                     onHandle: CartDetailsProjection.Handle,
                     onUpdate: (view, update) => update
                         .Set(e => e.Status, view.Status)

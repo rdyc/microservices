@@ -1,6 +1,6 @@
 using Shipment.Lookup.Attributes;
 
-namespace Cart.Products;
+namespace Shipment.Products;
 
 public record ProductAttribute(
     Guid Id,

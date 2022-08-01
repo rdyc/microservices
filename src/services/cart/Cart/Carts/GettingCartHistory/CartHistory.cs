@@ -43,10 +43,10 @@ public class CartHistoryProjection
 {
     public static CartHistory Handle(EventEnvelope<CartOpened> eventEnvelope)
     {
-        var (cartId, clientId, status) = eventEnvelope.Data;
+        var (id, clientId, status) = eventEnvelope.Data;
 
         return CartHistory.Create(
-            cartId,
+            id,
             $"Opened as clientId: {clientId} and status: {status}",
             eventEnvelope.Metadata
         );
@@ -57,7 +57,7 @@ public class CartHistoryProjection
         var (_, sku, name, quantity, currency, price) = eventEnvelope.Data.Product;
 
         return CartHistory.Create(
-            eventEnvelope.Data.CartId,
+            eventEnvelope.Data.Id,
             $"Added product for sku: {sku}, name: {name}, quantity: {quantity} and price: {currency.Symbol} {price}",
             eventEnvelope.Metadata
         );
@@ -68,7 +68,7 @@ public class CartHistoryProjection
         var (_, sku, name, quantity, currency, price) = eventEnvelope.Data.Product;
 
         return CartHistory.Create(
-            eventEnvelope.Data.CartId,
+            eventEnvelope.Data.Id,
             $"Removed product for sku: {sku}, name: {name}, quantity: {quantity} and price: {currency.Symbol} {price}",
             eventEnvelope.Metadata
         );
@@ -76,14 +76,14 @@ public class CartHistoryProjection
 
     public static CartHistory Handle(EventEnvelope<CartConfirmed> eventEnvelope) =>
         CartHistory.Create(
-            eventEnvelope.Data.CartId,
+            eventEnvelope.Data.Id,
             $"Confirmed at {eventEnvelope.Data.ConfirmedAt}",
             eventEnvelope.Metadata
         );
 
     public static CartHistory Handle(EventEnvelope<CartCanceled> eventEnvelope) =>
         CartHistory.Create(
-            eventEnvelope.Data.CartId,
+            eventEnvelope.Data.Id,
             $"Cancelled at {eventEnvelope.Data.CanceledAt}",
             eventEnvelope.Metadata
         );

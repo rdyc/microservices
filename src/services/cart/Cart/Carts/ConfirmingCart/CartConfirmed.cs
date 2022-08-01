@@ -1,17 +1,17 @@
 namespace Cart.Carts.ConfirmingCart;
 
 public record CartConfirmed(
-    Guid CartId,
+    Guid Id,
     DateTime ConfirmedAt
 )
 {
-    public static CartConfirmed Create(Guid cartId, DateTime confirmedAt)
+    public static CartConfirmed Create(Guid id, DateTime confirmedAt)
     {
-        if (cartId == Guid.Empty)
-            throw new ArgumentNullException(nameof(cartId));
+        if (id == Guid.Empty)
+            throw new ArgumentNullException(nameof(id));
         if (confirmedAt == default)
             throw new ArgumentNullException(nameof(confirmedAt));
 
-        return new(cartId, confirmedAt);
+        return new(id, confirmedAt);
     }
 }

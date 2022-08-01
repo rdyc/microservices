@@ -3,16 +3,16 @@ using FW.Core.Events;
 namespace Store.Products.ModifyingProduct;
 
 public record ProductModified(
-    Guid ProductId,
+    Guid Id,
     string Sku,
     string Name,
     string Description
 ) : IExternalEvent
 {
     public static ProductModified Create(
-        Guid productId,
+        Guid id,
         string sku,
         string name,
         string description
-    ) => new(productId, sku, name, description);
+    ) => new(id, sku, name, description);
 }

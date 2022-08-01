@@ -27,7 +27,7 @@ public class Currency : Aggregate
 
     public void Apply(CurrencyRegistered evt)
     {
-        Id = evt.CurrencyId;
+        Id = evt.Id;
         Name = evt.Name;
         Code = evt.Code;
         Symbol = evt.Symbol;

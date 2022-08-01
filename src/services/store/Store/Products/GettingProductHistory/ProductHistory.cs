@@ -69,10 +69,10 @@ public class ProductHistoryProjection
 
     public static ProductHistory Handle(EventEnvelope<ProductAttributeAdded> eventEnvelope)
     {
-        var (id, _, name, type, unit, value) = eventEnvelope.Data;
+        var (id, name, type, unit, value) = eventEnvelope.Data.Attribute;
 
         return ProductHistory.Create(
-            id,
+            eventEnvelope.Data.Id,
             $"Added attribute with name: {name}, type: {type}, unit: {unit} and value: {value}",
             eventEnvelope.Metadata
         );
@@ -80,10 +80,10 @@ public class ProductHistoryProjection
 
     public static ProductHistory Handle(EventEnvelope<ProductAttributeRemoved> eventEnvelope)
     {
-        var (id, _, name, type, unit, value) = eventEnvelope.Data;
+        var (_, name, type, unit, value) = eventEnvelope.Data.Attribute;
 
         return ProductHistory.Create(
-            id,
+            eventEnvelope.Data.Id,
             $"Removed attribute for name: {name}, type: {type}, unit: {unit} and value: {value}",
             eventEnvelope.Metadata
         );
@@ -122,5 +122,5 @@ public class ProductHistoryProjection
     }
 
     public static ProductHistory Handle(EventEnvelope<ProductRemoved> eventEnvelope) =>
-        ProductHistory.Create(eventEnvelope.Data.ProductId, "Removed", eventEnvelope.Metadata);
+        ProductHistory.Create(eventEnvelope.Data.Id, "Removed", eventEnvelope.Metadata);
 }

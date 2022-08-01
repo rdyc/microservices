@@ -40,18 +40,19 @@ internal class HandleCartFinalized : IEventHandler<EventEnvelope<CartConfirmed>>
 
     public async Task Handle(EventEnvelope<CartConfirmed> @event, CancellationToken cancellationToken)
     {
-        var cart = await eventStore.AggregateStream<Cart>(@event.Data.CartId, cancellationToken);
+        var (id, confirmedAt) = @event.Data;
+        var cart = await eventStore.AggregateStream<Cart>(id, cancellationToken);
 
         if (cart == null)
-            throw AggregateNotFoundException.For<Cart>(@event.Data.CartId);
+            throw AggregateNotFoundException.For<Cart>(id);
 
         var externalEvent = new EventEnvelope<CartFinalized>(
             CartFinalized.Create(
-                @event.Data.CartId,
+                id,
                 cart.ClientId,
                 cart.Products,
                 cart.TotalPrice,
-                @event.Data.ConfirmedAt
+                confirmedAt
             ),
             @event.Metadata
         );

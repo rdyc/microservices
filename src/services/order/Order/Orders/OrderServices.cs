@@ -140,6 +140,9 @@ internal static class OrderServices
             .Projection<OrderHistory>(builder => builder
                 .AddOn<OrderInitialized>(OrderHistoryProjection.Handle)
                 .AddOn<OrderPaymentRecorded>(OrderHistoryProjection.Handle)
+                .AddOn<PackagePrepared>(OrderHistoryProjection.Handle)
+                .AddOn<PackageWasSent>(OrderHistoryProjection.Handle)
+                .AddOn<ProductWasOutOfStock>(OrderHistoryProjection.Handle)
                 .AddOn<OrderCancelled>(OrderHistoryProjection.Handle)
                 .AddOn<OrderCompleted>(OrderHistoryProjection.Handle)
             );

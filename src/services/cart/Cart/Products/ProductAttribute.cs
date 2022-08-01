@@ -31,4 +31,13 @@ public record ProductAttribute
 
     [BsonElement("value")]
     public string Value { get; set; } = default!;
+
+    public void Deconstruct(out Guid id, out string name, out AttributeType type, out string unit, out string value)
+    {
+        id = Id;
+        name = Name;
+        type = Type;
+        unit = Unit;
+        value = Value;
+    }
 }
