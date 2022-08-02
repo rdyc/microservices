@@ -11,8 +11,8 @@ services:
       - 5432:5432
     networks:
       - pg_network
-    volumes:
-      - ${DOCKER_VOLUMES}/postgres-plv8/data:/var/lib/postgresql/data
+    # volumes:
+    #   - ${DOCKER_VOLUMES}/postgres-plv8/data:/var/lib/postgresql/data
     restart: always
 
   # MongoDB
@@ -24,8 +24,8 @@ services:
       MONGO_INITDB_ROOT_PASSWORD: P@ssw0rd!
     ports:
       - 27017:27017
-    volumes:
-      - ${DOCKER_VOLUMES}/mongo/db/:/data/db
+    # volumes:
+    #   - ${DOCKER_VOLUMES}/mongo/db/:/data/db
     restart: always
 
   # Event Store DB
@@ -44,44 +44,46 @@ services:
     ports:
       - 1113:1113
       - 2113:2113
-    volumes:
-      - ${DOCKER_VOLUMES}/eventstore/data:/var/lib/eventstore
-      - ${DOCKER_VOLUMES}/eventstore/logs:/var/log/eventstore
+    # volumes:
+    #   - ${DOCKER_VOLUMES}/eventstore/data:/var/lib/eventstore
+    #   - ${DOCKER_VOLUMES}/eventstore/logs:/var/log/eventstore
     networks:
       - esdb_network
     restart: always
 
   # Elastic
-  # elasticsearch:
-  #   image: docker.elastic.co/elasticsearch/elasticsearch:7.13.3
-  #   container_name: elasticsearch
-  #   environment:
-  #     - discovery.type=single-node
-  #     - bootstrap.memory_lock=true
-  #     - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
-  #   ulimits:
-  #     memlock:
-  #       soft: -1
-  #       hard: -1
-  #   volumes:
-  #     - ${DOCKER_VOLUMES}/elasticsearch/data:/usr/share/elasticsearch/data
-  #   ports:
-  #     - 9200:9200
-  #     - 9300:9300
-  #   networks:
-  #     - es_network
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:7.13.3
+    container_name: elasticsearch
+    environment:
+      - discovery.type=single-node
+      - bootstrap.memory_lock=true
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    # volumes:
+    #   - ${DOCKER_VOLUMES}/elasticsearch/data:/usr/share/elasticsearch/data
+    ports:
+      - 9200:9200
+      - 9300:9300
+    networks:
+      - es_network
+    restart: always
 
-  # kibana:
-  #   image: docker.elastic.co/kibana/kibana:7.13.3
-  #   container_name: kibana
-  #   environment:
-  #     ELASTICSEARCH_HOSTS: http://elastic_search:9200
-  #   ports:
-  #     - 5601:5601
-  #   networks:
-  #     - es_network
-  #   depends_on:
-  #     - elasticsearch
+  kibana:
+    image: docker.elastic.co/kibana/kibana:7.13.3
+    container_name: kibana
+    environment:
+      ELASTICSEARCH_HOSTS: http://elastic_search:9200
+    ports:
+      - 5601:5601
+    networks:
+      - es_network
+    depends_on:
+      - elasticsearch
+    restart: always
 
   # Zookeeper
   zookeeper:
@@ -95,9 +97,9 @@ services:
     environment:
       ZOOKEEPER_CLIENT_PORT: 2181
       ZOOKEEPER_TICK_TIME: 2000
-    volumes: 
-      - ${DOCKER_VOLUMES}/zookeeper/data:/var/lib/zookeeper/data
-      - ${DOCKER_VOLUMES}/zookeeper/log:/var/lib/zookeeper/log
+    # volumes: 
+    #   - ${DOCKER_VOLUMES}/zookeeper/data:/var/lib/zookeeper/data
+    #   - ${DOCKER_VOLUMES}/zookeeper/log:/var/lib/zookeeper/log
     restart: always
   
   # Kafka
@@ -119,8 +121,8 @@ services:
       KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
       KAFKA_ZOOKEEPER_CONNECT: 'zookeeper:2181'
-    volumes: 
-      - ${DOCKER_VOLUMES}/kafka/data:/var/lib/kafka/data
+    # volumes: 
+    #   - ${DOCKER_VOLUMES}/kafka/data:/var/lib/kafka/data
     restart: always
   
   kafka_init:
@@ -139,6 +141,7 @@ services:
       echo -e 'Creating kafka topics'
       kafka-topics --bootstrap-server kafka:29092 --create --if-not-exists --topic Lookups --replication-factor 1 --partitions 1
       kafka-topics --bootstrap-server kafka:29092 --create --if-not-exists --topic Stores --replication-factor 1 --partitions 1
+      kafka-topics --bootstrap-server kafka:29092 --create --if-not-exists --topic Search --replication-factor 1 --partitions 1
       kafka-topics --bootstrap-server kafka:29092 --create --if-not-exists --topic Carts --replication-factor 1 --partitions 1
       kafka-topics --bootstrap-server kafka:29092 --create --if-not-exists --topic Orders --replication-factor 1 --partitions 1
       kafka-topics --bootstrap-server kafka:29092 --create --if-not-exists --topic Payments --replication-factor 1 --partitions 1
@@ -203,6 +206,8 @@ services:
     restart: always
   
 networks:
+  es_network:
+    driver: bridge
   pg_network:
     driver: bridge
   esdb_network:

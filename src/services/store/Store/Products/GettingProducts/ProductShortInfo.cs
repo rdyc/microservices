@@ -1,7 +1,6 @@
 using FW.Core.Events;
 using FW.Core.MongoDB;
 using MongoDB.Bson.Serialization.Attributes;
-using Store.Lookup.Currencies;
 using Store.Products.ModifyingProduct;
 using Store.Products.RegisteringProduct;
 using Store.Products.RemovingProduct;
