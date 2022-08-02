@@ -1,0 +1,184 @@
+{
+  "Routes": [
+    {
+      "DownstreamPathTemplate": "/{everything}",
+      "DownstreamScheme": "https",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "localhost",
+          "Port": 7022
+        }
+      ],
+      "UpstreamPathTemplate": "/lookup/{everything}",
+      "UpstreamHttpMethod": [
+        "Get", "Post", "Put", "Delete"
+      ],
+      "SwaggerKey": "lookup"
+    },
+    {
+      "DownstreamPathTemplate": "/{everything}",
+      "DownstreamScheme": "https",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "localhost",
+          "Port": 7249
+        }
+      ],
+      "UpstreamPathTemplate": "/store/{everything}",
+      "UpstreamHttpMethod": [
+        "Get", "Post", "Put", "Delete"
+      ],
+      "SwaggerKey": "store"
+    },
+    {
+      "DownstreamPathTemplate": "/{everything}",
+      "DownstreamScheme": "https",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "localhost",
+          "Port": 7224
+        }
+      ],
+      "UpstreamPathTemplate": "/cart/{everything}",
+      "UpstreamHttpMethod": [
+        "Get", "Post", "Put", "Delete"
+      ],
+      "SwaggerKey": "cart"
+    },
+    {
+      "DownstreamPathTemplate": "/{everything}",
+      "DownstreamScheme": "https",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "localhost",
+          "Port": 7016
+        }
+      ],
+      "UpstreamPathTemplate": "/order/{everything}",
+      "UpstreamHttpMethod": [
+        "Get", "Post", "Put", "Delete"
+      ],
+      "SwaggerKey": "order"
+    },
+    {
+      "DownstreamPathTemplate": "/{everything}",
+      "DownstreamScheme": "https",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "localhost",
+          "Port": 7123
+        }
+      ],
+      "UpstreamPathTemplate": "/payment/{everything}",
+      "UpstreamHttpMethod": [
+        "Get", "Post", "Put", "Delete"
+      ],
+      "SwaggerKey": "payment"
+    },
+    {
+      "DownstreamPathTemplate": "/{everything}",
+      "DownstreamScheme": "https",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "localhost",
+          "Port": 7207
+        }
+      ],
+      "UpstreamPathTemplate": "/shipment/{everything}",
+      "UpstreamHttpMethod": [
+        "Get", "Post", "Put", "Delete"
+      ],
+      "SwaggerKey": "shipment"
+    },
+    {
+      "DownstreamPathTemplate": "/{everything}",
+      "DownstreamScheme": "https",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "localhost",
+          "Port": 7141
+        }
+      ],
+      "UpstreamPathTemplate": "/search/{everything}",
+      "UpstreamHttpMethod": [
+        "Get", "Post", "Put", "Delete"
+      ],
+      "SwaggerKey": "search"
+    }
+  ],
+  "SwaggerEndPoints": [
+    {
+      "Key": "lookup",
+      "Config": [
+        {
+          "Name": "Lookup API",
+          "Version": "v1",
+          "Url": "https://localhost:7022/swagger/v1/swagger.json"
+        }
+      ]
+    },
+    {
+      "Key": "store",
+      "Config": [
+        {
+          "Name": "Store API",
+          "Version": "v1",
+          "Url": "https://localhost:7249/swagger/v1/swagger.json"
+        }
+      ]
+    },
+    {
+      "Key": "cart",
+      "Config": [
+        {
+          "Name": "Cart API",
+          "Version": "v1",
+          "Url": "https://localhost:7224/swagger/v1/swagger.json"
+        }
+      ]
+    },
+    {
+      "Key": "order",
+      "Config": [
+        {
+          "Name": "Order API",
+          "Version": "v1",
+          "Url": "https://localhost:7016/swagger/v1/swagger.json"
+        }
+      ]
+    },
+    {
+      "Key": "payment",
+      "Config": [
+        {
+          "Name": "Payment API",
+          "Version": "v1",
+          "Url": "https://localhost:7123/swagger/v1/swagger.json"
+        }
+      ]
+    },
+    {
+      "Key": "shipment",
+      "Config": [
+        {
+          "Name": "Shipment API",
+          "Version": "v1",
+          "Url": "https://localhost:7207/swagger/v1/swagger.json"
+        }
+      ]
+    },
+    {
+      "Key": "search",
+      "Config": [
+        {
+          "Name": "Search API",
+          "Version": "v1",
+          "Url": "https://localhost:7141/swagger/v1/swagger.json"
+        }
+      ]
+    }
+  ],
+  "GlobalConfiguration": {
+    "BaseUrl": "https://localhost:7156"
+  }
+}
