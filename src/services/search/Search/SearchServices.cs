@@ -13,15 +13,14 @@ public static class SearchServices
         services
             .AddElasticsearch(configuration, settings =>
             {
-                settings
-                    .DefaultMappingFor<Product>(m => m
-                        .PropertyName(p => p.Id, "id")
-                        .PropertyName(p => p.Sku, "sku")
-                        .PropertyName(p => p.Name, "name")
-                        .PropertyName(p => p.Description, "description")
-                        .PropertyName(p => p.IsActive, "is_active")
-                        .PropertyName(p => p.Version, "version")
-                    );
+                settings.DefaultMappingFor<Product>(m => m
+                    .PropertyName(p => p.Id, "id")
+                    .PropertyName(p => p.Sku, "sku")
+                    .PropertyName(p => p.Name, "name")
+                    .PropertyName(p => p.Description, "description")
+                    .PropertyName(p => p.Status, "status")
+                    .PropertyName(p => p.Version, "version")
+                );
             })
             .AddProduct();
 }

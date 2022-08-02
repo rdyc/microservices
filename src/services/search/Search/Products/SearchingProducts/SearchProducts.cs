@@ -4,11 +4,12 @@ using FW.Core.Queries;
 namespace Search.Products.SearchingProducts;
 
 public record SearchProducts(
-    string? Find
+    string? Find,
+    int? Size
 ) : IQuery<IReadOnlyCollection<Product>>
 {
-    public static SearchProducts Create(string? find) =>
-        new(find?.ToLower());
+    public static SearchProducts Create(string? find, int? size) =>
+        new(find?.ToLower(), size);
 }
 
 internal class HandleSearchProducts : IQueryHandler<SearchProducts, IReadOnlyCollection<Product>>
@@ -30,7 +31,7 @@ internal class HandleSearchProducts : IQueryHandler<SearchProducts, IReadOnlyCol
                 .Index(IndexNameMapper.ToIndexName<Product>())
                 .Query(q => q
                     .QueryString(qs => qs.AnalyzeWildcard()
-                        .Query($"*{query?.Find}*")
+                        .Query($"*{query.Find}*")
                         .Fields(fs => fs.Fields(
                             f1 => f1.Sku, 
                             f2 => f2.Name, 
@@ -40,12 +41,12 @@ internal class HandleSearchProducts : IQueryHandler<SearchProducts, IReadOnlyCol
                 )
                 .Query(q => q
                     .Bool(b => b
-                        .Should(
-                            bs => bs.Term(p => p.IsActive, true)
+                        .Should(s => s
+                            .Term(p => p.Status, ProductStatus.Available)
                         )
                     )
                 )
-                .Size(MaxItemsCount),
+                .Size(query.Size ?? MaxItemsCount),
             cancellationToken);
 
         return response.Documents;

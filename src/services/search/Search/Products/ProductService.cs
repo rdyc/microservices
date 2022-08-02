@@ -9,7 +9,7 @@ using Search.Products.SearchingProducts;
 
 namespace Search.Products;
 
-public static class Config
+public static class ProductService
 {
     public static IServiceCollection AddProduct(this IServiceCollection services) =>
         services

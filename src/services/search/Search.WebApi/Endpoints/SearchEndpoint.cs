@@ -11,14 +11,15 @@ public static class SearchEndpoint
 {
     [SwaggerOperation(Summary = "Search products", OperationId = "search", Tags = new[] { "Search" })]
     internal static async Task<IResult> Products(
-        [FromQuery] string? filter,
+        [FromQuery] string? find,
+        [FromQuery] int? size,
         [FromServices] IQueryBus query,
         [FromServices] ILoggerFactory logger,
         CancellationToken cancellationToken)
     {
         var log = logger.CreateLogger<Program>();
         var task = query.SendAsync<SearchProducts, IReadOnlyCollection<Product>>(
-            SearchProducts.Create(filter), cancellationToken);
+            SearchProducts.Create(find, size), cancellationToken);
 
         return await WithCancellation.TryExecute(
             task: task,
