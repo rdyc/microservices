@@ -1,179 +1,220 @@
 {
+  "ServiceDiscoveryProvider": {
+    "Scheme": "http",
+    "Host": "localhost",
+    "Port": 8500,
+    "Type": "Consul"
+  },
   "Routes": [
     {
       "DownstreamPathTemplate": "/{everything}",
       "DownstreamScheme": "https",
-      "DownstreamHostAndPorts": [
-        {
-          "Host": "localhost",
-          "Port": 7022
-        }
-      ],
       "UpstreamPathTemplate": "/lookup/{everything}",
       "UpstreamHttpMethod": [
-        "Get", "Post", "Put", "Delete"
+        "Get",
+        "Post",
+        "Put",
+        "Delete"
       ],
-      "SwaggerKey": "lookup"
+      "SwaggerKey": "lookup",
+      "ServiceName": "lookups",
+      "LoadBalancerOptions": {
+        "Type": "LeastConnection"
+      }
     },
     {
       "DownstreamPathTemplate": "/{everything}",
       "DownstreamScheme": "https",
-      "DownstreamHostAndPorts": [
-        {
-          "Host": "localhost",
-          "Port": 7249
-        }
-      ],
       "UpstreamPathTemplate": "/store/{everything}",
       "UpstreamHttpMethod": [
-        "Get", "Post", "Put", "Delete"
+        "Get",
+        "Post",
+        "Put",
+        "Delete"
       ],
-      "SwaggerKey": "store"
+      "SwaggerKey": "store",
+      "ServiceName": "stores",
+      "LoadBalancerOptions": {
+        "Type": "LeastConnection"
+      }
     },
     {
       "DownstreamPathTemplate": "/{everything}",
       "DownstreamScheme": "https",
-      "DownstreamHostAndPorts": [
-        {
-          "Host": "localhost",
-          "Port": 7224
-        }
-      ],
       "UpstreamPathTemplate": "/cart/{everything}",
       "UpstreamHttpMethod": [
-        "Get", "Post", "Put", "Delete"
+        "Get",
+        "Post",
+        "Put",
+        "Delete"
       ],
-      "SwaggerKey": "cart"
+      "SwaggerKey": "cart",
+      "ServiceName": "carts",
+      "LoadBalancerOptions": {
+        "Type": "LeastConnection"
+      }
     },
     {
       "DownstreamPathTemplate": "/{everything}",
       "DownstreamScheme": "https",
-      "DownstreamHostAndPorts": [
-        {
-          "Host": "localhost",
-          "Port": 7016
-        }
-      ],
       "UpstreamPathTemplate": "/order/{everything}",
       "UpstreamHttpMethod": [
-        "Get", "Post", "Put", "Delete"
+        "Get",
+        "Post",
+        "Put",
+        "Delete"
       ],
-      "SwaggerKey": "order"
+      "SwaggerKey": "order",
+      "ServiceName": "orders",
+      "LoadBalancerOptions": {
+        "Type": "LeastConnection"
+      }
     },
     {
       "DownstreamPathTemplate": "/{everything}",
       "DownstreamScheme": "https",
-      "DownstreamHostAndPorts": [
-        {
-          "Host": "localhost",
-          "Port": 7123
-        }
-      ],
       "UpstreamPathTemplate": "/payment/{everything}",
       "UpstreamHttpMethod": [
-        "Get", "Post", "Put", "Delete"
+        "Get",
+        "Post",
+        "Put",
+        "Delete"
       ],
-      "SwaggerKey": "payment"
+      "SwaggerKey": "payment",
+      "ServiceName": "payments",
+      "LoadBalancerOptions": {
+        "Type": "LeastConnection"
+      }
     },
     {
       "DownstreamPathTemplate": "/{everything}",
       "DownstreamScheme": "https",
-      "DownstreamHostAndPorts": [
-        {
-          "Host": "localhost",
-          "Port": 7207
-        }
-      ],
       "UpstreamPathTemplate": "/shipment/{everything}",
       "UpstreamHttpMethod": [
-        "Get", "Post", "Put", "Delete"
+        "Get",
+        "Post",
+        "Put",
+        "Delete"
       ],
-      "SwaggerKey": "shipment"
+      "SwaggerKey": "shipment",
+      "ServiceName": "shipments",
+      "LoadBalancerOptions": {
+        "Type": "LeastConnection"
+      }
     },
     {
       "DownstreamPathTemplate": "/{everything}",
       "DownstreamScheme": "https",
-      "DownstreamHostAndPorts": [
-        {
-          "Host": "localhost",
-          "Port": 7141
-        }
-      ],
-      "UpstreamPathTemplate": "/search/{everything}",
+      "UpstreamPathTemplate": "/index/{everything}",
       "UpstreamHttpMethod": [
-        "Get", "Post", "Put", "Delete"
+        "Get",
+        "Post",
+        "Put",
+        "Delete"
       ],
-      "SwaggerKey": "search"
+      "SwaggerKey": "search",
+      "ServiceName": "searchs",
+      "LoadBalancerOptions": {
+        "Type": "LeastConnection"
+      }
     }
   ],
   "SwaggerEndPoints": [
     {
       "Key": "lookup",
+      "TakeServersFromDownstreamService": true,
       "Config": [
         {
           "Name": "Lookup API",
-          "Version": "v1",
-          "Url": "https://localhost:7022/swagger/v1/swagger.json"
+          "Version": "V1",
+          "Service": {
+            "Name": "lookups",
+            "Path": "/swagger/v1/swagger.json"
+          }
         }
       ]
     },
     {
       "Key": "store",
+      "TakeServersFromDownstreamService": true,
       "Config": [
         {
           "Name": "Store API",
-          "Version": "v1",
-          "Url": "https://localhost:7249/swagger/v1/swagger.json"
+          "Version": "V1",
+          "Service": {
+            "Name": "stores",
+            "Path": "/swagger/v1/swagger.json"
+          }
         }
       ]
     },
     {
       "Key": "cart",
+      "TakeServersFromDownstreamService": true,
       "Config": [
         {
           "Name": "Cart API",
-          "Version": "v1",
-          "Url": "https://localhost:7224/swagger/v1/swagger.json"
+          "Version": "V1",
+          "Service": {
+            "Name": "carts",
+            "Path": "/swagger/v1/swagger.json"
+          }
         }
       ]
     },
     {
       "Key": "order",
+      "TakeServersFromDownstreamService": true,
       "Config": [
         {
           "Name": "Order API",
-          "Version": "v1",
-          "Url": "https://localhost:7016/swagger/v1/swagger.json"
+          "Version": "V1",
+          "Service": {
+            "Name": "orders",
+            "Path": "/swagger/v1/swagger.json"
+          }
         }
       ]
     },
     {
       "Key": "payment",
+      "TakeServersFromDownstreamService": true,
       "Config": [
         {
           "Name": "Payment API",
-          "Version": "v1",
-          "Url": "https://localhost:7123/swagger/v1/swagger.json"
+          "Version": "V1",
+          "Service": {
+            "Name": "payments",
+            "Path": "/swagger/v1/swagger.json"
+          }
         }
       ]
     },
     {
       "Key": "shipment",
+      "TakeServersFromDownstreamService": true,
       "Config": [
         {
           "Name": "Shipment API",
-          "Version": "v1",
-          "Url": "https://localhost:7207/swagger/v1/swagger.json"
+          "Version": "V1",
+          "Service": {
+            "Name": "shipments",
+            "Path": "/swagger/v1/swagger.json"
+          }
         }
       ]
     },
     {
       "Key": "search",
+      "TakeServersFromDownstreamService": true,
       "Config": [
         {
           "Name": "Search API",
-          "Version": "v1",
-          "Url": "https://localhost:7141/swagger/v1/swagger.json"
+          "Version": "V1",
+          "Service": {
+            "Name": "searchs",
+            "Path": "/swagger/v1/swagger.json"
+          }
         }
       ]
     }

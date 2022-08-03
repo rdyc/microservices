@@ -26,6 +26,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\..\frameworks\FW.Core.Consul\FW.Core.Consul.csproj" />
     <ProjectReference Include="..\..\..\frameworks\FW.Core.WebApi\FW.Core.WebApi.csproj" />
     <ProjectReference Include="..\Lookup\Lookup.csproj" />
   </ItemGroup>

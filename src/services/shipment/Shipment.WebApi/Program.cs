@@ -16,6 +16,8 @@ using FW.Core.WebApi.OptimisticConcurrency;
 using FW.Core.WebApi.Tracing;
 using Microsoft.AspNetCore.Http.Json;
 using Swashbuckle.AspNetCore.SwaggerUI;
+using Microsoft.OpenApi.Models;
+using FW.Core.Consul;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -38,6 +40,25 @@ builder.Services
     .AddEndpointsApiExplorer()
     .AddSwaggerGen(options =>
     {
+        var openApiInfo = new OpenApiInfo
+        {
+            Version = "v1",
+            Title = "Shipment API",
+            Description = "An unambitious e-commerce for shipment service",
+            Contact = new OpenApiContact
+            {
+                Name = "Ruddy Cahyadi",
+                Email = "ruddycahyadi@gmail.com",
+                Url = new Uri("https://github.com/rdyc")
+            },
+            License = new OpenApiLicense
+            {
+                Name = "GNU General Public License",
+                Url = new Uri("https://raw.githubusercontent.com/rdyc/microservices/main/LICENSE")
+            }
+        };
+
+        options.SwaggerDoc("v1", openApiInfo);
         options.EnableAnnotations();
         options.DescribeAllParametersInCamelCase();
     })
@@ -49,7 +70,9 @@ builder.Services
         sp => () => sp.GetRequiredService<EventStoreDBNextStreamRevisionProvider>().Value?.ToString()
     )
     .Configure<MongoDbSettings>(builder.Configuration.GetSection(nameof(MongoDbSettings)))
-    .AddShipmentServices(config);
+    .AddShipmentServices(config)
+    .AddConsul(config)
+    .AddHealthChecks();
 
 var app = builder.Build();
 
@@ -89,6 +112,9 @@ app.UseResponseTimeMiddleware()
             new HttpStatusCodeInfo(HttpStatusCode.InternalServerError, exception.Message)
     });
 
-app.UseShipmentEndpoints();
+app.MapHealthChecks("/hc");
+
+app.UseShipmentEndpoints()
+    .UseConsul(app.Lifetime);
 
 app.Run();

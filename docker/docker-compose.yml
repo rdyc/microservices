@@ -51,6 +51,18 @@ services:
       - esdb_network
     restart: always
 
+  # Consul
+  consul:
+    image: consul:1.12.3
+    container_name: consul
+    ports:
+      - 8500:8500
+    # volumes:
+    #   - ${DOCKER_VOLUMES}/consul/server.json:/consul/config/server.json:ro
+    networks:
+      - consul_network
+    restart: always
+
   # Elastic
   elasticsearch:
     image: docker.elastic.co/elasticsearch/elasticsearch:7.13.3
@@ -207,6 +219,8 @@ services:
   
 networks:
   es_network:
+    driver: bridge
+  consul_network:
     driver: bridge
   pg_network:
     driver: bridge

@@ -1,10 +1,12 @@
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using FW.Core;
+using FW.Core.Consul;
 using FW.Core.Kafka;
 using FW.Core.WebApi.Middlewares;
 using FW.Core.WebApi.Tracing;
 using Microsoft.AspNetCore.Http.Json;
+using Microsoft.OpenApi.Models;
 using Search;
 using Search.WebApi.Endpoints;
 using Swashbuckle.AspNetCore.SwaggerUI;
@@ -30,13 +32,34 @@ builder.Services
     .AddEndpointsApiExplorer()
     .AddSwaggerGen(options =>
     {
+        var openApiInfo = new OpenApiInfo
+        {
+            Version = "v1",
+            Title = "Search API",
+            Description = "An unambitious e-commerce for search service",
+            Contact = new OpenApiContact
+            {
+                Name = "Ruddy Cahyadi",
+                Email = "ruddycahyadi@gmail.com",
+                Url = new Uri("https://github.com/rdyc")
+            },
+            License = new OpenApiLicense
+            {
+                Name = "GNU General Public License",
+                Url = new Uri("https://raw.githubusercontent.com/rdyc/microservices/main/LICENSE")
+            }
+        };
+
+        options.SwaggerDoc("v1", openApiInfo);
         options.EnableAnnotations();
         options.DescribeAllParametersInCamelCase();
     })
     .AddCoreServices()
     .AddKafkaConsumer()
     .AddCorrelationIdMiddleware()
-    .AddSearchServices(config);
+    .AddSearchServices(config)
+    .AddConsul(config)
+    .AddHealthChecks();
 
 var app = builder.Build();
 
@@ -63,6 +86,9 @@ app.UseResponseTimeMiddleware()
     .UseCorrelationIdMiddleware()
     .UseExceptionHandlingMiddleware();
 
-app.UseSearchEndpoints();
+app.MapHealthChecks("/hc");
+
+app.UseSearchEndpoints()
+    .UseConsul(app.Lifetime);
 
 app.Run();

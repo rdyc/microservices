@@ -2,6 +2,7 @@ using FW.Core.WebApi.Middlewares;
 using Ocelot.Administration;
 using Ocelot.DependencyInjection;
 using Ocelot.Middleware;
+using Ocelot.Provider.Consul;
 using Swashbuckle.AspNetCore.SwaggerUI;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -20,7 +21,8 @@ builder.Services
     .AddSwaggerGen()
     .AddSwaggerForOcelot(builder.Configuration)
     .AddOcelot()
-        .AddAdministration("/admin", "secret");
+    .AddConsul()
+    .AddAdministration("/admin", "secret");
 
 var app = builder.Build();
 
