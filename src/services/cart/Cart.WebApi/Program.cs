@@ -7,10 +7,11 @@ using EventStore.Client;
 using FluentValidation;
 using FW.Core;
 using FW.Core.Consul;
+using FW.Core.EventStoreDB;
 using FW.Core.EventStoreDB.OptimisticConcurrency;
 using FW.Core.Exceptions;
 using FW.Core.Kafka;
-using FW.Core.MongoDB.Settings;
+using FW.Core.MongoDB;
 using FW.Core.Validation;
 using FW.Core.WebApi.Middlewares;
 using FW.Core.WebApi.OptimisticConcurrency;
@@ -69,9 +70,10 @@ builder.Services
         sp => sp.GetRequiredService<EventStoreDBExpectedStreamRevisionProvider>().TrySet,
         sp => () => sp.GetRequiredService<EventStoreDBNextStreamRevisionProvider>().Value?.ToString()
     )
-    .Configure<MongoDbSettings>(builder.Configuration.GetSection(nameof(MongoDbSettings)))
-    .AddCartServices(config)
+    .AddMongoDb(config)
+    .AddEventStoreDB(config)
     .AddConsul(config)
+    .AddCartServices()
     .AddHealthChecks();
 
 var app = builder.Build();

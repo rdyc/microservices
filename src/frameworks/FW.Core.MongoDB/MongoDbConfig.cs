@@ -1,12 +1,12 @@
-namespace FW.Core.MongoDB.Settings
+namespace FW.Core.MongoDB
 {
-    public interface IMongoDbSettings
+    public interface IMongoDbConfig
     {
         string DatabaseName { get; }
         string ConnectionString { get; }
     }
 
-    public class MongoDbSettings : IMongoDbSettings
+    public class MongoDbConfig : IMongoDbConfig
     {
         public string DatabaseName { get; set; } = default!;
         public string ConnectionString { get; set; } = default!;

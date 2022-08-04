@@ -1,7 +1,4 @@
-﻿using FW.Core.Events;
-using FW.Core.EventStoreDB;
-using FW.Core.MongoDB.Settings;
-using Microsoft.Extensions.Configuration;
+﻿using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using MongoDB.Driver;
@@ -12,15 +9,15 @@ public static class Configuration
 {
     public static IServiceCollection AddMongoDb(this IServiceCollection services, IConfiguration configuration) =>
         services
-            // .Configure<MongoDbSettings>(configuration.GetSection(nameof(MongoDbSettings)).Value)
-            .AddSingleton<IMongoDbSettings>(sp => sp.GetRequiredService<IOptions<MongoDbSettings>>().Value)
-            .AddSingleton(ctx => {
-                var option = ctx.GetRequiredService<IMongoDbSettings>(); 
-                return new MongoClient(connectionString: option.ConnectionString);
+            .Configure<MongoDbConfig>(configuration.GetSection("MongoDb"))
+            .AddSingleton<IMongoDbConfig>(sp => sp.GetRequiredService<IOptions<MongoDbConfig>>().Value)
+            .AddSingleton(sp => {
+                var config = sp.GetRequiredService<IMongoDbConfig>(); 
+                return new MongoClient(connectionString: config.ConnectionString);
             })
-            .AddSingleton(ctx => {
-                var option = ctx.GetRequiredService<IMongoDbSettings>(); 
-                var client = ctx.GetRequiredService<MongoClient>();
-                return client.GetDatabase(option.DatabaseName);
+            .AddSingleton(sp => {
+                var config = sp.GetRequiredService<IMongoDbConfig>(); 
+                var client = sp.GetRequiredService<MongoClient>();
+                return client.GetDatabase(config.DatabaseName);
             });
 }

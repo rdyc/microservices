@@ -10,12 +10,7 @@
       "DownstreamPathTemplate": "/{everything}",
       "DownstreamScheme": "https",
       "UpstreamPathTemplate": "/lookup/{everything}",
-      "UpstreamHttpMethod": [
-        "Get",
-        "Post",
-        "Put",
-        "Delete"
-      ],
+      "UpstreamHttpMethod": [ "Get", "Post", "Put", "Delete" ],
       "SwaggerKey": "lookup",
       "ServiceName": "lookups",
       "LoadBalancerOptions": {
@@ -26,12 +21,7 @@
       "DownstreamPathTemplate": "/{everything}",
       "DownstreamScheme": "https",
       "UpstreamPathTemplate": "/store/{everything}",
-      "UpstreamHttpMethod": [
-        "Get",
-        "Post",
-        "Put",
-        "Delete"
-      ],
+      "UpstreamHttpMethod": [ "Get", "Post", "Put", "Delete" ],
       "SwaggerKey": "store",
       "ServiceName": "stores",
       "LoadBalancerOptions": {
@@ -42,12 +32,7 @@
       "DownstreamPathTemplate": "/{everything}",
       "DownstreamScheme": "https",
       "UpstreamPathTemplate": "/cart/{everything}",
-      "UpstreamHttpMethod": [
-        "Get",
-        "Post",
-        "Put",
-        "Delete"
-      ],
+      "UpstreamHttpMethod": [ "Get", "Post", "Delete" ],
       "SwaggerKey": "cart",
       "ServiceName": "carts",
       "LoadBalancerOptions": {
@@ -58,12 +43,7 @@
       "DownstreamPathTemplate": "/{everything}",
       "DownstreamScheme": "https",
       "UpstreamPathTemplate": "/order/{everything}",
-      "UpstreamHttpMethod": [
-        "Get",
-        "Post",
-        "Put",
-        "Delete"
-      ],
+      "UpstreamHttpMethod": [ "Get" ],
       "SwaggerKey": "order",
       "ServiceName": "orders",
       "LoadBalancerOptions": {
@@ -74,12 +54,7 @@
       "DownstreamPathTemplate": "/{everything}",
       "DownstreamScheme": "https",
       "UpstreamPathTemplate": "/payment/{everything}",
-      "UpstreamHttpMethod": [
-        "Get",
-        "Post",
-        "Put",
-        "Delete"
-      ],
+      "UpstreamHttpMethod": [ "Get", "Post" ],
       "SwaggerKey": "payment",
       "ServiceName": "payments",
       "LoadBalancerOptions": {
@@ -90,12 +65,7 @@
       "DownstreamPathTemplate": "/{everything}",
       "DownstreamScheme": "https",
       "UpstreamPathTemplate": "/shipment/{everything}",
-      "UpstreamHttpMethod": [
-        "Get",
-        "Post",
-        "Put",
-        "Delete"
-      ],
+      "UpstreamHttpMethod": [ "Get", "Post" ],
       "SwaggerKey": "shipment",
       "ServiceName": "shipments",
       "LoadBalancerOptions": {
@@ -106,12 +76,7 @@
       "DownstreamPathTemplate": "/{everything}",
       "DownstreamScheme": "https",
       "UpstreamPathTemplate": "/index/{everything}",
-      "UpstreamHttpMethod": [
-        "Get",
-        "Post",
-        "Put",
-        "Delete"
-      ],
+      "UpstreamHttpMethod": [ "Get" ],
       "SwaggerKey": "search",
       "ServiceName": "searchs",
       "LoadBalancerOptions": {

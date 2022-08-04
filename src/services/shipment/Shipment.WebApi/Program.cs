@@ -9,7 +9,6 @@ using FW.Core;
 using FW.Core.EventStoreDB.OptimisticConcurrency;
 using FW.Core.Exceptions;
 using FW.Core.Kafka;
-using FW.Core.MongoDB.Settings;
 using FW.Core.Validation;
 using FW.Core.WebApi.Middlewares;
 using FW.Core.WebApi.OptimisticConcurrency;
@@ -18,6 +17,8 @@ using Microsoft.AspNetCore.Http.Json;
 using Swashbuckle.AspNetCore.SwaggerUI;
 using Microsoft.OpenApi.Models;
 using FW.Core.Consul;
+using FW.Core.MongoDB;
+using FW.Core.EventStoreDB;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -69,9 +70,10 @@ builder.Services
         sp => sp.GetRequiredService<EventStoreDBExpectedStreamRevisionProvider>().TrySet,
         sp => () => sp.GetRequiredService<EventStoreDBNextStreamRevisionProvider>().Value?.ToString()
     )
-    .Configure<MongoDbSettings>(builder.Configuration.GetSection(nameof(MongoDbSettings)))
-    .AddShipmentServices(config)
+    .AddMongoDb(config)
+    .AddEventStoreDB(config)
     .AddConsul(config)
+    .AddShipmentServices()
     .AddHealthChecks();
 
 var app = builder.Build();
