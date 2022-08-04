@@ -12,10 +12,6 @@ tasks.json
     "version": "2.0.0",
     "tasks": [
         {
-            "group": {
-                "kind": "build",
-                "isDefault": true
-            },
             "label": "build-lookup",
             "command": "dotnet",
             "type": "process",
@@ -26,7 +22,8 @@ tasks.json
                 "/consoleloggerparameters:NoSummary",
                 "--no-restore"
             ],
-            "problemMatcher": "$msCompile"
+            "problemMatcher": "$msCompile",
+            "group": "build"
         },
         {
             "label": "build-store",
@@ -42,6 +39,7 @@ tasks.json
             "problemMatcher": "$msCompile"
         },
         {
+            "group": "build",
             "label": "build-cart",
             "command": "dotnet",
             "type": "process",
@@ -65,7 +63,8 @@ tasks.json
                 "/consoleloggerparameters:NoSummary",
                 "--no-restore"
             ],
-            "problemMatcher": "$msCompile"
+            "problemMatcher": "$msCompile",
+            "group": "build"
         },
         {
             "label": "build-payment",
@@ -78,7 +77,8 @@ tasks.json
                 "/consoleloggerparameters:NoSummary",
                 "--no-restore"
             ],
-            "problemMatcher": "$msCompile"
+            "problemMatcher": "$msCompile",
+            "group": "build"
         },
         {
             "label": "build-shipment",
@@ -91,7 +91,42 @@ tasks.json
                 "/consoleloggerparameters:NoSummary",
                 "--no-restore"
             ],
-            "problemMatcher": "$msCompile"
+            "problemMatcher": "$msCompile",
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            }
+        },
+        {
+            "label": "build-search",
+            "command": "dotnet",
+            "type": "process",
+            "args": [
+                "build",
+                "${workspaceFolder}/src/services/search/Search.WebApi/Search.WebApi.csproj",
+                "/property:GenerateFullPaths=true",
+                "/consoleloggerparameters:NoSummary",
+                "--no-restore"
+            ],
+            "problemMatcher": "$msCompile",
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            }
+        },
+        {
+            "label": "build-gateway",
+            "command": "dotnet",
+            "type": "process",
+            "args": [
+                "build",
+                "${workspaceFolder}/src/gateway/Gateway.WebApi/Gateway.WebApi.csproj",
+                "/property:GenerateFullPaths=true",
+                "/consoleloggerparameters:NoSummary",
+                "--no-restore"
+            ],
+            "problemMatcher": "$msCompile",
+            "group": "build"
         }
     ]
 }
@@ -179,6 +214,47 @@ launch.json
             "env": {
                 "ASPNETCORE_ENVIRONMENT": "Development"
             }
+        },
+        {
+            "name": "search",
+            "type": "coreclr",
+            "request": "launch",
+            "preLaunchTask": "build-search",
+            "program": "${workspaceFolder}/src/services/search/Search.WebApi/bin/Debug/net6.0/Search.WebApi.dll",
+            "args": [],
+            "cwd": "${workspaceFolder}/src/services/search/Search.WebApi",
+            "stopAtEntry": false,
+            "env": {
+                "ASPNETCORE_ENVIRONMENT": "Development"
+            }
+        },
+        {
+            "name": "gateway",
+            "type": "coreclr",
+            "request": "launch",
+            "preLaunchTask": "build-gateway",
+            "program": "${workspaceFolder}/src/gateway/Gateway.WebApi/bin/Debug/net6.0/Gateway.WebApi.dll",
+            "args": [],
+            "cwd": "${workspaceFolder}/src/gateway/Gateway.WebApi",
+            "stopAtEntry": false,
+            "env": {
+                "ASPNETCORE_ENVIRONMENT": "Development"
+            }
+        }
+    ],
+    "compounds": [
+        {
+            "name": "everything",
+            "configurations": [
+                "lookup",
+                "store",
+                "cart",
+                "order",
+                "payment",
+                "shipment",
+                "search",
+                "gateway"
+            ]
         }
     ]
 }
