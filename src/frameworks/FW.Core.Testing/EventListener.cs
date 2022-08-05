@@ -7,7 +7,7 @@ public class EventsLog
     public List<object> PublishedEvents { get; } = new();
 }
 
-public class EventListener: IEventBus
+public class EventListener : IEventBus
 {
     private readonly IEventBus eventBus;
     private readonly EventsLog eventsLog;

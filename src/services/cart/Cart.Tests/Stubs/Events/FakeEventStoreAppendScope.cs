@@ -3,12 +3,12 @@ using FW.Core.Tracing;
 
 namespace Cart.Tests.Stubs.Events;
 
-public class DummyEventStoreAppendScope : IEventStoreDBAppendScope
+public class FakeEventStoreAppendScope : IEventStoreDBAppendScope
 {
     private readonly ulong? expectedVersion;
     private readonly TraceMetadata? traceMetadata;
 
-    public DummyEventStoreAppendScope(
+    public FakeEventStoreAppendScope(
         ulong? expectedVersion = null,
         TraceMetadata? traceMetadata = null
     )

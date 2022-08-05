@@ -1,19 +1,19 @@
 using System.Linq.Expressions;
+using FluentAssertions;
 using FW.Core.Events;
 using FW.Core.Events.External;
 using FW.Core.Requests;
-using FluentAssertions;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 
 namespace FW.Core.Testing;
 
-public class TestWebApplicationFactory<TProject>: WebApplicationFactory<TProject> where TProject : class
+public class TestWebApplicationFactory<TProject> : WebApplicationFactory<TProject> where TProject : class
 {
     private readonly EventsLog eventsLog = new();
-    private readonly DummyExternalEventProducer externalEventProducer = new();
-    private readonly DummyExternalCommandBus externalCommandBus = new();
+    private readonly FakeExternalEventProducer externalEventProducer = new();
+    private readonly FakeExternalCommandBus externalCommandBus = new();
 
     private readonly string schemaName = $"test{Guid.NewGuid().ToString("N").ToLower()}";
 
@@ -30,7 +30,7 @@ public class TestWebApplicationFactory<TProject>: WebApplicationFactory<TProject
                     )
                 )
                 .AddSingleton<IExternalCommandBus>(externalCommandBus)
-                .AddSingleton<IExternalEventConsumer, DummyExternalEventConsumer>();
+                .AddSingleton<IExternalEventConsumer, FakeExternalEventConsumer>();
         });
 
 

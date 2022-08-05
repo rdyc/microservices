@@ -3,7 +3,7 @@ using FW.Core.Requests;
 
 namespace FW.Core.Testing;
 
-public class DummyExternalCommandBus : IExternalCommandBus
+public class FakeExternalCommandBus : IExternalCommandBus
 {
     public IList<ICommand> SentCommands { get; } = new List<ICommand>();
 

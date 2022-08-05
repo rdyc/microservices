@@ -1,5 +1,4 @@
 using FW.Core.Aggregates;
-using FW.Core.Events;
 
 namespace FW.Core.Testing;
 

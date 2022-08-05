@@ -62,6 +62,7 @@ builder.Services
         options.SwaggerDoc("v1", openApiInfo);
         options.EnableAnnotations();
         options.DescribeAllParametersInCamelCase();
+        // options.OperationFilter<MetadataOperationFilter>();
     })
     .AddCoreServices()
     .AddKafkaProducerAndConsumer()
@@ -120,3 +121,7 @@ app.UseCartEndpoints()
     .UseConsul(app.Lifetime);
 
 app.Run();
+
+#pragma warning disable CA1050
+public partial class Program { }
+#pragma warning restore CA1050

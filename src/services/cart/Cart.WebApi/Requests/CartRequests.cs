@@ -12,7 +12,7 @@ public record AddProductRequest(
 public record RemoveProductRequest(
     Guid? ProductId,
     int? Quantity,
-    decimal? UnitPrice
+    decimal? Price
 );
 
 public record ConfirmCartRequest;

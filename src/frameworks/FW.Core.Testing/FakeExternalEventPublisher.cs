@@ -3,7 +3,7 @@ using FW.Core.Events.External;
 
 namespace FW.Core.Testing;
 
-public class DummyExternalEventProducer: IExternalEventProducer
+public class FakeExternalEventProducer : IExternalEventProducer
 {
     public IList<object> PublishedEvents { get; } = new List<object>();
 

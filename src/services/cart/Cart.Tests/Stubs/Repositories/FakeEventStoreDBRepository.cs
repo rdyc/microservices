@@ -4,11 +4,11 @@ using FW.Core.Tracing;
 
 namespace Cart.Tests.Stubs.Repositories;
 
-public class FakeRepository<T> : IEventStoreDBRepository<T> where T : class, IAggregate
+public class FakeEventStoreDBRepository<T> : IEventStoreDBRepository<T> where T : class, IAggregate
 {
     public Dictionary<Guid, T> Aggregates { get; private set; }
 
-    public FakeRepository(params T[] aggregates)
+    public FakeEventStoreDBRepository(params T[] aggregates)
     {
         Aggregates = aggregates.ToDictionary(ks=> ks.Id, vs => vs);
     }

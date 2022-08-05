@@ -5,16 +5,16 @@ using Cart.Tests.Stubs.Repositories;
 using FluentAssertions;
 using Xunit;
 
-namespace Cart.Tests.Carts.InitializingCart;
+namespace Cart.Tests.Carts.OpeningCart;
 
-public class OpenCardCommandHandlerTests
+public class OpenCartCommandHandlerTests
 {
     [Fact]
-    public async Task ForInitCardCommand_ShouldAddNewCart()
+    public async Task ForInitCartCommand_ShouldAddNewCart()
     {
         // Given
-        var repository = new FakeRepository<Cart.Carts.Cart>();
-        var scope = new DummyEventStoreAppendScope();
+        var repository = new FakeEventStoreDBRepository<Cart.Carts.Cart>();
+        var scope = new FakeEventStoreAppendScope();
 
         var commandHandler = new HandleOpenCart(
             repository,
@@ -26,7 +26,7 @@ public class OpenCardCommandHandlerTests
         // When
         await commandHandler.Handle(command, CancellationToken.None);
 
-        //Then
+        // Then
         repository.Aggregates.Should().HaveCount(1);
 
         var cart = repository.Aggregates.Values.Single();

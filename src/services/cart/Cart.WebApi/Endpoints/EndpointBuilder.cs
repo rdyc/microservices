@@ -15,7 +15,7 @@ internal static class EndpointBuilder
     {
         app.MapGet("/carts", CartEndpoint.Carts).Produces((int)HttpStatusCode.OK, typeof(IListPaged<CartShortInfo>));
         app.MapPost("/carts", CartEndpoint.Open).Produces((int)HttpStatusCode.Created, typeof(Guid));
-        app.MapGet("/carts/{cartId}", CartEndpoint.CartDetails).Produces((int)HttpStatusCode.OK, typeof(CartDetails));
+        app.MapGet("/carts/{cartId}", CartEndpoint.CartDetails).Produces((int)HttpStatusCode.OK, typeof(CartDetails)).WithName("cart");
         app.MapGet("/carts/{cartId}/version/{version}", CartEndpoint.CartAtVersion).Produces((int)HttpStatusCode.OK, typeof(Carts.Cart));
         app.MapGet("/carts/{cartId}/histories", CartEndpoint.Histories).Produces((int)HttpStatusCode.OK, typeof(IListPaged<CartHistory>));
         app.MapPost("/carts/{cartId}/products", CartEndpoint.Add).Produces((int)HttpStatusCode.Accepted, typeof(Guid));

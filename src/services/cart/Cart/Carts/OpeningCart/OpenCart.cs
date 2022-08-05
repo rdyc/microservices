@@ -48,9 +48,9 @@ internal class HandleOpenCart : ICommandHandler<OpenCart>
         this.scope = scope;
     }
 
-    public async Task<Unit> Handle(OpenCart command, CancellationToken cancellationToken)
+    public async Task<Unit> Handle(OpenCart request, CancellationToken cancellationToken)
     {
-        var (cartId, clientId) = command;
+        var (cartId, clientId) = request;
 
         await scope.Do((_, eventMetadata) =>
             cartRepository.Add(

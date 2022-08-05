@@ -112,7 +112,7 @@ internal static class CartEndpoint
 
         return await WithCancellation.TryExecute(
             task: task,
-            onCompleted: () => Results.Created(string.Empty, cartId),
+            onCompleted: () => Results.CreatedAtRoute("cart", new { cartId }, cartId),
             onCancelled: (ex) => log.LogWarning(ex.Message),
             cancellationToken: cancellationToken
         );

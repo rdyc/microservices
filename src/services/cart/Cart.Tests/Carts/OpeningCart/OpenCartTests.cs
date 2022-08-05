@@ -1,9 +1,9 @@
 using Cart.Tests.Extensions.Carts;
 using Xunit;
 
-namespace Cart.Tests.Carts.InitializingCart;
+namespace Cart.Tests.Carts.OpeningCart;
 
-public class InitializeCartTests
+public class OpenCartTests
 {
     [Fact]
     public void ForValidParams_ShouldCreateCartWithPendingStatus()
@@ -19,7 +19,6 @@ public class InitializeCartTests
         );
 
         // Then
-
         cart
             .IsOpenedCartWith(
                 cartId,
