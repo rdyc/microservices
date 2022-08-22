@@ -1,20 +1,6 @@
 version: '3'
 
 services:
-  # PostgreSQL
-  postgres:
-    image: clkao/postgres-plv8
-    container_name: postgres
-    environment:
-      POSTGRES_PASSWORD: P@ssw0rd!
-    ports:
-      - 5432:5432
-    networks:
-      - pg_network
-    # volumes:
-    #   - ${DOCKER_VOLUMES}/postgres-plv8/data:/var/lib/postgresql/data
-    restart: always
-
   # MongoDB
   mongo:
     image: mongo
@@ -162,7 +148,7 @@ services:
       echo -e 'Successfully created the following topics:'
       kafka-topics --bootstrap-server kafka:29092 --list
       "
-  
+
   schema_registry:
     image: confluentinc/cp-schema-registry:latest
     container_name: schema_registry

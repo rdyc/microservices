@@ -8,7 +8,7 @@ namespace Lookup.WebApi.Endpoints;
 
 internal static class EndpointBuilder
 {
-    public static IApplicationBuilder UseLookupEndpoints(this WebApplication app) =>
+    internal static IApplicationBuilder UseLookupEndpoints(this WebApplication app) =>
         app
             .UseCurrencyEndpoints()
             .UseAttributeEndpoints()

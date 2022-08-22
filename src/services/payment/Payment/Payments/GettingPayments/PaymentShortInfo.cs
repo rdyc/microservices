@@ -45,7 +45,7 @@ internal class PaymentShortInfoProjection
             OrderId = orderId,
             Amount = amount,
             RequestedAt = requestedAt,
-            ExpiredAt = requestedAt.AddHours(6),
+            ExpiredAt = requestedAt.AddHours(1),
             Status = PaymentStatus.Pending,
             Version = eventEnvelope.Metadata.StreamPosition,
             Position = eventEnvelope.Metadata.LogPosition

@@ -8,7 +8,7 @@ namespace Shipment.WebApi.Endpoints;
 
 internal static class EndpointBuilder
 {
-    public static IApplicationBuilder UseShipmentEndpoints(this WebApplication app) =>
+    internal static IApplicationBuilder UseShipmentEndpoints(this WebApplication app) =>
         app
             .UseOrderEndpoint()
             .UsePackageEndpoint();

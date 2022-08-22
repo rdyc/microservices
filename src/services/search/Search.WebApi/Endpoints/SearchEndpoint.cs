@@ -7,7 +7,7 @@ using Swashbuckle.AspNetCore.Annotations;
 
 namespace Search.WebApi.Endpoints;
 
-public static class SearchEndpoint
+internal static class SearchEndpoint
 {
     [SwaggerOperation(Summary = "Search products", OperationId = "search", Tags = new[] { "Search" })]
     internal static async Task<IResult> Products(

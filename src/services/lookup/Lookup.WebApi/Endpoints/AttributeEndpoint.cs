@@ -2,6 +2,7 @@ using FW.Core.Commands;
 using FW.Core.Pagination;
 using FW.Core.Queries;
 using FW.Core.WebApi;
+using FW.Core.WebApi.Headers;
 using Lookup.Attributes.GettingAttributeById;
 using Lookup.Attributes.GettingAttributeList;
 using Lookup.Attributes.GettingAttributes;
@@ -14,7 +15,7 @@ using Swashbuckle.AspNetCore.Annotations;
 
 namespace Lookup.WebApi.Endpoints;
 
-public static class AttributeEndpoint
+internal static class AttributeEndpoint
 {
     [SwaggerOperation(Summary = "Retrieve all attributes", OperationId = "attributes", Tags = new[] { "Attribute" })]
     internal static async Task<IResult> Attributes(
@@ -22,7 +23,8 @@ public static class AttributeEndpoint
         [FromQuery] int? size,
         [FromServices] IQueryBus query,
         [FromServices] ILoggerFactory logger,
-        CancellationToken cancellationToken)
+        CancellationToken cancellationToken
+    )
     {
         var log = logger.CreateLogger<Program>();
         var task = query.SendAsync<GetAttributes, IListPaged<AttributeShortInfo>>(
@@ -36,12 +38,14 @@ public static class AttributeEndpoint
         );
     }
 
-    [SwaggerOperation(Summary = "Retrieve attribute", OperationId = "attribute", Tags = new[] { "Attribute" })]
+    [SwaggerOperation(Summary = "Retrievea an attribute", OperationId = "attribute", Tags = new[] { "Attribute" })]
     internal static async Task<IResult> Attribute(
         [FromRoute] Guid attributeId,
         [FromServices] IQueryBus query,
         [FromServices] ILoggerFactory logger,
-        CancellationToken cancellationToken)
+        HttpContext context,
+        CancellationToken cancellationToken
+    )
     {
         var log = logger.CreateLogger<Program>();
         var task = query.SendAsync<GetAttributeById, AttributeShortInfo>(
@@ -49,7 +53,12 @@ public static class AttributeEndpoint
 
         return await WithCancellation.TryExecute(
             task: task,
-            onCompleted: (result) => Results.Ok(result),
+            onCompleted: (result) => 
+            {
+                context.TrySetETagResponseHeader(result.Version);
+
+                return Results.Ok(result);
+            },
             onCancelled: (ex) => log.LogWarning(ex.Message),
             cancellationToken: cancellationToken
         );
@@ -60,7 +69,8 @@ public static class AttributeEndpoint
         [FromQuery] LookupStatus? status,
         [FromServices] IQueryBus query,
         [FromServices] ILoggerFactory logger,
-        CancellationToken cancellationToken)
+        CancellationToken cancellationToken
+    )
     {
         var log = logger.CreateLogger<Program>();
         var task = query.SendAsync<GetAttributeList, IListUnpaged<AttributeShortInfo>>(
@@ -79,7 +89,8 @@ public static class AttributeEndpoint
         [FromBody] AttributeCreateRequest request,
         [FromServices] ICommandBus command,
         [FromServices] ILoggerFactory logger,
-        CancellationToken cancellationToken)
+        CancellationToken cancellationToken
+    )
     {
         var log = logger.CreateLogger<Program>();
         var attributeId = Guid.NewGuid();
@@ -100,7 +111,8 @@ public static class AttributeEndpoint
         [FromBody] AttributeModifyRequest request,
         [FromServices] ICommandBus command,
         [FromServices] ILoggerFactory logger,
-        CancellationToken cancellationToken)
+        CancellationToken cancellationToken
+    )
     {
         var log = logger.CreateLogger<Program>();
         var (name, code, symbol) = request;
@@ -119,7 +131,8 @@ public static class AttributeEndpoint
         [FromRoute] Guid attributeId,
         [FromServices] ICommandBus command,
         [FromServices] ILoggerFactory logger,
-        CancellationToken cancellationToken)
+        CancellationToken cancellationToken
+    )
     {
         var log = logger.CreateLogger<Program>();
         var task = command.SendAsync(RemoveAttribute.Create(attributeId), cancellationToken);

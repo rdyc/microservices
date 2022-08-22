@@ -8,7 +8,7 @@ namespace Order.WebApi.Endpoints;
 
 internal static class EndpointBuilder
 {
-    public static IApplicationBuilder UseOrderEndpoints(this WebApplication app) =>
+    internal static IApplicationBuilder UseOrderEndpoints(this WebApplication app) =>
         app.UseOrderEndpoint();
 
     private static WebApplication UseOrderEndpoint(this WebApplication app)

@@ -24,6 +24,6 @@ public static class ETagExtensions
     {
         var value = eTag.Tag.Value;
         // trim first and last quote characters
-        return value.Substring(1, value.Length - 2);
+        return value[1..^1];
     }
 }

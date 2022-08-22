@@ -8,7 +8,7 @@ namespace Cart.WebApi.Endpoints;
 
 internal static class EndpointBuilder
 {
-    public static IApplicationBuilder UseCartEndpoints(this WebApplication app) =>
+    internal static IApplicationBuilder UseCartEndpoints(this WebApplication app) =>
         app.UseCartEndpoint();
 
     private static WebApplication UseCartEndpoint(this WebApplication app)

@@ -73,6 +73,7 @@ builder.Services
     .AddMongoDb(config)
     .AddEventStoreDB(config)
     .AddConsul(config)
+    .AddValidation()
     .AddStoreServices()
     .AddHealthChecks();
 

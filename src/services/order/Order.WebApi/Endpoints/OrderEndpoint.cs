@@ -1,6 +1,7 @@
 using FW.Core.Pagination;
 using FW.Core.Queries;
 using FW.Core.WebApi;
+using FW.Core.WebApi.Headers;
 using Microsoft.AspNetCore.Mvc;
 using Order.Orders.GettingOrderAtVersion;
 using Order.Orders.GettingOrderById;
@@ -10,7 +11,7 @@ using Swashbuckle.AspNetCore.Annotations;
 
 namespace Order.WebApi.Endpoints;
 
-public static class OrderEndpoint
+internal static class OrderEndpoint
 {
     [SwaggerOperation(Summary = "Retrieve all orders", OperationId = "orders", Tags = new[] { "Order" })]
     internal static async Task<IResult> Orders(
@@ -19,7 +20,8 @@ public static class OrderEndpoint
         [FromQuery] int? size,
         [FromServices] IQueryBus query,
         [FromServices] ILoggerFactory logger,
-        CancellationToken cancellationToken)
+        CancellationToken cancellationToken
+    )
     {
         var log = logger.CreateLogger<Program>();
         var task = query.SendAsync<GetOrders, IListPaged<OrderShortInfo>>(
@@ -39,7 +41,9 @@ public static class OrderEndpoint
         [FromRoute] Guid orderId,
         [FromServices] IQueryBus query,
         [FromServices] ILoggerFactory logger,
-        CancellationToken cancellationToken)
+        HttpContext context,
+        CancellationToken cancellationToken
+    )
     {
         var log = logger.CreateLogger<Program>();
         var task = query.SendAsync<GetOrderById, OrderDetails>(
@@ -47,7 +51,12 @@ public static class OrderEndpoint
 
         return await WithCancellation.TryExecute(
             task: task,
-            onCompleted: (result) => Results.Ok(result),
+            onCompleted: (result) =>
+            {
+                context.TrySetETagResponseHeader(result.Version);
+
+                return Results.Ok(result);
+            },
             onCancelled: (ex) => log.LogWarning(ex.Message),
             cancellationToken: cancellationToken
         );
@@ -60,7 +69,8 @@ public static class OrderEndpoint
         [FromRoute] ulong version,
         [FromServices] IQueryBus query,
         [FromServices] ILoggerFactory logger,
-        CancellationToken cancellationToken)
+        CancellationToken cancellationToken
+    )
     {
         var log = logger.CreateLogger<Program>();
         var task = query.SendAsync<GetOrderAtVersion, Orders.Order>(
@@ -82,7 +92,8 @@ public static class OrderEndpoint
         [FromQuery] int? size,
         [FromServices] IQueryBus query,
         [FromServices] ILoggerFactory logger,
-        CancellationToken cancellationToken)
+        CancellationToken cancellationToken
+    )
     {
         var log = logger.CreateLogger<Program>();
         var task = query.SendAsync<GetOrderHistory, IListPaged<OrderHistory>>(

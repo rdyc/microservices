@@ -2,6 +2,7 @@ using FW.Core.Commands;
 using FW.Core.Pagination;
 using FW.Core.Queries;
 using FW.Core.WebApi;
+using FW.Core.WebApi.Headers;
 using Lookup.Currencies.GettingCurrencies;
 using Lookup.Currencies.GettingCurrencyById;
 using Lookup.Currencies.GettingCurrencyList;
@@ -14,7 +15,7 @@ using Swashbuckle.AspNetCore.Annotations;
 
 namespace Lookup.WebApi.Endpoints;
 
-public static class CurrencyEndpoint
+internal static class CurrencyEndpoint
 {
     [SwaggerOperation(Summary = "Retrieve all currencies", OperationId = "currencies", Tags = new[] { "Currency" })]
     internal static async Task<IResult> Currencies(
@@ -22,7 +23,8 @@ public static class CurrencyEndpoint
         [FromQuery] int? size,
         [FromServices] IQueryBus query,
         [FromServices] ILoggerFactory logger,
-        CancellationToken cancellationToken)
+        CancellationToken cancellationToken
+    )
     {
         var log = logger.CreateLogger<Program>();
         var task = query.SendAsync<GetCurrencies, IListPaged<CurrencyShortInfo>>(
@@ -36,12 +38,14 @@ public static class CurrencyEndpoint
         );
     }
 
-    [SwaggerOperation(Summary = "Retrieve currency", OperationId = "currency", Tags = new[] { "Currency" })]
+    [SwaggerOperation(Summary = "Retrieve a currency", OperationId = "currency", Tags = new[] { "Currency" })]
     internal static async Task<IResult> Currency(
         [FromRoute] Guid currencyId,
         [FromServices] IQueryBus query,
         [FromServices] ILoggerFactory logger,
-        CancellationToken cancellationToken)
+        HttpContext context,
+        CancellationToken cancellationToken
+    )
     {
         var log = logger.CreateLogger<Program>();
         var task = query.SendAsync<GetCurrencyById, CurrencyShortInfo>(
@@ -49,7 +53,12 @@ public static class CurrencyEndpoint
 
         return await WithCancellation.TryExecute(
             task: task,
-            onCompleted: (result) => Results.Ok(result),
+            onCompleted: (result) => 
+            {
+                context.TrySetETagResponseHeader(result.Version);
+
+                return Results.Ok(result);
+            },
             onCancelled: (ex) => log.LogWarning(ex.Message),
             cancellationToken: cancellationToken
         );
@@ -60,7 +69,8 @@ public static class CurrencyEndpoint
         [FromQuery] LookupStatus? status,
         [FromServices] IQueryBus query,
         [FromServices] ILoggerFactory logger,
-        CancellationToken cancellationToken)
+        CancellationToken cancellationToken
+    )
     {
         var log = logger.CreateLogger<Program>();
         var task = query.SendAsync<GetCurrencyList, IListUnpaged<CurrencyShortInfo>>(
@@ -79,7 +89,8 @@ public static class CurrencyEndpoint
         [FromBody] CurrencyCreateRequest request,
         [FromServices] ICommandBus command,
         [FromServices] ILoggerFactory logger,
-        CancellationToken cancellationToken)
+        CancellationToken cancellationToken
+    )
     {
         var log = logger.CreateLogger<Program>();
         var currencyId = Guid.NewGuid();
@@ -101,7 +112,8 @@ public static class CurrencyEndpoint
         [FromBody] CurrencyModifyRequest request,
         [FromServices] ICommandBus command,
         [FromServices] ILoggerFactory logger,
-        CancellationToken cancellationToken)
+        CancellationToken cancellationToken
+    )
     {
         var log = logger.CreateLogger<Program>();
         var (name, code, symbol) = request;
@@ -121,7 +133,8 @@ public static class CurrencyEndpoint
         [FromRoute] Guid currencyId,
         [FromServices] ICommandBus command,
         [FromServices] ILoggerFactory logger,
-        CancellationToken cancellationToken)
+        CancellationToken cancellationToken
+    )
     {
         var log = logger.CreateLogger<Program>();
         var task = command.SendAsync(

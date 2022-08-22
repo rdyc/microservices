@@ -2,6 +2,7 @@ using FW.Core.Commands;
 using FW.Core.Pagination;
 using FW.Core.Queries;
 using FW.Core.WebApi;
+using FW.Core.WebApi.Headers;
 using Microsoft.AspNetCore.Mvc;
 using Store.Products.AddingAttribute;
 using Store.Products.GettingProductById;
@@ -18,7 +19,7 @@ using Swashbuckle.AspNetCore.Annotations;
 
 namespace Store.WebApi.Endpoints;
 
-public static class ProductEndpoint
+internal static class ProductEndpoint
 {
     [SwaggerOperation(Summary = "Retrieve all products", OperationId = "products", Tags = new[] { "Product" })]
     internal static async Task<IResult> Products(
@@ -40,12 +41,14 @@ public static class ProductEndpoint
         );
     }
 
-    [SwaggerOperation(Summary = "Retrieve product", OperationId = "product", Tags = new[] { "Product" })]
+    [SwaggerOperation(Summary = "Retrieve a product", OperationId = "product", Tags = new[] { "Product" })]
     internal static async Task<IResult> Product(
         [FromRoute] Guid productId,
         [FromServices] IQueryBus query,
         [FromServices] ILoggerFactory logger,
-        CancellationToken cancellationToken)
+        HttpContext context,
+        CancellationToken cancellationToken
+    )
     {
         var log = logger.CreateLogger<Program>();
         var task = query.SendAsync<GetProductById, ProductDetail>(
@@ -53,7 +56,12 @@ public static class ProductEndpoint
 
         return await WithCancellation.TryExecute(
             task: task,
-            onCompleted: (result) => Results.Ok(result),
+            onCompleted: (result) =>
+            {
+                context.TrySetETagResponseHeader(result.Version);
+
+                return Results.Ok(result);
+            },
             onCancelled: (ex) => log.LogWarning(ex.Message),
             cancellationToken: cancellationToken
         );
@@ -66,7 +74,8 @@ public static class ProductEndpoint
         [FromQuery] int? size,
         [FromServices] IQueryBus query,
         [FromServices] ILoggerFactory logger,
-        CancellationToken cancellationToken)
+        CancellationToken cancellationToken
+    )
     {
         var log = logger.CreateLogger<Program>();
         var task = query.SendAsync<GetProductHistory, IListPaged<ProductHistory>>(
@@ -85,7 +94,8 @@ public static class ProductEndpoint
         [FromBody] ProductCreateRequest request,
         [FromServices] ICommandBus command,
         [FromServices] ILoggerFactory logger,
-        CancellationToken cancellationToken)
+        CancellationToken cancellationToken
+    )
     {
         var log = logger.CreateLogger<Program>();
         var productId = Guid.NewGuid();
@@ -107,7 +117,8 @@ public static class ProductEndpoint
         [FromBody] ProductModifyRequest request,
         [FromServices] ICommandBus command,
         [FromServices] ILoggerFactory logger,
-        CancellationToken cancellationToken)
+        CancellationToken cancellationToken
+    )
     {
         var log = logger.CreateLogger<Program>();
         var (name, code, symbol) = request;
@@ -128,7 +139,8 @@ public static class ProductEndpoint
         [FromBody] AddProductAttributeRequest request,
         [FromServices] ICommandBus command,
         [FromServices] ILoggerFactory logger,
-        CancellationToken cancellationToken)
+        CancellationToken cancellationToken
+    )
     {
         var log = logger.CreateLogger<Program>();
         var (attributeId, value) = request;
@@ -149,7 +161,8 @@ public static class ProductEndpoint
         [FromRoute] Guid attributeId,
         [FromServices] ICommandBus command,
         [FromServices] ILoggerFactory logger,
-        CancellationToken cancellationToken)
+        CancellationToken cancellationToken
+    )
     {
         var log = logger.CreateLogger<Program>();
         var task = command.SendAsync(
@@ -169,7 +182,8 @@ public static class ProductEndpoint
         [FromBody] UpdateProductPriceRequest request,
         [FromServices] ICommandBus command,
         [FromServices] ILoggerFactory logger,
-        CancellationToken cancellationToken)
+        CancellationToken cancellationToken
+    )
     {
         var log = logger.CreateLogger<Program>();
         var (currencyId, price) = request;
@@ -190,7 +204,8 @@ public static class ProductEndpoint
         [FromBody] UpdateProductStockRequest request,
         [FromServices] ICommandBus command,
         [FromServices] ILoggerFactory logger,
-        CancellationToken cancellationToken)
+        CancellationToken cancellationToken
+    )
     {
         var log = logger.CreateLogger<Program>();
         var task = command.SendAsync(
@@ -209,7 +224,8 @@ public static class ProductEndpoint
         [FromRoute] Guid productId,
         [FromServices] ICommandBus command,
         [FromServices] ILoggerFactory logger,
-        CancellationToken cancellationToken)
+        CancellationToken cancellationToken
+    )
     {
         var log = logger.CreateLogger<Program>();
         var task = command.SendAsync(

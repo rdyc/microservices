@@ -7,7 +7,7 @@ using Swashbuckle.AspNetCore.Annotations;
 
 namespace Shipment.WebApi.Endpoints;
 
-public static class OrderEndpoint
+internal static class OrderEndpoint
 {
     [SwaggerOperation(Summary = "Retrieve all orders", OperationId = "orders", Tags = new[] { "Order" })]
     internal static async Task<IResult> Orders(

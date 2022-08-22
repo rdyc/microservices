@@ -74,6 +74,7 @@ builder.Services
     .AddMongoDb(config)
     .AddEventStoreDB(config)
     .AddConsul(config)
+    .AddValidation()
     .AddCartServices()
     .AddHealthChecks();
 

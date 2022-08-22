@@ -12,6 +12,7 @@ using FW.Core.Commands;
 using FW.Core.Pagination;
 using FW.Core.Queries;
 using FW.Core.WebApi;
+using FW.Core.WebApi.Headers;
 using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Annotations;
 
@@ -25,7 +26,8 @@ internal static class CartEndpoint
         [FromQuery] int? size,
         [FromServices] IQueryBus query,
         [FromServices] ILoggerFactory logger,
-        CancellationToken cancellationToken)
+        CancellationToken cancellationToken
+    )
     {
         var log = logger.CreateLogger<Program>();
         var task = query.SendAsync<GetCarts, IListPaged<CartShortInfo>>(
@@ -39,12 +41,14 @@ internal static class CartEndpoint
         );
     }
 
-    [SwaggerOperation(Summary = "Retrieve cart", OperationId = "cart", Tags = new[] { "Cart" })]
+    [SwaggerOperation(Summary = "Retrieve a cart", OperationId = "cart", Tags = new[] { "Cart" })]
     internal static async Task<IResult> CartDetails(
         [FromRoute] Guid cartId,
         [FromServices] IQueryBus query,
         [FromServices] ILoggerFactory logger,
-        CancellationToken cancellationToken)
+        HttpContext context,
+        CancellationToken cancellationToken
+    )
     {
         var log = logger.CreateLogger<Program>();
         var task = query.SendAsync<GetCartById, CartDetails>(
@@ -52,7 +56,12 @@ internal static class CartEndpoint
 
         return await WithCancellation.TryExecute(
             task: task,
-            onCompleted: (result) => Results.Ok(result),
+            onCompleted: (result) =>
+            {
+                context.TrySetETagResponseHeader(result.Version);
+
+                return Results.Ok(result);
+            },
             onCancelled: (ex) => log.LogWarning(ex.Message),
             cancellationToken: cancellationToken
         );
@@ -64,7 +73,8 @@ internal static class CartEndpoint
         [FromRoute] ulong version,
         [FromServices] IQueryBus query,
         [FromServices] ILoggerFactory logger,
-        CancellationToken cancellationToken)
+        CancellationToken cancellationToken
+    )
     {
         var log = logger.CreateLogger<Program>();
         var task = query.SendAsync<GetCartAtVersion, Carts.Cart>(
@@ -85,7 +95,8 @@ internal static class CartEndpoint
         [FromQuery] int? size,
         [FromServices] IQueryBus query,
         [FromServices] ILoggerFactory logger,
-        CancellationToken cancellationToken)
+        CancellationToken cancellationToken
+    )
     {
         var log = logger.CreateLogger<Program>();
         var task = query.SendAsync<GetCartHistory, IListPaged<CartHistory>>(
@@ -104,7 +115,8 @@ internal static class CartEndpoint
         [FromBody] OpenCartRequest request,
         [FromServices] ICommandBus command,
         [FromServices] ILoggerFactory logger,
-        CancellationToken cancellationToken)
+        CancellationToken cancellationToken
+    )
     {
         var log = logger.CreateLogger<Program>();
         var cartId = Guid.NewGuid();
@@ -124,7 +136,8 @@ internal static class CartEndpoint
         [FromBody] AddProductRequest request,
         [FromServices] ICommandBus command,
         [FromServices] ILoggerFactory logger,
-        CancellationToken cancellationToken)
+        CancellationToken cancellationToken
+    )
     {
         var log = logger.CreateLogger<Program>();
         var (productId, quantity) = request;
@@ -144,7 +157,8 @@ internal static class CartEndpoint
         [FromBody] RemoveProductRequest request,
         [FromServices] ICommandBus command,
         [FromServices] ILoggerFactory logger,
-        CancellationToken cancellationToken)
+        CancellationToken cancellationToken
+    )
     {
         var log = logger.CreateLogger<Program>();
         var task = command.SendAsync(RemoveProductCart.Create(cartId, request.ProductId), cancellationToken);
@@ -162,7 +176,8 @@ internal static class CartEndpoint
         [FromRoute] Guid cartId,
         [FromServices] ICommandBus command,
         [FromServices] ILoggerFactory logger,
-        CancellationToken cancellationToken)
+        CancellationToken cancellationToken
+    )
     {
         var log = logger.CreateLogger<Program>();
         var task = command.SendAsync(CancelCart.Create(cartId), cancellationToken);
@@ -180,7 +195,8 @@ internal static class CartEndpoint
         [FromRoute] Guid cartId,
         [FromServices] ICommandBus command,
         [FromServices] ILoggerFactory logger,
-        CancellationToken cancellationToken)
+        CancellationToken cancellationToken
+    )
     {
         var log = logger.CreateLogger<Program>();
         var task = command.SendAsync(ConfirmCart.Create(cartId), cancellationToken);

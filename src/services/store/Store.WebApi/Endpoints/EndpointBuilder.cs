@@ -8,7 +8,7 @@ namespace Store.WebApi.Endpoints;
 
 internal static class EndpointBuilder
 {
-    public static IApplicationBuilder UseStoreEndpoints(this WebApplication app) =>
+    internal static IApplicationBuilder UseStoreEndpoints(this WebApplication app) =>
         app.UseProductEndpoints();
 
     private static WebApplication UseProductEndpoints(this WebApplication app)

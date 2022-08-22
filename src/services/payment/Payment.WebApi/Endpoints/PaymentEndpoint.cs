@@ -2,6 +2,7 @@ using FW.Core.Commands;
 using FW.Core.Pagination;
 using FW.Core.Queries;
 using FW.Core.WebApi;
+using FW.Core.WebApi.Headers;
 using Microsoft.AspNetCore.Mvc;
 using Payment.Payments.CompletingPayment;
 using Payment.Payments.DiscardingPayment;
@@ -14,7 +15,7 @@ using Swashbuckle.AspNetCore.Annotations;
 
 namespace Payment.WebApi.Endpoints;
 
-public static class PaymentEndpoint
+internal static class PaymentEndpoint
 {
     [SwaggerOperation(Summary = "Retrieve all payments", OperationId = "payments", Tags = new[] { "Payment" })]
     internal static async Task<IResult> Payments(
@@ -22,7 +23,8 @@ public static class PaymentEndpoint
         [FromQuery] int? size,
         [FromServices] IQueryBus query,
         [FromServices] ILoggerFactory logger,
-        CancellationToken cancellationToken)
+        CancellationToken cancellationToken
+    )
     {
         var log = logger.CreateLogger<Program>();
         var task = query.SendAsync<GetPayments, IListPaged<PaymentShortInfo>>(
@@ -36,12 +38,14 @@ public static class PaymentEndpoint
         );
     }
 
-    [SwaggerOperation(Summary = "Retrieve payment", OperationId = "payment", Tags = new[] { "Payment" })]
+    [SwaggerOperation(Summary = "Retrieve a payment", OperationId = "payment", Tags = new[] { "Payment" })]
     internal static async Task<IResult> Payment(
         [FromRoute] Guid paymentId,
         [FromServices] IQueryBus query,
         [FromServices] ILoggerFactory logger,
-        CancellationToken cancellationToken)
+        HttpContext context,
+        CancellationToken cancellationToken
+    )
     {
         var log = logger.CreateLogger<Program>();
         var task = query.SendAsync<GetPaymentById, PaymentDetails>(
@@ -49,7 +53,12 @@ public static class PaymentEndpoint
 
         return await WithCancellation.TryExecute(
             task: task,
-            onCompleted: (result) => Results.Ok(result),
+            onCompleted: (result) =>
+            {
+                context.TrySetETagResponseHeader(result.Version);
+
+                return Results.Ok(result);
+            },
             onCancelled: (ex) => log.LogWarning(ex.Message),
             cancellationToken: cancellationToken
         );
@@ -60,7 +69,8 @@ public static class PaymentEndpoint
         [FromBody] CreatePaymentRequest request,
         [FromServices] ICommandBus command,
         [FromServices] ILoggerFactory logger,
-        CancellationToken cancellationToken)
+        CancellationToken cancellationToken
+    )
     {
         var log = logger.CreateLogger<Program>();
         var paymentId = Guid.NewGuid();
@@ -81,7 +91,8 @@ public static class PaymentEndpoint
         [FromRoute] Guid paymentId,
         [FromServices] ICommandBus command,
         [FromServices] ILoggerFactory logger,
-        CancellationToken cancellationToken)
+        CancellationToken cancellationToken
+    )
     {
         var log = logger.CreateLogger<Program>();
         var task = command.SendAsync(
@@ -101,7 +112,8 @@ public static class PaymentEndpoint
         [FromBody] DiscardPaymentRequest request,
         [FromServices] ICommandBus command,
         [FromServices] ILoggerFactory logger,
-        CancellationToken cancellationToken)
+        CancellationToken cancellationToken
+    )
     {
         var log = logger.CreateLogger<Program>();
         var task = command.SendAsync(
@@ -120,7 +132,8 @@ public static class PaymentEndpoint
         [FromRoute] Guid paymentId,
         [FromServices] ICommandBus command,
         [FromServices] ILoggerFactory logger,
-        CancellationToken cancellationToken)
+        CancellationToken cancellationToken
+    )
     {
         var log = logger.CreateLogger<Program>();
         var task = command.SendAsync(

@@ -7,7 +7,7 @@ using Swashbuckle.AspNetCore.Annotations;
 
 namespace Lookup.WebApi.Endpoints;
 
-public static class HistoryEndpoint
+internal static class HistoryEndpoint
 {
     [SwaggerOperation(Summary = "Retrieve lookup histories", OperationId = "histories", Tags = new[] { "History" })]
     internal static async Task<IResult> Histories(

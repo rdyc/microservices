@@ -24,15 +24,15 @@ public class OpenCartTests : IClassFixture<TestWebApplicationFactory<Program>>
                     BODY(new OpenCartRequest(ClientId))
                 )
                 .When(POST)
-                // .Then(CREATED_WITH_DEFAULT_HEADERS(eTag: 0)),
-                .Then(CREATED),
+                .Then(CREATED_WITH_DEFAULT_HEADERS(eTag: 0)),
+                // .Then(CREATED),
 
             response =>
                 API.Given(
                         URI($"/carts/{response.GetCreatedId()}")
                     )
-                    // .When(GET_UNTIL(RESPONSE_ETAG_IS(0)))
-                    .When(GET_UNTIL(RESPONSE_SUCCEEDED()))
+                    .When(GET_UNTIL(RESPONSE_ETAG_IS(0)))
+                    // .When(GET_UNTIL(RESPONSE_SUCCEEDED()))
                     .Then(
                         OK,
                         RESPONSE_BODY<Cart.Carts.Cart>(cart =>

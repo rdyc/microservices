@@ -2,6 +2,7 @@ using FW.Core.Commands;
 using FW.Core.Pagination;
 using FW.Core.Queries;
 using FW.Core.WebApi;
+using FW.Core.WebApi.Headers;
 using Microsoft.AspNetCore.Mvc;
 using Shipment.Packages.DiscardingPackage;
 using Shipment.Packages.GettingPackageById;
@@ -13,7 +14,7 @@ using Swashbuckle.AspNetCore.Annotations;
 
 namespace Shipment.WebApi.Endpoints;
 
-public static class PackageEndpoint
+internal static class PackageEndpoint
 {
     [SwaggerOperation(Summary = "Retrieve all packages", OperationId = "packages", Tags = new[] { "Package" })]
     internal static async Task<IResult> Packages(
@@ -21,7 +22,8 @@ public static class PackageEndpoint
         [FromQuery] int? size,
         [FromServices] IQueryBus query,
         [FromServices] ILoggerFactory logger,
-        CancellationToken cancellationToken)
+        CancellationToken cancellationToken
+    )
     {
         var log = logger.CreateLogger<Program>();
         var task = query.SendAsync<GetPackages, IListPaged<PackageShortInfo>>(
@@ -35,12 +37,14 @@ public static class PackageEndpoint
         );
     }
 
-    [SwaggerOperation(Summary = "Retrieve package", OperationId = "package", Tags = new[] { "Package" })]
+    [SwaggerOperation(Summary = "Retrieve a package", OperationId = "package", Tags = new[] { "Package" })]
     internal static async Task<IResult> Package(
         [FromRoute] Guid packageId,
         [FromServices] IQueryBus query,
         [FromServices] ILoggerFactory logger,
-        CancellationToken cancellationToken)
+        HttpContext context,
+        CancellationToken cancellationToken
+    )
     {
         var log = logger.CreateLogger<Program>();
         var task = query.SendAsync<GetPackageById, PackageDetails>(
@@ -48,7 +52,12 @@ public static class PackageEndpoint
 
         return await WithCancellation.TryExecute(
             task: task,
-            onCompleted: (result) => Results.Ok(result),
+            onCompleted: (result) =>
+            {
+                context.TrySetETagResponseHeader(result.Version);
+
+                return Results.Ok(result);
+            },
             onCancelled: (ex) => log.LogWarning(ex.Message),
             cancellationToken: cancellationToken
         );
@@ -59,7 +68,8 @@ public static class PackageEndpoint
         [FromBody] PreparePackageRequest request,
         [FromServices] ICommandBus command,
         [FromServices] ILoggerFactory logger,
-        CancellationToken cancellationToken)
+        CancellationToken cancellationToken
+    )
     {
         var log = logger.CreateLogger<Program>();
         var packageId = Guid.NewGuid();
@@ -81,7 +91,8 @@ public static class PackageEndpoint
         [FromBody] SendPackageRequest request,
         [FromServices] ICommandBus command,
         [FromServices] ILoggerFactory logger,
-        CancellationToken cancellationToken)
+        CancellationToken cancellationToken
+    )
     {
         var log = logger.CreateLogger<Program>();
         var (orderId, items) = request;
@@ -104,7 +115,8 @@ public static class PackageEndpoint
         [FromBody] DiscardPackageRequest request,
         [FromServices] ICommandBus command,
         [FromServices] ILoggerFactory logger,
-        CancellationToken cancellationToken)
+        CancellationToken cancellationToken
+    )
     {
         var log = logger.CreateLogger<Program>();
         var task = command.SendAsync(
